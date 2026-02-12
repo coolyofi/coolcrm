@@ -21,14 +21,6 @@ export default function History() {
   const [searchTerm, setSearchTerm] = useState("")
   const [industryFilter, setIndustryFilter] = useState("")
 
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  useEffect(() => {
-    filterCustomers()
-  }, [customers, searchTerm, industryFilter])
-
   const fetchData = async () => {
     const { data, error } = await supabase
       .from("customers")
@@ -57,6 +49,14 @@ export default function History() {
 
     setFilteredCustomers(filtered)
   }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  useEffect(() => {
+    filterCustomers()
+  }, [customers, searchTerm, industryFilter])
 
   const handleDelete = async (id: string) => {
     if (!confirm("确定要删除这个客户吗？")) return

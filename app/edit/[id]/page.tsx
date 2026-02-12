@@ -1,209 +1,288 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, memo } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { useForm, Controller } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
 import toast, { Toaster } from "react-hot-toast"
+import { format, parseISO } from "date-fns"
+import useSWR from "swr"
+import { User } from "@supabase/supabase-js"
+import ErrorBoundary from "@/components/ErrorBoundary"
 
-interface Customer {
+const customerSchema = z.object({
+  company_name: z.string().min(1, "公司名称不能为空"),
+  industry: z.string().optional(),
+  intent_level: z.number().min(1).max(5, "意向等级必须在1-5之间"),
+  visit_date: z.string().optional(),
+  contact: z.string().optional(),
+  notes: z.string().optional(),
+})
+
+type CustomerForm = z.infer<typeof customerSchema>
+
+interface Customer extends CustomerForm {
   id: string
-  company_name: string
-  industry: string
-  intent_level: number
-  visit_date: string
-  contact: string
-  notes: string
+}
+
+const industries = [
+  { value: "", label: "请选择行业" },
+  { value: "科技", label: "科技" },
+  { value: "金融", label: "金融" },
+  { value: "医疗", label: "医疗" },
+  { value: "教育", label: "教育" },
+  { value: "制造业", label: "制造业" },
+  { value: "零售", label: "零售" },
+  { value: "其他", label: "其他" },
+]
+
+const FormField = memo(({
+  label,
+  children,
+  error,
+}: {
+  label: string
+  children: React.ReactNode
+  error?: string
+}) => (
+  <div>
+    <label className="block text-sm font-medium mb-2" aria-label={label}>
+      {label}
+    </label>
+    {children}
+    {error && <p className="text-red-400 text-sm mt-1" role="alert">{error}</p>}
+  </div>
+))
+
+FormField.displayName = "FormField"
+
+const fetcher = async (id: string) => {
+  const { data: userData } = await supabase.auth.getUser()
+  const user = (userData as any)?.user
+  if (!user) throw new Error("未登录")
+
+  const { data, error } = await supabase
+    .from("customers")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .single()
+  if (error) throw error
+  return data
 }
 
 export default function EditCustomer() {
   const params = useParams()
   const id = params.id as string
   const router = useRouter()
-  const [customer, setCustomer] = useState<Customer | null>(null)
-  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    fetchCustomer()
-  }, [id])
-
-  const fetchCustomer = async () => {
-    try {
-      const { data: userData } = await supabase.auth.getUser()
-      const user = (userData as any)?.user
-      if (!user) {
-        router.push('/login')
-        return
-      }
-
-      const { data, error } = await supabase
-        .from("customers")
-        .select("*")
-        .eq("id", id)
-        .eq("user_id", user.id)
-        .single()
-
-      if (error) {
-        toast.error("加载失败")
-        console.error(error)
-      } else {
-        setCustomer(data)
-      }
-    } catch (err) {
-      toast.error("加载失败")
-      console.error(err)
-    } finally {
-      setLoading(false)
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+      if (!user) router.push("/login")
     }
-  }
+    getUser()
+  }, [router])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const { data: customer, error, isLoading, mutate } = useSWR(id, fetcher, {
+    revalidateOnFocus: false,
+  })
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CustomerForm>({
+    resolver: zodResolver(customerSchema),
+  })
+
+  useEffect(() => {
+    if (customer) {
+      reset({
+        company_name: customer.company_name,
+        industry: customer.industry,
+        intent_level: customer.intent_level,
+        visit_date: customer.visit_date ? format(parseISO(customer.visit_date), "yyyy-MM-dd") : "",
+        contact: customer.contact,
+        notes: customer.notes,
+      })
+    }
+  }, [customer, reset])
+
+  const onSubmit = async (data: CustomerForm) => {
     if (!customer) return
 
     setSaving(true)
     try {
-      const { data: userData } = await supabase.auth.getUser()
-      const user = (userData as any)?.user
-      if (!user) {
-        router.push('/login')
-        return
-      }
-
       const { error } = await supabase
         .from("customers")
-        .update({
-          company_name: customer.company_name,
-          industry: customer.industry,
-          intent_level: customer.intent_level,
-          visit_date: customer.visit_date,
-          contact: customer.contact,
-          notes: customer.notes,
-        })
+        .update(data)
         .eq("id", id)
-        .eq("user_id", user.id)
+        .eq("user_id", (user as User)?.id)
 
-      if (error) {
-        toast.error("更新失败: " + error.message)
-        console.error(error)
-      } else {
-        toast.success("更新成功")
-        router.push("/history")
-      }
-    } catch (err) {
-      toast.error("更新失败")
-      console.error(err)
+      if (error) throw error
+      toast.success("更新成功")
+      mutate()
+      router.push("/history")
+    } catch (error) {
+      toast.error("更新失败: " + (error as Error).message)
+      console.error(error)
     } finally {
       setSaving(false)
     }
   }
 
-  const handleChange = (field: keyof Customer, value: string | number) => {
-    if (customer) {
-      setCustomer({ ...customer, [field]: value })
-    }
+  const memoizedIndustries = useMemo(() => industries, [])
+
+  if (isLoading) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6 p-6" aria-live="polite">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-700 rounded mb-4"></div>
+          <div className="space-y-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-10 bg-gray-700 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  if (loading) {
-    return <div className="p-6 text-gray-400">加载中...</div>
+  if (error) {
+    return <div className="p-6 text-red-400" role="alert">加载失败: {error.message}</div>
   }
 
   if (!customer) {
-    return <div className="p-6 text-red-400">客户不存在或无权限</div>
+    return <div className="p-6 text-red-400" role="alert">客户不存在</div>
   }
 
   return (
-    <>
-      <Toaster />
+    <ErrorBoundary>
+      <Toaster position="top-right" />
       <div className="max-w-2xl mx-auto space-y-6">
         <div>
           <h1 className="text-2xl font-bold">编辑客户</h1>
           <p className="text-gray-400 mt-1">修改客户信息</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">公司名称 *</label>
-            <input
-              type="text"
-              value={customer.company_name}
-              onChange={(e) => handleChange("company_name", e.target.value)}
-              required
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <form onSubmit={handleSubmit(onSubmit)} className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4" noValidate>
+          <FormField label="公司名称 *" error={errors.company_name?.message}>
+            <Controller
+              name="company_name"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="text"
+                  required
+                  aria-describedby={errors.company_name ? "company_name_error" : undefined}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              )}
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">行业</label>
-            <select
-              value={customer.industry}
-              onChange={(e) => handleChange("industry", e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">请选择行业</option>
-              <option value="科技">科技</option>
-              <option value="金融">金融</option>
-              <option value="医疗">医疗</option>
-              <option value="教育">教育</option>
-              <option value="制造业">制造业</option>
-              <option value="零售">零售</option>
-              <option value="其他">其他</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2">意向等级 (1-5)</label>
-            <input
-              type="number"
-              min="1"
-              max="5"
-              value={customer.intent_level}
-              onChange={(e) => handleChange("intent_level", Number(e.target.value))}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <FormField label="行业">
+            <Controller
+              name="industry"
+              control={control}
+              render={({ field }) => (
+                <select
+                  {...field}
+                  aria-label="选择行业"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {memoizedIndustries.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              )}
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">拜访日期</label>
-            <input
-              type="date"
-              value={customer.visit_date || ""}
-              onChange={(e) => handleChange("visit_date", e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <FormField label="意向等级 (1-5)" error={errors.intent_level?.message}>
+            <Controller
+              name="intent_level"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="number"
+                  min="1"
+                  max="5"
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  aria-describedby={errors.intent_level ? "intent_level_error" : undefined}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              )}
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">联系人</label>
-            <input
-              type="text"
-              value={customer.contact || ""}
-              onChange={(e) => handleChange("contact", e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <FormField label="拜访日期">
+            <Controller
+              name="visit_date"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="date"
+                  aria-label="选择拜访日期"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              )}
             />
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">备注</label>
-            <textarea
-              value={customer.notes || ""}
-              onChange={(e) => handleChange("notes", e.target.value)}
-              rows={3}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <FormField label="联系人">
+            <Controller
+              name="contact"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="text"
+                  aria-label="输入联系人"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              )}
             />
-          </div>
+          </FormField>
+
+          <FormField label="备注">
+            <Controller
+              name="notes"
+              control={control}
+              render={({ field }) => (
+                <textarea
+                  {...field}
+                  rows={3}
+                  aria-label="输入备注"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              )}
+            />
+          </FormField>
 
           <div className="flex gap-4">
             <button
               type="submit"
               disabled={saving}
+              aria-disabled={saving}
               className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition"
             >
               {saving ? "保存中..." : "保存"}
             </button>
             <button
               type="button"
-              onClick={() => router.push('/')}
+              onClick={() => router.push("/")}
               className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition"
             >
               取消
@@ -211,6 +290,6 @@ export default function EditCustomer() {
           </div>
         </form>
       </div>
-    </>
+    </ErrorBoundary>
   )
 }

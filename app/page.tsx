@@ -14,10 +14,6 @@ export default function Home() {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchRecentCustomers()
-  }, [])
-
   const fetchRecentCustomers = async () => {
     const { data, error } = await supabase
       .from("customers")
@@ -30,6 +26,10 @@ export default function Home() {
     }
     setLoading(false)
   }
+
+  useEffect(() => {
+    fetchRecentCustomers()
+  }, [])
 
   return (
     <div className="space-y-6">
