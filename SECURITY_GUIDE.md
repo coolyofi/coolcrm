@@ -24,10 +24,9 @@
 在Supabase控制台 → SQL Editor中执行：
 
 ```sql
--- 启用RLS
+-- customers表RLS
 ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
 
--- 用户只能访问自己的客户记录
 CREATE POLICY "Users can view own customers" ON customers
   FOR SELECT USING (auth.uid() = user_id);
 
@@ -39,6 +38,18 @@ CREATE POLICY "Users can update own customers" ON customers
 
 CREATE POLICY "Users can delete own customers" ON customers
   FOR DELETE USING (auth.uid() = user_id);
+
+-- profiles表RLS
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own profile" ON profiles
+  FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can insert own profile" ON profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Users can update own profile" ON profiles
+  FOR UPDATE USING (auth.uid() = id);
 ```
 
 ### 2. 认证设置配置
@@ -88,6 +99,7 @@ CREATE POLICY "Users can delete own customers" ON customers
 ## 🚨 安全检查清单
 
 - [ ] RLS已在customers表启用
+- [ ] RLS已在profiles表启用
 - [ ] 用户策略正确配置
 - [ ] 密码策略已设置
 - [ ] 邮箱验证已启用

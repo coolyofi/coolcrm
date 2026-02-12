@@ -59,6 +59,9 @@ export function Navigation() {
         <Link href="/history" className="hover:text-white text-gray-400 transition">
           历史记录
         </Link>
+        <Link href="/settings" className="hover:text-white text-gray-400 transition">
+          设置
+        </Link>
       </nav>
 
       <div className="mt-8 pt-6 border-t border-gray-800">
