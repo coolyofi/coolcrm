@@ -9,6 +9,8 @@ import toast, { Toaster } from "react-hot-toast"
 import { format, parseISO } from "date-fns"
 import useSWR from "swr"
 import { User } from "@supabase/supabase-js"
+import { supabase } from "@/lib/supabase"
+import { useAuth } from "@/components/AuthProvider"
 import ErrorBoundary from "@/components/ErrorBoundary"
 
 const customerSchema = z.object({
@@ -57,40 +59,33 @@ const FormField = memo(({
 
 FormField.displayName = "FormField"
 
-const fetcher = async (id: string) => {
-  const { data: userData } = await supabase.auth.getUser()
-  const user = (userData as any)?.user
-  if (!user) throw new Error("未登录")
-
-  const { data, error } = await supabase
-    .from("customers")
-    .select("*")
-    .eq("id", id)
-    .eq("user_id", user.id)
-    .single()
-  if (error) throw error
-  return data
-}
-
 export default function EditCustomer() {
   const params = useParams()
   const id = params.id as string
   const router = useRouter()
+  const { user } = useAuth()
   const [saving, setSaving] = useState(false)
-  const [user, setUser] = useState<User | null>(null)
 
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-      if (!user) router.push("/login")
+  const fetcher = async (id: string) => {
+    if (!user) throw new Error("未登录")
+
+    const { data, error } = await supabase
+      .from("customers")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single()
+    if (error) throw error
+    return data
+  }
+
+  const { data: customer, error, isLoading, mutate } = useSWR(
+    user ? id : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
     }
-    getUser()
-  }, [router])
-
-  const { data: customer, error, isLoading, mutate } = useSWR(id, fetcher, {
-    revalidateOnFocus: false,
-  })
+  )
 
   const {
     control,
@@ -123,7 +118,7 @@ export default function EditCustomer() {
         .from("customers")
         .update(data)
         .eq("id", id)
-        .eq("user_id", (user as User)?.id)
+        .eq("user_id", user?.id)
 
       if (error) throw error
       toast.success("更新成功")
