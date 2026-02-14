@@ -85,18 +85,18 @@ export default function Home() {
         `}>
           <KpiCard 
             title="Total Customers"
-            value={customers?.current || 0}
-            previousValue={customers?.previous || 0}
-            trendPercent={customers?.trendPercent || null}
+            value={customers.current || 0}
+            previousValue={customers.previous || 0}
+            trendPercent={customers.trendPercent || null}
             emptyLabel="Start by creating your first customer"
             emptyAction="Add Customer"
           />
           
           <KpiCard 
             title="Visits This Month"
-            value={visits?.current || 0}
-            previousValue={visits?.previous || 0}
-            trendPercent={visits?.trendPercent || null}
+            value={visits.current || 0}
+            previousValue={visits.previous || 0}
+            trendPercent={visits.trendPercent || null}
             emptyLabel="Log a visit to track activity"
             emptyAction="Log Visit"
             // In real app, log visit might open a modal or go to visits page
@@ -117,7 +117,7 @@ export default function Home() {
           {/* Quick Goal Glance (Mini) or just another metric */}
            <KpiCard 
                title="High Intent"
-               value={(data.customers?.recent || []).filter((c) => (c.intent_level || 0) >= 4).length} // Safe access with default array
+               value={(data.customers.recent || []).filter((c) => (c.intent_level || 0) >= 4).length} // Safe access with default array
                previousValue={0} // No trend yet
                trendPercent={null}
                emptyLabel="No high intent leads yet"
@@ -128,8 +128,8 @@ export default function Home() {
       {/* 3. Goals Progress */}
       <GoalsSection 
         stats={{
-            customers: Math.max(0, (customers?.current || 0) - (customers?.previous || 0)), // Safe calculation with defaults
-            visits: visits?.current || 0
+            customers: Math.max(0, (customers.current || 0) - (customers.previous || 0)), // Safe calculation with defaults
+            visits: visits.current || 0
         }}
       />
 

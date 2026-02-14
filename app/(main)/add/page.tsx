@@ -46,7 +46,7 @@ export default function AddCustomer() {
           const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh`)
           
           if (!response.ok) {
-            throw new Error('Geocoding service unavailable')
+            throw new Error(`Geocoding service unavailable (status: ${response.status})`)
           }
           
           const data = await response.json()

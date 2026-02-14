@@ -6,11 +6,7 @@ export type DashboardVisit = {
   id: string
   visit_date: string
   notes: string | null
-  customers: {
-    company_name: string
-  } | {
-    company_name: string
-  }[]
+  customers: { company_name: string } | Array<{ company_name: string }>
 }
 
 export type KpiTrend = {
