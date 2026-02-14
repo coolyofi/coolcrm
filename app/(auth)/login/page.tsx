@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { supabase, isSupabaseConfigured } from "@/lib/supabase"
 import toast, { Toaster } from "react-hot-toast"
 
 export default function Login() {
@@ -54,6 +54,8 @@ export default function Login() {
     }
   }
 
+  const configWarning = !isSupabaseConfigured()
+
   return (
     <>
       <Toaster 
@@ -67,6 +69,23 @@ export default function Login() {
             }
         }}
       />
+      
+      {/* Configuration Warning Banner */}
+      {configWarning && (
+        <div className="w-full max-w-md mb-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl backdrop-blur-sm">
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-yellow-500 mb-1">配置未完成</h3>
+              <p className="text-xs text-yellow-500/80 leading-relaxed">
+                Supabase环境变量未设置。请在 <code className="px-1.5 py-0.5 bg-yellow-500/20 rounded">.env.local</code> 文件中配置 <code className="px-1.5 py-0.5 bg-yellow-500/20 rounded">NEXT_PUBLIC_SUPABASE_URL</code> 和 <code className="px-1.5 py-0.5 bg-yellow-500/20 rounded">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>。
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* 
         Layer 2: Auth Card (Semi-Solid Glass) 
