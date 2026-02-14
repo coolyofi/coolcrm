@@ -1,4 +1,13 @@
 import { supabase } from "@/lib/supabase"
+import type { Customer } from "@/lib/api/customers"
+
+// Partial Visit type for dashboard use (only includes fields we query)
+export type DashboardVisit = {
+  id: string
+  visit_date: string
+  notes: string | null
+  customers: { company_name: string } | Array<{ company_name: string }>
+}
 
 export type KpiTrend = {
   current: number
@@ -14,15 +23,16 @@ export type ActivityItem = {
   date: string
 }
 
+// Fixed: Replaced unknown[] with proper Customer[] and DashboardVisit[] types for type safety
 export type DashboardData = {
   profile: { nickname: string | null } | null
   customers: {
     total: KpiTrend
-    recent: unknown[]
+    recent: Customer[]
   }
   visits: {
     thisMonth: KpiTrend
-    recent: unknown[]
+    recent: DashboardVisit[]
   }
   activity: ActivityItem[] // Mixed timeline
 }
@@ -127,15 +137,17 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
       : null
   }
 
-  const customersMapped: ActivityItem[] = (recentCustomers || []).map((c: { id: string; company_name: string; created_at: string }) => ({
+  // Type-safe mapping using Customer type
+  const customersMapped: ActivityItem[] = (recentCustomers || []).map((c: Customer) => ({
     type: 'customer' as const,
-    id: c.id,
+    id: c.id || '',
     title: `Added new customer`,
     subtitle: c.company_name,
-    date: c.created_at
+    date: c.created_at || ''
   }))
 
-  const visitsMapped: ActivityItem[] = (recentVisits || []).map((v: { id: string; customers: { company_name: string } | { company_name: string }[]; notes?: string; visit_date: string }) => ({
+  // Type-safe mapping using DashboardVisit type (partial Visit with only queried fields)
+  const visitsMapped: ActivityItem[] = (recentVisits || []).map((v: DashboardVisit) => ({
     type: 'visit' as const,
     id: v.id,
     title: `Visited ${Array.isArray(v.customers) ? v.customers[0]?.company_name : v.customers?.company_name || 'Unknown'}`,

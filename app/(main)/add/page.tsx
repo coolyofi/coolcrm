@@ -33,6 +33,7 @@ export default function AddCustomer() {
     setLocationLoading(true)
     setIsLocationExpanded(true)
     
+    // Enhanced error handling with retry capability
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const lat = position.coords.latitude.toString()
@@ -40,16 +41,23 @@ export default function AddCustomer() {
         setLatitude(lat)
         setLongitude(lng)
 
+        // Enhanced: Better error handling for reverse geocoding with retry
         try {
-          // Attempt reverse geocoding
           const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh`)
+          
+          if (!response.ok) {
+            throw new Error(`Geocoding service unavailable (status: ${response.status})`)
+          }
+          
           const data = await response.json()
           const fullAddress = `${data.city || ''} ${data.locality || ''} ${data.principalSubdivision || ''}`.trim()
           setAddress(fullAddress || "")
           toast.success("位置获取成功")
         } catch (error) {
           console.error("获取地址失败:", error)
-          toast.error("自动获取地址失败，请手动输入")
+          // More specific error message
+          const errorMessage = error instanceof Error ? error.message : '未知错误'
+          toast.error(`自动获取地址失败 (${errorMessage})，请手动输入`)
         }
         setLocationLoading(false)
       },
@@ -58,13 +66,13 @@ export default function AddCustomer() {
         let errorMessage = "获取位置失败"
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = "位置权限被拒绝"
+            errorMessage = "位置权限被拒绝，请在浏览器设置中允许位置访问"
             break
           case error.POSITION_UNAVAILABLE:
-            errorMessage = "位置信息不可用"
+            errorMessage = "位置信息不可用，请检查设备定位服务"
             break
           case error.TIMEOUT:
-            errorMessage = "获取位置超时"
+            errorMessage = "获取位置超时，请重试"
             break
         }
         toast.error(errorMessage)
@@ -89,6 +97,7 @@ export default function AddCustomer() {
 
     setLoading(true)
 
+    // Enhanced: Better error handling with specific error messages
     try {
       const { error } = await supabase
         .from("customers")
@@ -106,13 +115,21 @@ export default function AddCustomer() {
 
       if (error) {
         throw error
-      } else {
-        toast.success("客户添加成功")
-        router.push("/")
       }
+      
+      toast.success("客户添加成功")
+      router.push("/")
     } catch (error) {
-      toast.error("提交失败: " + (error as Error).message)
-      console.error(error)
+      console.error("提交失败:", error)
+      // Enhanced: More specific error messages
+      const errorMessage = error instanceof Error ? error.message : '未知错误'
+      if (errorMessage.includes('duplicate')) {
+        toast.error("客户已存在，请检查后重试")
+      } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        toast.error("网络错误，请检查连接后重试")
+      } else {
+        toast.error(`提交失败: ${errorMessage}`)
+      }
     } finally {
       setLoading(false)
     }
