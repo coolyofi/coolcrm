@@ -2,7 +2,458 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  background-color: #0f172a;
+:root {
+  /* motion */
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* radius */
+  --r-card: 22px;
+  --r-control: 14px;
+
+  /* spacing */
+  --pad-page: 32px;
+  --pad-card: 24px;
+  --nav-w: 260px; /* Default desktop width */
+
+  /* elevation (shadow is subtle) */
+  --shadow-1: 0 10px 30px rgba(0,0,0,0.08);
+  --shadow-2: 0 18px 60px rgba(0,0,0,0.14);
+
+  /* Glass Tokens - Light (Default) */
+  --glass-tint: 255, 255, 255;
+  --glass-alpha: 0.72; /* Improved visibility as requested */
+  --glass-alpha-scrolled: 0.85;
+  --glass-blur: 18px;
+  --glass-blur-scrolled: 28px;
+  --glass-border: 255, 255, 255;
+  --glass-border-alpha: 0.45;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* Phase 1.1: Motion Tokens */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-slow: 240ms;
+  --ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* Large Title Collapse */
+  --lt-height: 72px;
+  --lt-collapse-distance: 56px;
+  --lt-title-max: 34px;
+  --lt-title-min: 17px;
+  --lt-subtitle-max: 13px;
+  --lt-subtitle-min: 0px;
+
+  /* Layer System — Navigation Architecture (v2 Stable)
+     Never create new stacking context at content level
+     Content must always be lower than Navigation
+  */
+  --z-content: 0;
+  --z-topbar: 40;
+  --z-nav: 50;
+  --z-drawer-backdrop: 60;
+  --z-drawer: 70;
+  --z-modal: 90;
+
+  /* OS Layer Dimensions */
+  --nav-w-expanded: 260px;
+  --nav-w-collapsed: 72px;
+  --topbar-h: 60px;
+}
+
+/* ---------------- Dark (Liquid Glass) ---------------- */
+[data-theme="dark"] {
+  --bg: #0b1020;
+  --fg: rgba(255,255,255,0.92);
+  --fg-muted: rgba(255,255,255,0.64);
+  --border: rgba(255,255,255,0.10);
+
+  --primary: #4da3ff;
+  --danger: #ff4d5e;
+
+  /* Glass Tokens - Dark */
+  --glass-tint: 11, 16, 32;
+  --glass-alpha: 0.46;
+  --glass-alpha-scrolled: 0.62;
+  --glass-border: 255, 255, 255;
+  --glass-border-alpha: 0.14;
+  --glass-blur: 18px;
+  --glass-blur-scrolled: 28px;
+
+  --glass-shadow: var(--shadow-1);
+  --glass-noise: 0.06;
+
+  /* table/inputs should be more solid for readability */
+  --surface-solid: rgba(17, 24, 39, 0.72);
+  --surface-solid-border: rgba(255,255,255,0.10);
+
+  /* Auth Tokens - Dark */
+  --auth-bg: #0b1020;
+  --auth-scrim: rgba(0,0,0,0.25);
+  --auth-card: rgba(255,255,255,0.10);
+  --auth-card-border: rgba(255,255,255,0.18);
+  --auth-control: rgba(17,24,39,0.72);
+  --auth-control-border: rgba(255,255,255,0.10);
+  --auth-text: rgba(255,255,255,0.92);
+  --auth-muted: rgba(255,255,255,0.62);
+  --auth-primary: #4da3ff;
+  --auth-focus: rgba(77, 163, 255, 0.18);
+  --auth-blur: 20px;
+}
+
+/* ---------------- Light (Solid Glass) ---------------- */
+[data-theme="light"] {
+  --bg: #f4f7fb;
+  --fg: rgba(17,24,39,0.92);
+  --fg-muted: rgba(17,24,39,0.62);
+  --border: rgba(17,24,39,0.08);
+
+  --primary: #2563eb;
+  --danger: #dc2626;
+
+  /* glass algo (more solid, less blur) */
+  --glass-bg: rgba(255,255,255,0.86);
+  --glass-border: rgba(17,24,39,0.08);
+  --glass-blur: 8px;
+  --glass-shadow: 0 12px 30px rgba(17,24,39,0.08);
+  --glass-noise: 0.03;
+
+  --surface-solid: rgba(255,255,255,0.95);
+  --surface-solid-border: rgba(17,24,39,0.08);
+
+  /* Auth Tokens - Light */
+  --auth-bg: #f4f7fb;
+  --auth-scrim: rgba(255,255,255,0.35);
+  --auth-card: rgba(255,255,255,0.92);
+  --auth-card-border: rgba(17,24,39,0.08);
+  --auth-control: rgba(255,255,255,0.98);
+  --auth-control-border: rgba(17,24,39,0.10);
+  --auth-text: rgba(17,24,39,0.92);
+  --auth-muted: rgba(17,24,39,0.60);
+  --auth-primary: #2563eb;
+  --auth-focus: rgba(37, 99, 235, 0.18);
+  --auth-blur: 8px;
+}
+
+/* Phase 1.2: Scroll Behavior - Lock Body */
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background 0.3s ease, color 0.3s ease;
+  overflow: hidden; /* Lock body scroll, delegate to ContentScroll */
+  height: 100%; /* Fallback */
+  height: 100svh; /* Modern mobile viewport fix */
+}
+* { min-width: 0; } /* Prevent flex children from overflowing */
+
+/* Motion Utilities */
+.motion-fast { transition-duration: var(--motion-fast); transition-timing-function: var(--ease-spring); }
+.motion-base { transition-duration: var(--motion-base); transition-timing-function: var(--ease-spring); }
+.motion-slow { transition-duration: var(--motion-slow); transition-timing-function: var(--ease-spring); }
+
+
+/* ---------------- Components ---------------- */
+
+/* ===== GLASS RENDERING ISOLATION ===== 
+   Phase 1 Fix: Prevent backdrop-filter pixel-reading artifacts.
+   isolation:isolate creates new stacking context for backdrop-filter effects.
+   overflow:hidden clips content, prevents blur glow bleed outside bounds. */
+
+.glass {
+  background: rgba(var(--glass-tint), var(--glass-alpha));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid rgba(var(--glass-border), var(--glass-border-alpha));
+  box-shadow: var(--shadow-1);
+  /* Stacking Context: Isolate backdrop-filter rendering */
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.glass.scrolled {
+  background: rgba(var(--glass-tint), var(--glass-alpha-scrolled));
+  -webkit-backdrop-filter: blur(var(--glass-blur-scrolled));
+  backdrop-filter: blur(var(--glass-blur-scrolled));
+  box-shadow: var(--shadow-2);
+  /* Stacking Context: Isolate backdrop-filter rendering */
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.glass-strong {
+  background: rgba(var(--glass-tint), var(--glass-alpha-scrolled));
+  border: 1px solid rgba(var(--glass-border), var(--glass-border-alpha));
+  border-radius: var(--r-card);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  /* Stacking Context: Isolate backdrop-filter rendering */
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.surface-solid {
+  background: var(--surface-solid);
+  border: 1px solid var(--surface-solid-border);
+  border-radius: var(--r-card);
+}
+
+/* ---------------- Auth Components ---------------- */
+.auth-bg {
+  background-color: var(--auth-bg);
+  /* Optional: Radial gradient overlay if needed by design, but keeping simple as per token spec first */
+}
+
+.auth-scrim {
+  background: var(--auth-scrim);
+  backdrop-filter: blur(var(--auth-blur));
+  -webkit-backdrop-filter: blur(var(--auth-blur));
+}
+
+.auth-card {
+  background: var(--auth-card);
+  border: 1px solid var(--auth-card-border);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  backdrop-filter: blur(var(--auth-blur));
+  -webkit-backdrop-filter: blur(var(--auth-blur));
+}
+
+.auth-input {
+  background: var(--auth-control);
+  border: 1px solid var(--auth-control-border);
+  color: var(--auth-text);
+  border-radius: 14px;
+  transition: all 0.2s ease;
+}
+
+.auth-input::placeholder {
+  color: var(--auth-muted);
+}
+
+.auth-input:focus {
+  border-color: var(--auth-primary);
+  box-shadow: 0 0 0 4px var(--auth-focus);
+  outline: none;
+}
+
+.auth-btn-primary {
+  background: var(--auth-primary);
   color: white;
+  font-weight: 500;
+  border-radius: 9999px; /* Capsule */
+  transition: transform 0.1s ease, filter 0.2s ease;
+}
+
+.auth-btn-primary:active {
+  transform: scale(0.98);
+  filter: brightness(0.95);
+}
+
+.auth-text {
+  color: var(--auth-text);
+}
+
+.auth-text-muted {
+  color: var(--auth-muted);
+}
+
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 9999px; /* Capsule */
+  font-weight: 500;
+  transition: transform 0.1s ease, filter 0.2s ease;
+  position: relative;
+  /* Remove box-shadow from button itself - moved to glow-layer */
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* Button glow extracted to separate layer */
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: var(--primary);
+  opacity: 0.3;
+  filter: blur(4px);
+  z-index: -1;
+  transition: opacity 0.2s ease;
+}
+
+.btn-primary:hover::before {
+  opacity: 0.5;
+}
+
+/* Ambient Background Light */
+.ambient-light {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(800px 600px at 20% 10%, rgba(77,163,255,0.08), transparent 60%),
+    radial-gradient(900px 700px at 85% 20%, rgba(255,255,255,0.05), transparent 55%),
+    radial-gradient(900px 700px at 70% 85%, rgba(120,200,255,0.05), transparent 60%);
+  opacity: 1;
+}
+
+[data-theme="light"] .ambient-light {
+  background:
+    radial-gradient(900px 700px at 20% 10%, rgba(37,99,235,0.08), transparent 60%),
+    radial-gradient(900px 700px at 85% 20%, rgba(255,255,255,0.70), transparent 55%);
+}
+
+/* ===== GLOW CONTAINMENT ===== 
+   Phase 1 Fix: Prevent box-shadow glow leakage outside card boundaries.
+   overflow:hidden clips inner glow to card bounds. */
+.card {
+  overflow: hidden;
+}
+
+/* ===== CONTENT LAYER BACKDROP-FILTER PROHIBITION ===== 
+   Phase 2 Fix: Prohibit backdrop-filter usage at content level.
+   Only glass layer elements may use backdrop-filter effects.
+   Content elements must not create new stacking contexts. */
+main *,
+main {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Re-enable for glass layer elements only */
+.glass,
+.glass.scrolled,
+.glass-strong,
+.auth-card {
+  backdrop-filter: blur(var(--glass-blur)) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
+}
+
+.glass.scrolled {
+  backdrop-filter: blur(var(--glass-blur-scrolled)) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur-scrolled)) !important;
+}
+
+/* ===== DRAWER STATE CONTENT FREEZE ===== 
+   Phase 1 Fix: When drawer is open, freeze content interactivity and visual state.
+   scale(.985) shrinks content slightly for depth perception.
+   saturate(.9) reduces color saturation for visual depth.
+   pointer-events-none handled by parent wrapper (pointer-events:none on content-scroll). */
+[data-drawer-open="true"] {
+  --content-scale: 0.985;
+  --content-saturate: 0.9;
+}
+
+[data-drawer-open="true"] main {
+  transform: scale(var(--content-scale, 1));
+  filter: saturate(var(--content-saturate, 1));
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+/* Input Overrides */
+input, textarea, select {
+  background-color: var(--surface-solid) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--fg) !important;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--primary) !important;
+  outline: none !important;
+}
+
+/* Animation Keyframes */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out forwards;
+}
+
+@keyframes slide-down {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.animate-slide-down {
+  animation: slide-down 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Navigation Layout Safety */
+html, body {
+  overflow-x: hidden;
+}
+
+main {
+  min-width: 0;
+  flex: 1;
+}
+
+/* Prefers Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Disable velocity blur enhancement */
+  [data-theme="dark"] {
+    --glass-blur-scrolled: 28px;
+  }
+  
+  [data-theme="light"] {
+    --glass-blur-scrolled: 28px;
+  }
+}
+
+/* ---------------- SVG Safety Rules ---------------- */
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---------------- Scroll Isolation (iOS Safari) ---------------- */
+html, body {
+  overflow: hidden;
+  height: 100%;
+}
+
+#content-scroll {
+  overflow-y: auto;
+  height: 100dvh;
+  -webkit-overflow-scrolling: touch;
 }

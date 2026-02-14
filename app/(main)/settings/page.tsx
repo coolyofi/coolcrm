@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -9,6 +9,7 @@ import toast, { Toaster } from "react-hot-toast"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/components/AuthProvider"
 import ErrorBoundary from "@/components/ErrorBoundary"
+import { PageHeader } from "@/components/PageHeader"
 
 const profileSchema = z.object({
   nickname: z.string().min(1, "昵称不能为空").max(50, "昵称不能超过50个字符"),
@@ -25,11 +26,6 @@ const passwordSchema = z.object({
 
 type ProfileForm = z.infer<typeof profileSchema>
 type PasswordForm = z.infer<typeof passwordSchema>
-
-interface Profile {
-  id: string
-  nickname: string
-}
 
 const FormField = ({
   label,
@@ -52,10 +48,11 @@ const FormField = ({
 export default function Settings() {
   const { user } = useAuth()
   const router = useRouter()
-  const [profile, setProfile] = useState<Profile | null>(null)
+  // profile unused
   const [loading, setLoading] = useState(true)
   const [savingProfile, setSavingProfile] = useState(false)
   const [changingPassword, setChangingPassword] = useState(false)
+  const [currentTheme, setCurrentTheme] = useState('auto')
 
   const profileForm = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -65,15 +62,7 @@ export default function Settings() {
     resolver: zodResolver(passwordSchema),
   })
 
-  useEffect(() => {
-    if (!user) {
-      router.push("/login")
-      return
-    }
-    fetchProfile()
-  }, [user, router])
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user) return
 
     try {
@@ -84,11 +73,12 @@ export default function Settings() {
         .single()
 
       if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        // Do not throw, just log? Or throw to catch below.
         throw error
       }
 
       if (data) {
-        setProfile(data)
+        // setProfile(data)
         profileForm.reset({ nickname: data.nickname || "" })
       } else {
         // 如果没有资料记录，设置默认值
@@ -100,6 +90,30 @@ export default function Settings() {
     } finally {
       setLoading(false)
     }
+  }, [user, profileForm])
+
+  useEffect(() => {
+    if (!user) {
+      router.push("/login")
+      return
+    }
+    fetchProfile()
+    
+    // Initial theme check
+    const saved = localStorage.getItem('themeMode') || 'auto'
+    setCurrentTheme(saved)
+  }, [user, router, fetchProfile])
+
+  const handleThemeChange = (mode: string) => {
+    setCurrentTheme(mode)
+    localStorage.setItem('themeMode', mode)
+    
+    let themeToApply = mode
+    if (mode === 'auto') {
+      const hour = new Date().getHours()
+      themeToApply = (hour >= 19 || hour < 7) ? 'dark' : 'light'
+    }
+    document.documentElement.setAttribute('data-theme', themeToApply)
   }
 
   const onProfileSubmit = async (data: ProfileForm) => {
@@ -182,16 +196,41 @@ export default function Settings() {
     <ErrorBoundary>
       <Toaster position="top-right" />
       <div className="max-w-2xl mx-auto space-y-8 p-6">
-        <div>
-          <h1 className="text-2xl font-bold">账户设置</h1>
-          <p className="text-gray-400 mt-1">管理你的账户信息和安全设置</p>
+        <PageHeader
+          title="Settings"
+          subtitle="Manage your account and preferences"
+        />
+
+        {/* Theme Settings */}
+        <div className="glass p-6">
+          <h2 className="text-xl font-semibold mb-4 text-[var(--fg)]">Appearance</h2>
+          <div className="grid grid-cols-3 gap-4">
+            {['auto', 'light', 'dark'].map((mode) => (
+              <button
+                key={mode}
+                onClick={() => handleThemeChange(mode)}
+                className={`
+                  flex flex-col items-center justify-center p-4 rounded-xl border transition-all capitalized
+                  ${currentTheme === mode 
+                    ? 'bg-[var(--primary)] text-white border-transparent shadow-lg' 
+                    : 'bg-white/5 border-[var(--border)] text-[var(--fg-muted)] hover:bg-white/10'
+                  }
+                `}
+              >
+                <span className="capitalize font-medium">{mode}</span>
+              </button>
+            ))}
+          </div>
+          <div className="mt-4 text-sm text-[var(--fg-muted)]">
+            Auto mode switches to Dark at 7 PM and Light at 7 AM.
+          </div>
         </div>
 
         {/* 昵称设置 */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h2 className="text-xl font-semibold mb-4">个人资料</h2>
+        <div className="glass p-6">
+          <h2 className="text-xl font-semibold mb-4 text-[var(--fg)]">Profile</h2>
           <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
-            <FormField label="昵称" error={profileForm.formState.errors.nickname?.message}>
+            <FormField label="Nickname" error={profileForm.formState.errors.nickname?.message}>
               <Controller
                 name="nickname"
                 control={profileForm.control}
@@ -199,37 +238,28 @@ export default function Settings() {
                   <input
                     {...field}
                     type="text"
-                    placeholder="输入你的昵称"
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="Enter nickname"
+                    className="w-full px-4 py-3 rounded-lg transition-all duration-300 bg-[var(--surface-solid)] border border-[var(--glass-border)] text-[var(--fg)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
                   />
                 )}
               />
             </FormField>
 
-            <div className="flex gap-4">
-              <button
-                type="submit"
-                disabled={savingProfile}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105"
-              >
-                {savingProfile ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    保存中...
-                  </div>
-                ) : (
-                  "保存昵称"
-                )}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={savingProfile}
+              className="btn-primary py-3 px-6 w-full"
+            >
+              {savingProfile ? "Saving..." : "Update Profile"}
+            </button>
           </form>
         </div>
 
-        {/* 密码修改 */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h2 className="text-xl font-semibold mb-4">修改密码</h2>
+        {/* Password Settings */}
+        <div className="glass p-6">
+          <h2 className="text-xl font-semibold mb-4 text-[var(--fg)]">Change Password</h2>
           <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
-            <FormField label="当前密码" error={passwordForm.formState.errors.currentPassword?.message}>
+            <FormField label="Current Password" error={passwordForm.formState.errors.currentPassword?.message}>
               <Controller
                 name="currentPassword"
                 control={passwordForm.control}
@@ -237,14 +267,14 @@ export default function Settings() {
                   <input
                     {...field}
                     type="password"
-                    placeholder="输入当前密码"
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="Current password"
+                    className="w-full px-4 py-3 rounded-lg transition-all duration-300 bg-[var(--surface-solid)] border border-[var(--glass-border)] text-[var(--fg)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
                   />
                 )}
               />
             </FormField>
 
-            <FormField label="新密码" error={passwordForm.formState.errors.newPassword?.message}>
+            <FormField label="New Password" error={passwordForm.formState.errors.newPassword?.message}>
               <Controller
                 name="newPassword"
                 control={passwordForm.control}
@@ -252,14 +282,14 @@ export default function Settings() {
                   <input
                     {...field}
                     type="password"
-                    placeholder="输入新密码（至少6位）"
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="Min 6 chars"
+                    className="w-full px-4 py-3 rounded-lg transition-all duration-300 bg-[var(--surface-solid)] border border-[var(--glass-border)] text-[var(--fg)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
                   />
                 )}
               />
             </FormField>
 
-            <FormField label="确认新密码" error={passwordForm.formState.errors.confirmPassword?.message}>
+            <FormField label="Confirm Password" error={passwordForm.formState.errors.confirmPassword?.message}>
               <Controller
                 name="confirmPassword"
                 control={passwordForm.control}
@@ -267,8 +297,8 @@ export default function Settings() {
                   <input
                     {...field}
                     type="password"
-                    placeholder="再次输入新密码"
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="Confirm new password"
+                    className="w-full px-4 py-3 rounded-lg transition-all duration-300 bg-[var(--surface-solid)] border border-[var(--glass-border)] text-[var(--fg)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
                   />
                 )}
               />
@@ -278,39 +308,33 @@ export default function Settings() {
               <button
                 type="submit"
                 disabled={changingPassword}
-                className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105"
+                className="btn-primary py-3 px-6 bg-red-500 hover:brightness-110 shadow-red-500/30 w-full"
+                style={{ background: 'var(--danger)' }}
               >
-                {changingPassword ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    修改中...
-                  </div>
-                ) : (
-                  "修改密码"
-                )}
+                {changingPassword ? "Updating..." : "Update Password"}
               </button>
             </div>
           </form>
         </div>
 
-        {/* 账户信息 */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h2 className="text-xl font-semibold mb-4">账户信息</h2>
+        {/* Account Info */}
+        <div className="glass p-6">
+          <h2 className="text-xl font-semibold mb-4 text-[var(--fg)]">Account Info</h2>
           <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-400">邮箱地址</label>
-              <p className="text-white">{user.email}</p>
+              <label className="block text-sm font-medium text-[var(--fg-muted)]">Email</label>
+              <p className="text-[var(--fg)]">{user.email}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400">注册时间</label>
-              <p className="text-white">
-                {user.created_at ? new Date(user.created_at).toLocaleDateString('zh-CN') : '未知'}
+              <label className="block text-sm font-medium text-[var(--fg-muted)]">Registered</label>
+              <p className="text-[var(--fg)]">
+                {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400">最后登录</label>
-              <p className="text-white">
-                {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString('zh-CN') : '未知'}
+              <label className="block text-sm font-medium text-[var(--fg-muted)]">Last Login</label>
+              <p className="text-[var(--fg)]">
+                {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : 'Unknown'}
               </p>
             </div>
           </div>

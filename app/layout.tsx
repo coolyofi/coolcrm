@@ -1,8 +1,6 @@
 import "./globals.css"
-import Link from "next/link"
 import { AuthProvider } from "@/components/AuthProvider"
 import { Navigation } from "@/components/Navigation"
-import { Analytics } from "@vercel/analytics/next"
 
 export default function RootLayout({
   children,
@@ -10,17 +8,19 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html>
-      <body suppressHydrationWarning={true}>
+    <html lang="en">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
+      </head>
+      <body>
+        <div className="ambient-light" />
         <AuthProvider>
-          <div className="flex min-h-screen">
-            <Navigation />
-            <main className="flex-1 p-10">
+          <NavigationProvider>
+            <AppShell>
               {children}
-            </main>
-          </div>
+            </AppShell>
+          </NavigationProvider>
         </AuthProvider>
-        <Analytics />
       </body>
     </html>
   )
