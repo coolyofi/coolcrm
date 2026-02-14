@@ -20,12 +20,21 @@ export function Sidebar() {
       style={{ width: navWidthPx }}
     >
       {/* Header / Brand */}
-      <div className="h-[60px] flex items-center px-4 border-b border-[var(--border)] shrink-0">
-        <div 
-            className={`font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--fg)] to-[var(--fg-muted)] overflow-hidden whitespace-nowrap transition-all duration-300 ${isExpanded ? "opacity-100 w-auto" : "opacity-0 w-0"}`}
-        >
-          CoolCRM
-        </div>
+      <div className="h-[60px] flex items-center justify-center px-4 border-b border-[var(--border)] shrink-0">
+        {isExpanded ? (
+          <div className="flex items-center gap-2">
+            <svg className="w-6 h-6 text-[var(--primary)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <div className="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--fg)] to-[var(--fg-muted)] overflow-hidden whitespace-nowrap">
+              CoolCRM
+            </div>
+          </div>
+        ) : (
+          <svg className="w-6 h-6 text-[var(--primary)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        )}
       </div>
 
       {/* Navigation Items */}
@@ -37,7 +46,7 @@ export function Sidebar() {
               key={item.path}
               href={item.path}
               className={`
-                group flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                group relative flex items-center ${isExpanded ? 'gap-3 px-3 justify-start' : 'justify-center px-2'} py-2.5 rounded-lg transition-all duration-200
                 ${isActive 
                   ? 'bg-[var(--primary)]/10 text-[var(--primary)]' 
                   : 'text-[var(--fg-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)]'
@@ -45,6 +54,9 @@ export function Sidebar() {
               `}
               title={!isExpanded ? item.name : undefined}
             >
+              {isActive && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-[var(--primary)] rounded-full"></span>
+              )}
               <svg 
                 className={`w-6 h-6 shrink-0 transition-colors ${isActive ? "text-[var(--primary)]" : "text-current group-hover:text-[var(--fg)]"}`}
                 fill="none" 
