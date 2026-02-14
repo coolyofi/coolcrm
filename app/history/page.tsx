@@ -181,7 +181,9 @@ export default function History() {
                           </Link>
                           <button
                             onClick={() => handleDelete(c.id)}
-                            className="text-[var(--danger)]
+                            className="text-[var(--danger)] hover:text-red-400 transition-colors"
+                          >
+                            删除
                           </button>
                         </div>
                       </td>

@@ -224,7 +224,8 @@ export default function AddCustomer() {
                   placeholder="经度"
                   value={longitude}
                   onChange={(e) => setLongitude(e.target.value)}
-                  className="px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]
+                  className="px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] placeholder-[var(--fg-muted)] transition-all duration-300"
+                />
               </div>
               <input
                 type="text"
