@@ -28,8 +28,13 @@ for file in "${FILES_TO_CHECK[@]}"; do
 done
 
 # Check TypeScript/JavaScript files that might try to access it
-# Allow documentation files (README.md, SECURITY_GUIDE.md) to mention it as a bad example
-if grep -r "$DANGEROUS_VAR" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" . 2>/dev/null | grep -v "node_modules" | grep -v ".next" | grep -v "check-env-security.sh"; then
+# Documentation files are allowed to mention it as a bad example
+echo "   Checking source code files..."
+if find . -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' \) \
+  -not -path '*/node_modules/*' \
+  -not -path '*/.next/*' \
+  -not -path '*/.git/*' \
+  -exec grep -l "$DANGEROUS_VAR" {} + 2>/dev/null; then
   echo "❌ ERROR: Found $DANGEROUS_VAR in source code!"
   echo "   Service role key should only be accessed via SUPABASE_SERVICE_ROLE_KEY"
   FOUND_ISSUES=1
