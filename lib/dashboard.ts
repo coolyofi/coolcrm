@@ -10,12 +10,15 @@ export type DashboardData = {
   profile: { nickname: string | null } | null
   customers: {
     total: KpiTrend
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recent: any[]
   }
   visits: {
     thisMonth: KpiTrend
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recent: any[]
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   activity: any[] // Mixed timeline
 }
 
@@ -26,13 +29,14 @@ function getMonthRanges() {
   
   const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
   const startOfLast = lastMonth.toISOString()
-  const endOfLast = new Date(now.getFullYear(), now.getMonth(), 0).toISOString() // Last day of prev month
+  // endOfLast unused
+  // const endOfLast = new Date(now.getFullYear(), now.getMonth(), 0).toISOString() 
 
-  return { startOfCurrent, startOfLast, endOfLast }
+  return { startOfCurrent, startOfLast }
 }
 
 export async function getDashboardData(userId: string): Promise<DashboardData> {
-  const { startOfCurrent, startOfLast, endOfLast } = getMonthRanges()
+  const { startOfCurrent, startOfLast } = getMonthRanges()
 
   // 1. Profile
   const { data: profile } = await supabase
@@ -116,7 +120,8 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     .order("visit_date", { ascending: false })
     .limit(5)
 
-  const customersMapped = (recentCustomers || []).map(c => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const customersMapped = (recentCustomers || []).map((c: any) => ({
     type: 'customer',
     id: c.id,
     title: `Added new customer`,
@@ -124,6 +129,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     date: c.created_at
   }))
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const visitsMapped = (recentVisits || []).map((v: any) => ({
     type: 'visit',
     id: v.id,

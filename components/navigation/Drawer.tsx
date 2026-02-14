@@ -7,7 +7,7 @@ import { useNav } from "./useNav"
 import { MENU_ITEMS } from "./constants"
 
 export function Drawer() {
-  const { drawerOpen, closeDrawer, elevated } = useNav()
+  const { drawerOpen, closeDrawer } = useNav()
   const { signOut } = useAuth()
   const pathname = usePathname()
 

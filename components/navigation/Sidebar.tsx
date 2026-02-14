@@ -6,7 +6,7 @@ import { useNav } from "./useNav"
 import { MENU_ITEMS } from "./constants"
 
 export function Sidebar() {
-  const { state, setExpanded, setIcon, toggleSidebar, navWidthPx, mode } = useNav()
+  const { state, toggleSidebar, navWidthPx, mode } = useNav()
   const pathname = usePathname()
 
   if (mode === "mobile") return null

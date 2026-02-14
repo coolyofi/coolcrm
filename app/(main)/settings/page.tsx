@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -52,7 +52,7 @@ const FormField = ({
 export default function Settings() {
   const { user } = useAuth()
   const router = useRouter()
-  const [profile, setProfile] = useState<Profile | null>(null)
+  // profile unused
   const [loading, setLoading] = useState(true)
   const [savingProfile, setSavingProfile] = useState(false)
   const [changingPassword, setChangingPassword] = useState(false)
@@ -66,31 +66,7 @@ export default function Settings() {
     resolver: zodResolver(passwordSchema),
   })
 
-  useEffect(() => {
-    if (!user) {
-      router.push("/login")
-      return
-    }
-    fetchProfile()
-    
-    // Initial theme check
-    const saved = localStorage.getItem('themeMode') || 'auto'
-    setCurrentTheme(saved)
-  }, [user, router])
-
-  const handleThemeChange = (mode: string) => {
-    setCurrentTheme(mode)
-    localStorage.setItem('themeMode', mode)
-    
-    let themeToApply = mode
-    if (mode === 'auto') {
-      const hour = new Date().getHours()
-      themeToApply = (hour >= 19 || hour < 7) ? 'dark' : 'light'
-    }
-    document.documentElement.setAttribute('data-theme', themeToApply)
-  }
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user) return
 
     try {
@@ -101,11 +77,12 @@ export default function Settings() {
         .single()
 
       if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        // Do not throw, just log? Or throw to catch below.
         throw error
       }
 
       if (data) {
-        setProfile(data)
+        // setProfile(data)
         profileForm.reset({ nickname: data.nickname || "" })
       } else {
         // 如果没有资料记录，设置默认值
@@ -117,6 +94,30 @@ export default function Settings() {
     } finally {
       setLoading(false)
     }
+  }, [user, profileForm])
+
+  useEffect(() => {
+    if (!user) {
+      router.push("/login")
+      return
+    }
+    fetchProfile()
+    
+    // Initial theme check
+    const saved = localStorage.getItem('themeMode') || 'auto'
+    setCurrentTheme(saved)
+  }, [user, router, fetchProfile])
+
+  const handleThemeChange = (mode: string) => {
+    setCurrentTheme(mode)
+    localStorage.setItem('themeMode', mode)
+    
+    let themeToApply = mode
+    if (mode === 'auto') {
+      const hour = new Date().getHours()
+      themeToApply = (hour >= 19 || hour < 7) ? 'dark' : 'light'
+    }
+    document.documentElement.setAttribute('data-theme', themeToApply)
   }
 
   const onProfileSubmit = async (data: ProfileForm) => {

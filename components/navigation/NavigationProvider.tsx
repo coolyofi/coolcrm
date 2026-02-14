@@ -72,6 +72,7 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     const persisted = readPersisted()
     if (persisted) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         setState(persisted)
     }
   }, [])
@@ -87,7 +88,8 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     if (mode === "mobile") {
       setDrawerOpen(false)
-      setState("closed") // mobile sidebar is effectively closed
+      // mobile sidebar is effectively closed
+      setState("closed") 
       return
     }
 
@@ -98,6 +100,7 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     } else {
       setState(persisted ?? DEFAULT_DESKTOP_STATE)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode])
 
   // Esc key handler

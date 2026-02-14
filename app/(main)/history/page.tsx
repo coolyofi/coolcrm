@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, useCallback } from "react"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import toast, { Toaster } from "react-hot-toast"
@@ -24,7 +24,7 @@ export default function History() {
   const [searchTerm, setSearchTerm] = useState("")
   const [industryFilter, setIndustryFilter] = useState("")
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const { data, error } = await supabase
       .from("customers")
       .select("*")
@@ -34,7 +34,7 @@ export default function History() {
       setCustomers(data)
     }
     setLoading(false)
-  }
+  }, [])
 
   // Use useMemo for performance
   const filteredCustomers = useMemo(() => {
@@ -56,7 +56,7 @@ export default function History() {
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [fetchData])
 
   const handleDelete = async (id: string) => {
     if (!confirm("确定要删除这个客户吗？")) return

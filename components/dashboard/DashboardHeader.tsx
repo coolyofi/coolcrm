@@ -1,11 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { useAuth } from "@/components/AuthProvider"
 
 interface DashboardHeaderProps {
   nickname?: string | null
-  email?: string | null
   stats: {
     hasCustomers: boolean
     hasVisitsRecent: boolean
@@ -13,7 +11,7 @@ interface DashboardHeaderProps {
   }
 }
 
-export function DashboardHeader({ nickname, email, stats }: DashboardHeaderProps) {
+export function DashboardHeader({ nickname, stats }: DashboardHeaderProps) {
   const getGreeting = () => {
     const hour = new Date().getHours()
     if (hour < 5) return "Good evening" // Late night
@@ -39,9 +37,6 @@ export function DashboardHeader({ nickname, email, stats }: DashboardHeaderProps
     return "Here's what's happening with your customers today."
   }
 
-  const displayName = nickname || "there" // "Good afternoon, there" is a bit awkward.
-  // Better: "Good afternoon, Yofi" or just "Good afternoon" if no name.
-  
   const greetingName = nickname ? `, ${nickname}` : ""
 
   return (
