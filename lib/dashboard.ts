@@ -124,7 +124,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     date: c.created_at
   }))
 
-  const visitsMapped = (recentVisits || []).map(v => ({
+  const visitsMapped = (recentVisits || []).map((v: any) => ({
     type: 'visit',
     id: v.id,
     title: `Visited ${Array.isArray(v.customers) ? v.customers[0]?.company_name : v.customers?.company_name || 'Unknown'}`,
