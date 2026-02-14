@@ -6,7 +6,7 @@ import { useAuth } from "@/components/AuthProvider"
 import { useNav } from "./NavigationProvider"
 import { MENU_ITEMS } from "./constants"
 import { useScrollVelocity } from "../../hooks/useScrollVelocity"
-import { Z_INDEX, NAV_DIMENSIONS } from "./tokens"
+import { Z_INDEX } from "./tokens"
 import React from "react"
 
 /**

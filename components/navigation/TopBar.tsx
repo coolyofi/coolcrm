@@ -37,8 +37,9 @@ export function TopBar() {
   
   // Large title collapse: interpolate between large and compact heights
   const titleProgress = Math.min(1, p)
+  const heightDifference = NAV_DIMENSIONS.TOPBAR_HEIGHT_LARGE - NAV_DIMENSIONS.TOPBAR_HEIGHT
   const barHeight = motion.largeTitleEnabled 
-    ? (NAV_DIMENSIONS.TOPBAR_HEIGHT_LARGE - (titleProgress * (NAV_DIMENSIONS.TOPBAR_HEIGHT_LARGE - NAV_DIMENSIONS.TOPBAR_HEIGHT)))
+    ? (NAV_DIMENSIONS.TOPBAR_HEIGHT_LARGE - (titleProgress * heightDifference))
     : NAV_DIMENSIONS.TOPBAR_HEIGHT
 
   // Only show on mobile/tablet
