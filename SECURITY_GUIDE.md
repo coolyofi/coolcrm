@@ -68,10 +68,33 @@ CREATE POLICY "Users can update own profile" ON profiles
 - 设置登录尝试限制 (推荐：5次/分钟)
 
 ### 3. 环境变量安全
+
+#### ⚠️ 关键安全规则：Service Role Key
+
+**绝对禁止** 使用 `NEXT_PUBLIC_` 前缀命名 service role key！
+
+```env
+# ❌ 错误 - 会暴露到浏览器端，造成严重安全风险！
+NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY=your-key-here
+
+# ✅ 正确 - 仅在服务器端可访问
+SUPABASE_SERVICE_ROLE_KEY=your-key-here
+```
+
+**为什么这很重要？**
+- `NEXT_PUBLIC_` 前缀的变量会被 Next.js 打包到客户端代码中
+- service_role key 拥有**完全的数据库访问权限**，可以绕过所有 RLS 策略
+- 如果暴露到浏览器，攻击者可以：
+  - 读取、修改、删除任意数据
+  - 创建管理员账户
+  - 完全控制你的数据库
+
+#### 环境变量检查清单
 确保 `.env.local` 文件：
 - ✅ 不提交到Git (已在 .gitignore)
-- ✅ 只包含公开密钥 (anon key)
-- ❌ 不要包含service_role key
+- ✅ 客户端密钥使用 `NEXT_PUBLIC_SUPABASE_ANON_KEY` (公开)
+- ✅ 服务端密钥使用 `SUPABASE_SERVICE_ROLE_KEY` (私密，无 NEXT_PUBLIC_ 前缀)
+- ❌ 绝不在 `.env.local.example` 中使用 `NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY`
 
 ### 4. 生产环境配置
 - ✅ 使用HTTPS
@@ -104,6 +127,7 @@ CREATE POLICY "Users can update own profile" ON profiles
 - [ ] 密码策略已设置
 - [ ] 邮箱验证已启用
 - [ ] 环境变量安全存储
+- [ ] Service role key 使用正确的变量名（无 NEXT_PUBLIC_ 前缀）
 - [ ] HTTPS在生产环境启用
 - [ ] CORS策略正确配置
 
