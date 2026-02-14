@@ -208,6 +208,15 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     [motionLevel, scrollVelocity, scrollTop]
   )
 
+  // Computed values
+  const navWidthPx = useMemo(() => {
+    switch (sidebar) {
+      case "expanded": return 260
+      case "icon": return 72
+      case "closed": return 72
+    }
+  }, [sidebar])
+
   // Actions
   const open = useCallback(() => setSidebar("expanded"), [])
   const close = useCallback(() => setSidebar("closed"), [])
@@ -234,7 +243,11 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     close,
     toggle,
     setMotionLevel: setMotionLevelCallback,
-  }), [mode, sidebar, drawerOpen, motion, motionLevel, open, close, toggle, setMotionLevelCallback])
+    state: sidebar,
+    toggleSidebar: toggle,
+    navWidthPx,
+    proximity: mouseNear,
+  }), [mode, sidebar, drawerOpen, motion, motionLevel, open, close, toggle, setMotionLevelCallback, navWidthPx, mouseNear])
 
   return (
     <NavigationContext.Provider value={value}>
