@@ -1,18 +1,16 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { validateSupabaseConfig } from './lib/supabase'
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
+  
+  // Validate Supabase configuration (throws in production if invalid)
+  validateSupabaseConfig()
+  
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-
-  // In production, throw error if Supabase is not configured
-  if (process.env.NODE_ENV === 'production' && (!supabaseUrl || !supabaseAnonKey)) {
-    throw new Error(
-      'Supabase configuration error: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set in production environment.'
-    )
-  }
 
   // Use the typed middleware adapter so we don't need to cast to `any` everywhere
   const { middlewareCookiesAdapter } = await import('./lib/cookie-adapter')

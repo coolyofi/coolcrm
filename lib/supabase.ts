@@ -13,21 +13,40 @@ const isProduction = process.env.NODE_ENV === 'production'
 const supabaseUrlEnv = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKeyEnv = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-// In production, throw error if environment variables are not set
-if (isProduction && (!supabaseUrlEnv || !supabaseAnonKeyEnv)) {
-  throw new Error(
-    'Supabase configuration error: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set in production environment. ' +
-    'Please configure these environment variables before deploying.'
-  )
+/**
+ * Validates Supabase configuration and throws an error in production if invalid.
+ * In development, logs a warning when using placeholders.
+ * @throws {Error} In production when environment variables are not properly configured
+ */
+export function validateSupabaseConfig() {
+  const isProduction = process.env.NODE_ENV === 'production'
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  
+  // Check if env vars are missing or using placeholder values
+  const isMissingOrPlaceholder = 
+    !url || 
+    !key || 
+    url === PLACEHOLDER_URL || 
+    key === PLACEHOLDER_KEY
+  
+  if (isProduction && isMissingOrPlaceholder) {
+    throw new Error(
+      'Supabase configuration error: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set in production environment. ' +
+      'Please configure these environment variables before deploying.'
+    )
+  }
+  
+  if (!isProduction && isMissingOrPlaceholder) {
+    console.warn(
+      '⚠️  Supabase configuration warning: Environment variables not set. Using placeholder values. ' +
+      'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local for full functionality.'
+    )
+  }
 }
 
-// In development, use placeholders with a warning
-if (!isProduction && (!supabaseUrlEnv || !supabaseAnonKeyEnv)) {
-  console.warn(
-    '⚠️  Supabase configuration warning: Environment variables not set. Using placeholder values. ' +
-    'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local for full functionality.'
-  )
-}
+// Validate configuration at module initialization
+validateSupabaseConfig()
 
 // Use environment variables or placeholders (only in development)
 const supabaseUrl = supabaseUrlEnv || PLACEHOLDER_URL
