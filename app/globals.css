@@ -72,8 +72,8 @@ input:focus, textarea:focus, select:focus {
 }
 
 /* Subtle text contrast improvements */
-.text-white/60 { color: rgba(255,255,255,0.72) !important; }
-.text-white/90 { color: rgba(255,255,255,0.94) !important; }
+.text-white\/60 { color: rgba(255,255,255,0.72) !important; }
+.text-white\/90 { color: rgba(255,255,255,0.94) !important; }
 
 /* Utility to get stronger glossy panel when needed */
 .glass-strong {
