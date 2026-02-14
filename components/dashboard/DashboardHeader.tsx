@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useScrollProgress } from "../../hooks/useScrollProgress"
 
 interface DashboardHeaderProps {
   nickname?: string | null
@@ -12,6 +13,8 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ nickname, stats }: DashboardHeaderProps) {
+  const { p } = useScrollProgress("content-scroll", 56)
+
   const getGreeting = () => {
     const hour = new Date().getHours()
     if (hour < 5) return "Good evening" // Late night
@@ -39,13 +42,22 @@ export function DashboardHeader({ nickname, stats }: DashboardHeaderProps) {
 
   const greetingName = nickname ? `, ${nickname}` : ""
 
+  const titleSize = 34 - (34 - 17) * p
+  const subtitleOpacity = 1 - p
+
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 animate-fade-in">
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 animate-fade-in" style={{ height: '72px', paddingTop: '16px' }}>
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-[var(--fg)]">
+        <h1 
+          className="font-bold tracking-tight text-[var(--fg)] transition-all duration-200"
+          style={{ fontSize: `${titleSize}px` }}
+        >
           {getGreeting()}{greetingName}
         </h1>
-        <p className="text-[var(--fg-muted)] mt-2 text-lg">
+        <p 
+          className="text-[var(--fg-muted)] mt-2 text-lg transition-opacity duration-200"
+          style={{ opacity: subtitleOpacity }}
+        >
           {getSubtitle()}
         </p>
       </div>

@@ -5,11 +5,56 @@ import { usePathname } from "next/navigation"
 import { useAuth } from "@/components/AuthProvider"
 import { useNav } from "./useNav"
 import { MENU_ITEMS } from "./constants"
+import { useScrollVelocity } from "../../hooks/useScrollVelocity"
+import React from "react"
 
 export function Drawer() {
   const { drawerOpen, closeDrawer, mode } = useNav()
   const { signOut } = useAuth()
   const pathname = usePathname()
+  const v = useScrollVelocity("content-scroll")
+
+  // Velocity boost: 0~2 -> 0~10px
+  const boost = Math.min(10, v * 6)
+  const blur = 28 + boost
+
+  // Swipe state
+  const [translateX, setTranslateX] = React.useState(0)
+  const [isDragging, setIsDragging] = React.useState(false)
+  const startXRef = React.useRef(0)
+  const startTranslateRef = React.useRef(0)
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    setIsDragging(true)
+    startXRef.current = e.clientX
+    startTranslateRef.current = translateX
+    ;(e.target as Element).setPointerCapture(e.pointerId)
+  }
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) return
+    const deltaX = e.clientX - startXRef.current
+    const newTranslateX = Math.max(-100, Math.min(0, startTranslateRef.current + deltaX))
+    setTranslateX(newTranslateX)
+  }
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isDragging) return
+    setIsDragging(false)
+    
+    const deltaX = e.clientX - startXRef.current
+    const progress = Math.abs(translateX) / 100 // 0 to 1
+    const velocity = Math.abs(deltaX) / (performance.now() - (startXRef.current as any).startTime || 1) // rough velocity
+
+    if (progress > 0.3 || velocity > 0.6) {
+      // Close
+      setTranslateX(-110)
+      setTimeout(closeDrawer, 200)
+    } else {
+      // Snap back
+      setTranslateX(0)
+    }
+  }
 
   // Extra Safety: Never render drawer if not mobile, even if state says open
   if (mode !== 'mobile') return null
@@ -25,7 +70,16 @@ export function Drawer() {
       />
       
       {/* Drawer Content */}
-      <div className="absolute top-[60px] left-0 right-0 bg-[var(--bg)]/95 glass border-b border-[var(--glass-border)] rounded-b-[24px] shadow-2xl p-4 animate-slide-down flex flex-col gap-2">
+      <div 
+        className="absolute top-[60px] left-0 right-0 glass scrolled border-b border-[var(--glass-border)] rounded-b-[24px] shadow-2xl p-4 animate-slide-down flex flex-col gap-2 transition-transform duration-200"
+        style={{ 
+          ["--glass-blur-scrolled" as any]: `${blur}px`,
+          transform: `translateX(${translateX}%)`
+        }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+      >
         {MENU_ITEMS.map((item) => {
           const isActive = pathname === item.path
           return (

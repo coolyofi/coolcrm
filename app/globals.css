@@ -39,6 +39,15 @@
   --motion-slow: 240ms;
   --ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* Large Title Collapse */
+  --lt-height: 72px;
+  --lt-collapse-distance: 56px;
+  --lt-title-max: 34px;
+  --lt-title-min: 17px;
+  --lt-subtitle-max: 13px;
+  --lt-subtitle-min: 0px;
+}
 }
 
 /* ---------------- Dark (Liquid Glass) ---------------- */

@@ -5,6 +5,7 @@ import { Sidebar } from "./Sidebar"
 import { TopBar } from "./TopBar"
 import { Drawer } from "./Drawer"
 import { usePathname } from "next/navigation"
+import { CommandBar } from "../CommandBar"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { navWidthPx, elevated, mode } = useNav()
@@ -47,10 +48,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           boxShadow: elevated ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none'
         }}
       >
-        <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
-           {children}
+        <div 
+          id="content-scroll"
+          className="h-full overflow-y-auto"
+          style={{
+            height: (mode === 'mobile' || mode === 'tablet-expanded') ? 'calc(100vh - 60px)' : '100vh'
+          }}
+        >
+          <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
+            {children}
+          </div>
         </div>
       </main>
+
+      <CommandBar />
     </>
   )
 }
