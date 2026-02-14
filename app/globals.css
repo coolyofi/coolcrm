@@ -2,9 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%);
+  --text-color: #000000;
+}
+
+.dark {
+  --background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  --text-color: #ffffff;
+}
+
 body {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  background: var(--background);
   background-attachment: fixed;
-  color: white;
+  color: var(--text-color);
   min-height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
 }
