@@ -24,6 +24,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return "0px"
   }
 
+  // Check if drawer is open (mobile mode with expanded sidebar)
+  const isDrawerOpen = mode === 'mobile' && sidebar === 'expanded'
+
   return (
     <div className="h-[100dvh] overflow-hidden bg-[rgb(var(--bg))]">
       {/* Navigation Layer (OS Layer) */}
@@ -35,10 +38,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main
         id="content-scroll"
         className="h-[100dvh] overflow-y-auto overscroll-contain min-w-0"
+        data-drawer-open={isDrawerOpen ? "true" : "false"}
         style={{
           marginLeft: getContentMarginLeft(),
           zIndex: 'var(--z-content)',
-          pointerEvents: mode === 'mobile' && sidebar === 'expanded' ? 'none' : 'auto'
+          pointerEvents: isDrawerOpen ? 'none' : 'auto'
         }}
       >
         <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">

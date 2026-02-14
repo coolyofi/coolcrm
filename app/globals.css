@@ -48,7 +48,10 @@
   --lt-subtitle-max: 13px;
   --lt-subtitle-min: 0px;
 
-  /* Layer System — Navigation Architecture */
+  /* Layer System — Navigation Architecture (v2 Stable)
+     Never create new stacking context at content level
+     Content must always be lower than Navigation
+  */
   --z-content: 1;
   --z-topbar: 40;
   --z-overlay: 50;
@@ -152,12 +155,20 @@ html, body {
 
 /* ---------------- Components ---------------- */
 
+/* ===== GLASS RENDERING ISOLATION ===== 
+   Phase 1 Fix: Prevent backdrop-filter pixel-reading artifacts.
+   isolation:isolate creates new stacking context for backdrop-filter effects.
+   overflow:hidden clips content, prevents blur glow bleed outside bounds. */
+
 .glass {
   background: rgba(var(--glass-tint), var(--glass-alpha));
   -webkit-backdrop-filter: blur(var(--glass-blur));
   backdrop-filter: blur(var(--glass-blur));
   border: 1px solid rgba(var(--glass-border), var(--glass-border-alpha));
   box-shadow: var(--shadow-1);
+  /* Stacking Context: Isolate backdrop-filter rendering */
+  isolation: isolate;
+  overflow: hidden;
 }
 
 .glass.scrolled {
@@ -165,6 +176,9 @@ html, body {
   -webkit-backdrop-filter: blur(var(--glass-blur-scrolled));
   backdrop-filter: blur(var(--glass-blur-scrolled));
   box-shadow: var(--shadow-2);
+  /* Stacking Context: Isolate backdrop-filter rendering */
+  isolation: isolate;
+  overflow: hidden;
 }
 
 .glass-strong {
@@ -174,6 +188,9 @@ html, body {
   box-shadow: var(--glass-shadow);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
+  /* Stacking Context: Isolate backdrop-filter rendering */
+  isolation: isolate;
+  overflow: hidden;
 }
 
 .surface-solid {
@@ -277,6 +294,28 @@ html, body {
   background:
     radial-gradient(900px 700px at 20% 10%, rgba(37,99,235,0.08), transparent 60%),
     radial-gradient(900px 700px at 85% 20%, rgba(255,255,255,0.70), transparent 55%);
+}
+
+/* ===== GLOW CONTAINMENT ===== 
+   Phase 1 Fix: Prevent box-shadow glow leakage outside card boundaries.
+   overflow:hidden clips inner glow to card bounds. */
+.card {
+  overflow: hidden;
+}
+
+/* ===== DRAWER STATE CONTENT FREEZE ===== 
+   Phase 1 Fix: When drawer is open, freeze content interactivity and visual state.
+   scale(.985) shrinks content slightly for depth perception.
+   saturate(.9) reduces color saturation for visual depth.
+   pointer-events-none handled by parent wrapper (pointer-events:none on content-scroll). */
+[data-drawer-open="true"] {
+  --content-scale: 0.985;
+  --content-saturate: 0.9;
+}
+
+[data-drawer-open="true"] main {
+  transform: scale(var(--content-scale, 1));
+  filter: saturate(var(--content-saturate, 1));
 }
 
 /* Scrollbar */
