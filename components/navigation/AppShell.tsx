@@ -15,7 +15,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { p } = useScrollProgress("content-scroll", UI_CONTRACT.PAGE_HEADER_SCROLL_DISTANCE)
 
   // Don't wrap login page with shell
-  if (pathname === '/login') {
+  // Don't wrap login page with shell. Also avoid rendering shell until
+  // hydration completes to keep server and client markup identical on first load.
+  if (pathname === '/login' || !isHydrated) {
     return <>{children}</>
   }
 
