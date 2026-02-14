@@ -160,18 +160,47 @@ export default function EditCustomer() {
         setValue("latitude", lat)
         setValue("longitude", lng)
 
-        // Enhanced: Better error handling for reverse geocoding
+        // 使用高德地图逆地理编码API - 获取详细地址信息
         try {
-          const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh`)
+          const AMAP_KEY = process.env.NEXT_PUBLIC_AMAP_KEY || 'your_amap_key_here'
+          const response = await fetch(`https://restapi.amap.com/v3/geocode/regeo?key=${AMAP_KEY}&location=${lng},${lat}&extensions=all&roadlevel=1`)
           
           if (!response.ok) {
-            throw new Error(`Geocoding service unavailable (status: ${response.status})`)
+            throw new Error(`高德地图服务不可用 (status: ${response.status})`)
           }
           
           const data = await response.json()
-          const fullAddress = `${data.city || ''} ${data.locality || ''} ${data.principalSubdivision || ''}`.trim()
-          setValue("address", fullAddress || "")
-          toast.success("位置已更新")
+          if (data.status === '1' && data.regeocode) {
+            // 优先使用格式化的完整地址
+            let address = data.regeocode.formatted_address
+            
+            // 如果有更详细的POI信息，尝试构建更精确的地址
+            if (data.regeocode.pois && data.regeocode.pois.length > 0) {
+              const nearestPoi = data.regeocode.pois[0]
+              if (nearestPoi.name && nearestPoi.address) {
+                address = `${nearestPoi.name}(${nearestPoi.address})`
+              }
+            }
+            
+            // 如果没有POI信息，使用地址组件构建详细地址
+            if (!address || address === data.regeocode.formatted_address) {
+              const addrComp = data.regeocode.addressComponent
+              const parts = [
+                addrComp.province,
+                addrComp.city,
+                addrComp.district,
+                addrComp.township,
+                addrComp.streetNumber?.street || addrComp.neighborhood,
+                addrComp.streetNumber?.number
+              ].filter(Boolean)
+              address = parts.join('') || data.regeocode.formatted_address
+            }
+            
+            setValue("address", address)
+            toast.success("位置已更新")
+          } else {
+            throw new Error(data.info || '地址解析失败')
+          }
         } catch (error) {
           console.error("获取地址失败:", error)
           const errorMessage = error instanceof Error ? error.message : '未知错误'
