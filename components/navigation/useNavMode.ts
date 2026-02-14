@@ -1,37 +1,44 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import type { NavMode } from "./constants"
-import { BREAKPOINTS } from "./constants"
+/**
+ * @deprecated This file is deprecated. Use NavigationProvider's useNav() instead.
+ * 
+ * NavigationProvider now handles device mode detection internally.
+ * Import { useNav } from "./NavigationProvider" and use nav.mode instead.
+ */
 
-function getMode(width: number, height: number): NavMode {
+import { useEffect, useState } from "react"
+
+// Simple NavMode for backward compatibility
+export type NavMode = "mobile" | "tablet" | "desktop"
+
+const BREAKPOINTS = {
+  mobileMax: 767,
+  tabletMax: 1023,
+} as const
+
+function getMode(width: number): NavMode {
   if (width <= BREAKPOINTS.mobileMax) return "mobile"
-  
-  // iPad detection: width >= 768 && width < 1024
-  const isIpad = width >= 768 && width < BREAKPOINTS.tabletMax
-  if (isIpad) {
-    const isLandscape = width > height
-    return isLandscape ? "tablet-compact" : "tablet-expanded"
-  }
-  
+  if (width <= BREAKPOINTS.tabletMax) return "tablet"
   return "desktop"
 }
 
+/**
+ * @deprecated Use NavigationProvider's useNav().mode instead
+ */
 export function useNavMode(): NavMode {
-  // Use lazy initialization with window check to support SSR safely
   const [mode, setMode] = useState<NavMode>(() => {
     if (typeof window === "undefined") return "desktop"
-    return getMode(window.innerWidth, window.innerHeight)
+    return getMode(window.innerWidth)
   })
 
   useEffect(() => {
     let raf = 0
     const onResize = () => {
       cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(() => setMode(getMode(window.innerWidth, window.innerHeight)))
+      raf = requestAnimationFrame(() => setMode(getMode(window.innerWidth)))
     }
     
-    // Initial check in effect in case hydration mismatch
     onResize()
 
     window.addEventListener("resize", onResize, { passive: true })
