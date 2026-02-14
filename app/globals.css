@@ -41,6 +41,19 @@
   /* table/inputs should be more solid for readability */
   --surface-solid: rgba(17, 24, 39, 0.72);
   --surface-solid-border: rgba(255,255,255,0.10);
+
+  /* Auth Tokens - Dark */
+  --auth-bg: #0b1020;
+  --auth-scrim: rgba(0,0,0,0.25);
+  --auth-card: rgba(255,255,255,0.10);
+  --auth-card-border: rgba(255,255,255,0.18);
+  --auth-control: rgba(17,24,39,0.72);
+  --auth-control-border: rgba(255,255,255,0.10);
+  --auth-text: rgba(255,255,255,0.92);
+  --auth-muted: rgba(255,255,255,0.62);
+  --auth-primary: #4da3ff;
+  --auth-focus: rgba(77, 163, 255, 0.18);
+  --auth-blur: 20px;
 }
 
 /* ---------------- Light (Solid Glass) ---------------- */
@@ -62,6 +75,19 @@
 
   --surface-solid: rgba(255,255,255,0.95);
   --surface-solid-border: rgba(17,24,39,0.08);
+
+  /* Auth Tokens - Light */
+  --auth-bg: #f4f7fb;
+  --auth-scrim: rgba(255,255,255,0.35);
+  --auth-card: rgba(255,255,255,0.92);
+  --auth-card-border: rgba(17,24,39,0.08);
+  --auth-control: rgba(255,255,255,0.98);
+  --auth-control-border: rgba(17,24,39,0.10);
+  --auth-text: rgba(17,24,39,0.92);
+  --auth-muted: rgba(17,24,39,0.60);
+  --auth-primary: #2563eb;
+  --auth-focus: rgba(37, 99, 235, 0.18);
+  --auth-blur: 8px;
 }
 
 /* base */
@@ -99,6 +125,67 @@ html, body {
   border: 1px solid var(--surface-solid-border);
   border-radius: var(--r-card);
 }
+
+/* ---------------- Auth Components ---------------- */
+.auth-bg {
+  background-color: var(--auth-bg);
+  /* Optional: Radial gradient overlay if needed by design, but keeping simple as per token spec first */
+}
+
+.auth-scrim {
+  background: var(--auth-scrim);
+  backdrop-filter: blur(var(--auth-blur));
+  -webkit-backdrop-filter: blur(var(--auth-blur));
+}
+
+.auth-card {
+  background: var(--auth-card);
+  border: 1px solid var(--auth-card-border);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  backdrop-filter: blur(var(--auth-blur));
+  -webkit-backdrop-filter: blur(var(--auth-blur));
+}
+
+.auth-input {
+  background: var(--auth-control);
+  border: 1px solid var(--auth-control-border);
+  color: var(--auth-text);
+  border-radius: 14px;
+  transition: all 0.2s ease;
+}
+
+.auth-input::placeholder {
+  color: var(--auth-muted);
+}
+
+.auth-input:focus {
+  border-color: var(--auth-primary);
+  box-shadow: 0 0 0 4px var(--auth-focus);
+  outline: none;
+}
+
+.auth-btn-primary {
+  background: var(--auth-primary);
+  color: white;
+  font-weight: 500;
+  border-radius: 9999px; /* Capsule */
+  transition: transform 0.1s ease, filter 0.2s ease;
+}
+
+.auth-btn-primary:active {
+  transform: scale(0.98);
+  filter: brightness(0.95);
+}
+
+.auth-text {
+  color: var(--auth-text);
+}
+
+.auth-text-muted {
+  color: var(--auth-muted);
+}
+
 
 .btn-primary {
   background: var(--primary);
