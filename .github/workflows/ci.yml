@@ -1,9 +1,9 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [ main ]
   push:
+    branches: [ main ]
+  pull_request:
     branches: [ main ]
 
 concurrency:
@@ -11,67 +11,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
+  build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     strategy:
       matrix:
         node-version: [20.x]
+
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Setup Node
-      - uses: actions/setup-node@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
 
-      - name: Install
+      - name: Install dependencies
         run: npm ci
 
-      # ✅ 只 lint 改动文件（超快）
-      - name: Lint changed files
-        if: github.event_name == 'pull_request'
-        run: |
-          npx eslint $(git diff --name-only origin/main...HEAD -- '*.ts' '*.tsx' || true) --max-warnings=0
-
-      # ✅ push main 仍跑全量 lint
-      - name: Lint (full)
-        if: github.event_name == 'push'
+      - name: Run ESLint
         run: npm run lint
 
       - name: Type check
         run: npm run type-check
 
-      - name: Tests
+      - name: Run tests
         run: npm run test
 
-  build:
-    if: github.event_name == 'push'
-    needs: quality
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-          cache: npm
-
-      - name: Install
-        run: npm ci
-
-      # ✅ Next.js build cache（关键）
-      - name: Restore Next.js cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            .next/cache
-          key: ${{ runner.os }}-nextcache-${{ hashFiles('package-lock.json') }}-${{ hashFiles('**/*.[jt]s', '**/*.[jt]sx', '**/*.[jt]s?') }}
-          restore-keys: |
-            ${{ runner.os }}-nextcache-${{ hashFiles('package-lock.json') }}-
-
-      - name: Build
+      - name: Build (main only)
+        if: github.event_name == 'push'
         run: npm run build
