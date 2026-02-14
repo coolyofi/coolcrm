@@ -3,13 +3,13 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useAuth } from "@/components/AuthProvider"
-import { useNav } from "./NavigationProvider"
+import { useNavigation } from "./NavigationProvider"
 import { MENU_ITEMS } from "./constants"
 import { useScrollVelocity } from "../../hooks/useScrollVelocity"
 import React from "react"
 
 export function DrawerOverlay() {
-  const { mode, sidebar, close, motion, isHydrated } = useNav()
+  const { deviceMode, navMode, drawerOpen, closeDrawer, motion, isHydrated } = useNavigation()
   const { signOut } = useAuth()
   const pathname = usePathname()
   const v = useScrollVelocity("content-scroll")
@@ -21,10 +21,10 @@ export function DrawerOverlay() {
   const startXRef = React.useRef<{ x: number; startTime: number } | null>(null)
   const startTranslateRef = React.useRef(0)
 
-  // Only show on mobile, but hide during hydration to prevent mismatch
-  if (!isHydrated || mode !== "mobile") return null
+  // Only show on mobile (drawer mode), but hide during hydration to prevent mismatch
+  if (!isHydrated || navMode !== "drawer") return null
 
-  const open = sidebar === "expanded"
+  const open = drawerOpen
 
   // Velocity boost: 0~2 -> 0~10px
   const boost = Math.min(10, v * 6)
@@ -56,11 +56,21 @@ export function DrawerOverlay() {
     if (progress > 0.3 || velocity > 0.6) {
       // Close
       setTranslateX(-110)
-      setTimeout(close, 200)
+      setTimeout(closeDrawer, 200)
     } else {
       // Snap back
       setTranslateX(0)
     }
+  }
+
+  const handlePointerCancel = (e: React.PointerEvent) => {
+    // Treat pointer cancel the same as pointer up
+    if (!isDragging) return
+    setIsDragging(false)
+    setTranslateX(0)
+    try {
+      ;(e.target as Element).releasePointerCapture?.(e.pointerId)
+    } catch {}
   }
 
   if (!open) return null
@@ -70,7 +80,7 @@ export function DrawerOverlay() {
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity pointer-events-auto opacity-100"
-        onClick={close}
+        onClick={closeDrawer}
       />
 
       {/* Drawer Content */}
@@ -81,9 +91,10 @@ export function DrawerOverlay() {
           transform: `translateX(${translateX}%)`,
           transitionDuration: `${motion.durations.base}ms`
         } as React.CSSProperties}
-        onPointerDown={motion.drawerDragEnabled ? handlePointerDown : undefined}
-        onPointerMove={motion.drawerDragEnabled ? handlePointerMove : undefined}
-        onPointerUp={motion.drawerDragEnabled ? handlePointerUp : undefined}
+          onPointerDown={motion.drawerDragEnabled ? handlePointerDown : undefined}
+          onPointerMove={motion.drawerDragEnabled ? handlePointerMove : undefined}
+          onPointerUp={motion.drawerDragEnabled ? handlePointerUp : undefined}
+          onPointerCancel={motion.drawerDragEnabled ? handlePointerCancel : undefined}
       >
         {MENU_ITEMS.map((item) => {
           const isActive = pathname === item.path

@@ -33,3 +33,19 @@ export const calculateTitleSize = (progress: number) => {
   const { INITIAL, MIN } = UI_CONTRACT.PAGE_HEADER_TITLE
   return INITIAL - (INITIAL - MIN) * Math.min(Math.max(progress, 0), 1)
 }
+
+// Navigation layout constants
+export const NAV_LAYOUT = {
+  WIDTH: {
+    EXPANDED: 260,
+    ICON: 72,
+    CLOSED: 72,
+  },
+  PROXIMITY: {
+    LEFT_EDGE: 60,
+    RIGHT_EDGE: 300,
+  },
+  TOPBAR: {
+    COLLAPSED_PX: 60,
+  }
+} as const

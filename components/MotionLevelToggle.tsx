@@ -1,10 +1,10 @@
 "use client"
 
 import { usePathname } from 'next/navigation'
-import { useNav } from "@/components/navigation/NavigationProvider"
+import { useNavigation } from "@/components/navigation/NavigationProvider"
 
 export function MotionLevelToggle() {
-  const { motionLevel, setMotionLevel } = useNav()
+  const { motionLevel, setMotionLevel } = useNavigation()
   const pathname = usePathname()
 
   // Only show in development
@@ -15,8 +15,8 @@ export function MotionLevelToggle() {
   // Smart positioning to avoid bottom action buttons on add/edit pages
   const isOnActionPage = pathname.startsWith('/add') || pathname.startsWith('/edit')
   const positionClasses = isOnActionPage 
-    ? "fixed bottom-20 left-4 z-40" 
-    : "fixed bottom-20 right-4 z-40"
+    ? "fixed bottom-20 left-4 z-[var(--z-overlay)]" 
+    : "fixed bottom-20 right-4 z-[var(--z-overlay)]"
 
   return (
     <div className={positionClasses}>

@@ -16,7 +16,7 @@ export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
   const subtitleOpacity = 1 - p
 
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 animate-fade-in" style={{ height: '72px', paddingTop: '16px' }}>
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 animate-fade-in" style={{ height: `${UI_CONTRACT.TOPBAR_HEIGHT_PX}px`, paddingTop: '16px' }}>
       <div>
         <h1
           className="font-bold tracking-tight text-[var(--fg)] transition-all duration-200"

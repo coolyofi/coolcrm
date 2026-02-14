@@ -2,35 +2,36 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useNav } from "./NavigationProvider"
+import { useNavigation } from "./NavigationProvider"
 import { MENU_ITEMS } from "./constants"
 import { useScrollVelocity } from "../../hooks/useScrollVelocity"
 
 export function SidebarDesktop() {
-  const { mode, sidebar, toggle, motion, isHydrated } = useNav()
+  const { deviceMode, sidebarState, toggle, motion, isHydrated } = useNavigation()
   const pathname = usePathname()
   const v = useScrollVelocity("content-scroll")
 
   // Only show on tablet/desktop, but hide during hydration to prevent mismatch
-  if (!isHydrated || mode === "mobile") return null
+  if (!isHydrated || deviceMode === "mobile") return null
 
   // Velocity boost: only for apple motion level (we'll add this back later)
   const boost = Math.min(10, v * 6)
   const blur = 28 + boost
 
-  const isExpanded = sidebar === "expanded"
+  const isExpanded = sidebarState === "expanded"
   const collapsed = !isExpanded
 
   return (
     <aside
-      className="fixed left-0 top-0 h-[100dvh] flex flex-col select-none transition-[width] ease-[var(--ease)]"
+      className="fixed left-0 top-0 bottom-0 flex flex-col select-none transition-[width] ease-[var(--ease)]"
       style={{
         width: collapsed ? 'var(--nav-w-collapsed)' : 'var(--nav-w-expanded)',
         zIndex: 'var(--z-nav)',
-        transitionDuration: `${motion.durations.base}ms`
+        transitionDuration: `${motion.durations.base}ms`,
+        overflow: 'hidden'
       }}
     >
-      <div className="h-full p-3">
+      <div className="h-full p-3" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div 
           className="h-full rounded-2xl border border-white/20 bg-white/55 backdrop-blur-[18px] shadow-[var(--shadow-elev-1)] flex flex-col overflow-hidden" 
           style={{ 

@@ -1,16 +1,17 @@
 "use client"
 
 import Link from "next/link"
-import { useNav } from "./NavigationProvider"
+import { useNavigation } from "./NavigationProvider"
 import { usePathname } from "next/navigation"
 import { useScrollProgress } from "../../hooks/useScrollProgress"
+import { UI_CONTRACT, NAV_LAYOUT } from "./constants"
 
 function clamp(v: number, min: number, max: number) { return Math.max(min, Math.min(max, v)) }
 
 export function TopBar() {
-  const { mode, open, motion, isHydrated } = useNav()
+  const { deviceMode, openDrawer, motion, isHydrated, topbarHeight } = useNavigation()
   const pathname = usePathname()
-  const { p } = useScrollProgress("content-scroll", 56)
+  const { p } = useScrollProgress("content-scroll", UI_CONTRACT.PAGE_HEADER_SCROLL_DISTANCE)
 
   const getCompactTitle = () => {
     if (pathname === '/') return 'Dashboard'
@@ -26,12 +27,12 @@ export function TopBar() {
   
   // Large title collapse: interpolate between large and compact heights
   const titleProgress = Math.min(1, p)
-  const barHeight = motion.largeTitleEnabled 
-    ? (72 - (titleProgress * 12)) // 72px -> 60px
-    : 60
+  const barHeight = motion.largeTitleEnabled
+    ? (topbarHeight - (titleProgress * (topbarHeight - NAV_LAYOUT.TOPBAR.COLLAPSED_PX)))
+    : NAV_LAYOUT.TOPBAR.COLLAPSED_PX
 
   // Only show on mobile/tablet, but hide during hydration to prevent mismatch
-  if (!isHydrated || mode === "desktop") return null
+  if (!isHydrated || deviceMode === "desktop") return null
 
   return (
     <div
@@ -45,7 +46,7 @@ export function TopBar() {
     >
       {/* Menu Trigger */}
       <button 
-        onClick={open}
+        onClick={openDrawer}
         className="p-2 -ml-2 text-[var(--fg)] active:scale-95 transition-transform"
         aria-label="Open Navigation"
       >

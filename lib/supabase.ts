@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
+import { middlewareCookiesAdapter, requestCookiesAdapter } from './cookie-adapter'
 
 // Placeholder values used when environment variables are not set
 const PLACEHOLDER_URL = 'https://placeholder.supabase.co'
@@ -39,8 +40,7 @@ export async function createServerSupabase() {
   const cookieStore = cookies()
 
   return createServerClient(supabaseUrl, supabaseAnonKey, {
-    // cast to any to satisfy differing cookie method types across Next/Supabase versions
-    cookies: (() => cookieStore) as any,
+    cookies: requestCookiesAdapter(cookieStore) as any,
   })
 }
 
@@ -52,7 +52,7 @@ export async function createServerSupabase() {
 export function createRouteSupabase(request: Request, response: Response) {
   // Use createServerClient for route handlers; provide cookie accessors from the Request/Response
   return createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: (() => (request as any).cookies) as any,
+    cookies: middlewareCookiesAdapter((request as any), (response as any)) as any,
   })
 }
 
@@ -63,7 +63,7 @@ export function createRouteSupabase(request: Request, response: Response) {
  */
 export function createMiddlewareSupabase(request: Request) {
   return createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: (() => (request as any).cookies) as any,
+    cookies: middlewareCookiesAdapter((request as any), (undefined as any)) as any,
   })
 }
 

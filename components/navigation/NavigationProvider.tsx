@@ -1,10 +1,11 @@
 "use client"
 
 import React, { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { NAV_LAYOUT, UI_CONTRACT } from "./constants"
 
 // Navigation State Machine Types
-export type NavMode = "mobile" | "tablet" | "desktop"
-export type SidebarState = "closed" | "icon" | "expanded"
+export type DeviceMode = "mobile" | "tablet" | "desktop"
+export type SidebarState = "expanded" | "collapsed"
 export type MotionLevel = "stable" | "apple"
 
 // Motion Policy Output (组件消费这些参数)
@@ -32,9 +33,11 @@ export type MotionTokens = {
 
 // Navigation Context
 type NavContextValue = {
-  mode: NavMode
-  sidebar: SidebarState
+  deviceMode: DeviceMode
+  navMode: "drawer" | "sidebar"
+  sidebarState: SidebarState
   drawerOpen: boolean
+  topbarHeight: number
 
   // Motion system
   motion: MotionTokens
@@ -47,11 +50,12 @@ type NavContextValue = {
   open: () => void
   close: () => void
   toggle: () => void
+  openDrawer: () => void
+  closeDrawer: () => void
+  toggleDrawer: () => void
   setMotionLevel: (level: MotionLevel) => void
 
   // Computed values for components
-  state: SidebarState
-  toggleSidebar: () => void
   navWidthPx: number
   proximity: boolean
 }
@@ -59,8 +63,8 @@ type NavContextValue = {
 const NavigationContext = createContext<NavContextValue | null>(null)
 
 // Hook: Device-based mode detection with touch support
-function useNavMode(): NavMode {
-  const [mode, setMode] = useState<NavMode>(() => {
+function useDeviceMode(): DeviceMode {
+  const [mode, setMode] = useState<DeviceMode>(() => {
     // SSR-safe initialization: check window availability
     // Default to mobile on the server to avoid sending a desktop-heavy layout that
     // will jump to mobile on hydration. Mobile-first rendering reduces layout shifts
@@ -132,8 +136,8 @@ function useMouseProximity(enabled: boolean) {
     if (!enabled) return
 
     const move = (e: MouseEvent) => {
-      if (e.clientX < 60) setNearLeft(true)  // Expand when mouse within 60px of left edge
-      else if (e.clientX > 300) setNearLeft(false)  // Collapse when mouse beyond 300px
+      if (e.clientX < NAV_LAYOUT.PROXIMITY.LEFT_EDGE) setNearLeft(true)  // Expand when mouse within left edge
+      else if (e.clientX > NAV_LAYOUT.PROXIMITY.RIGHT_EDGE) setNearLeft(false)  // Collapse when mouse beyond right edge
     }
 
     window.addEventListener("mousemove", move)
@@ -208,7 +212,7 @@ function getMotionPolicy(
 
 // Navigation Provider v3 (双轨架构)
 export function NavigationProvider({ children }: { children: React.ReactNode }) {
-  const mode = useNavMode()
+  const deviceMode = useDeviceMode()
 
   // Core state: Sidebar state for manual toggle (only affects desktop/tablet)
   const [sidebarOverride, setSidebarOverride] = useState<SidebarState | null>(null)
@@ -238,24 +242,24 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   }, [])
 
   // Proximity (desktop only)
-  const mouseNear = useMouseProximity(mode === "desktop" && getMotionPolicy(motionLevel).proximityEnabled)
+  const mouseNear = useMouseProximity(deviceMode === "desktop" && getMotionPolicy(motionLevel).proximityEnabled)
 
-  // Derived sidebar state from mode + overrides
-  const sidebar = useMemo<SidebarState>(() => {
-    // Mobile: always closed
-    if (mode === "mobile") return "closed"
+  // Derived sidebar state from deviceMode + overrides
+  const sidebarState = useMemo<SidebarState>(() => {
+    // Mobile: always collapsed
+    if (deviceMode === "mobile") return "collapsed"
     // Tablet: expanded by default (better for iPad UX)
-    if (mode === "tablet") return sidebarOverride ?? "expanded"
-    // Desktop: icon/expanded based on mouse proximity or override
-    if (mode === "desktop") {
+    if (deviceMode === "tablet") return sidebarOverride ?? "expanded"
+    // Desktop: expanded when mouse near or override
+    if (deviceMode === "desktop") {
       if (sidebarOverride) return sidebarOverride
-      return mouseNear ? "expanded" : "icon"
+      return mouseNear ? "expanded" : "collapsed"
     }
-    return "closed"
-  }, [mode, sidebarOverride, mouseNear])
+    return "collapsed"
+  }, [deviceMode, sidebarOverride, mouseNear])
 
   // Drawer state
-  const [drawerOpen] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   // Scroll physics (apple mode only)
   useEffect(() => {
@@ -294,20 +298,32 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   )
 
   // Computed values
+  // Use centralized constants for nav widths
   const navWidthPx = useMemo(() => {
-    switch (sidebar) {
-      case "expanded": return 260
-      case "icon": return 72
-      case "closed": return 72
+    switch (sidebarState) {
+      case "expanded": return NAV_LAYOUT.WIDTH.EXPANDED
+      case "collapsed": return NAV_LAYOUT.WIDTH.ICON
     }
-  }, [sidebar])
+  }, [sidebarState])
+
+  // Topbar height token (read from CSS var if available)
+  const topbarHeight = useMemo(() => {
+    if (typeof window === 'undefined') return UI_CONTRACT.TOPBAR_HEIGHT_PX
+    const v = getComputedStyle(document.documentElement).getPropertyValue('--topbar-h')
+    const parsed = v ? parseInt(v.trim().replace('px', ''), 10) : NaN
+    return Number.isFinite(parsed) ? parsed : UI_CONTRACT.TOPBAR_HEIGHT_PX
+  }, [])
 
   // Actions
   const open = useCallback(() => setSidebarOverride("expanded"), [])
-  const close = useCallback(() => setSidebarOverride("closed"), [])
+  const close = useCallback(() => setSidebarOverride("collapsed"), [])
   const toggle = useCallback(() =>
-    setSidebarOverride(s => s === "closed" ? "expanded" : "closed"), []
+    setSidebarOverride(s => s === "collapsed" ? "expanded" : "collapsed"), []
   )
+
+  const openDrawer = useCallback(() => setDrawerOpen(true), [])
+  const closeDrawer = useCallback(() => setDrawerOpen(false), [])
+  const toggleDrawer = useCallback(() => setDrawerOpen(v => !v), [])
 
   const setMotionLevelCallback = useCallback((level: MotionLevel) => {
     setMotionLevel(level)
@@ -318,22 +334,27 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     }
   }, [])
 
+  const navMode = deviceMode === 'mobile' ? 'drawer' : 'sidebar'
+
   const value = useMemo<NavContextValue>(() => ({
-    mode,
-    sidebar,
+    deviceMode,
+    navMode,
+    sidebarState,
     drawerOpen,
+    topbarHeight,
     motion,
     motionLevel,
     isHydrated,
     open,
     close,
     toggle,
+    openDrawer,
+    closeDrawer,
+    toggleDrawer,
     setMotionLevel: setMotionLevelCallback,
-    state: sidebar,
-    toggleSidebar: toggle,
     navWidthPx,
     proximity: mouseNear
-  }), [mode, sidebar, drawerOpen, motion, motionLevel, isHydrated, open, close, toggle, setMotionLevelCallback, navWidthPx, mouseNear])
+  }), [deviceMode, navMode, sidebarState, drawerOpen, topbarHeight, motion, motionLevel, isHydrated, open, close, toggle, openDrawer, closeDrawer, toggleDrawer, setMotionLevelCallback, navWidthPx, mouseNear])
 
   return (
     <NavigationContext.Provider value={value}>
@@ -343,8 +364,9 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
 }
 
 // Hook: Access navigation state
-export function useNav() {
+// Canonical hook name per navigation contract
+export function useNavigation() {
   const ctx = useContext(NavigationContext)
-  if (!ctx) throw new Error("useNav must be used within NavigationProvider")
+  if (!ctx) throw new Error("useNavigation must be used within NavigationProvider")
   return ctx
 }

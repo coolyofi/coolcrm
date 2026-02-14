@@ -1,16 +1,16 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { useNav } from "./NavigationProvider"
+import { useEffect } from "react"
+import { useNavigation } from "./NavigationProvider"
 import { TopBar } from "./TopBar"
-import { DrawerOverlay } from "./DrawerOverlay"
-import { SidebarDesktop } from "./SidebarDesktop"
+import { NavigationRoot } from "./NavigationRoot"
 import { MotionLevelToggle } from "../MotionLevelToggle"
 import { useScrollProgress } from "../../hooks/useScrollProgress"
-import { UI_CONTRACT } from "./constants"
+import { UI_CONTRACT, NAV_LAYOUT } from "./constants"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { mode, sidebar, motion, isHydrated } = useNav()
+  const { deviceMode, sidebarState, motion, isHydrated, topbarHeight, drawerOpen } = useNavigation()
   const pathname = usePathname()
   const { p } = useScrollProgress("content-scroll", UI_CONTRACT.PAGE_HEADER_SCROLL_DISTANCE)
 
@@ -21,14 +21,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // During hydration, avoid assuming desktop on the server (prevents desktop->mobile jump).
   // Use a mobile-first default until the client hydrates and determines the real mode.
-  const safeMode = isHydrated ? mode : "mobile"
-  const safeSidebar = isHydrated ? sidebar : "closed"
+  const safeMode = isHydrated ? deviceMode : "mobile"
+  const safeSidebar = isHydrated ? sidebarState : "collapsed"
 
   // Calculate content margin based on navigation state
   const getContentMarginLeft = () => {
     if (safeMode === "mobile") return "0px"
-    if (safeMode === "tablet") return safeSidebar === "expanded" ? "260px" : "72px"
-    if (safeMode === "desktop") return safeSidebar === "expanded" ? "260px" : "72px"
+    if (safeMode === "tablet") return safeSidebar === "expanded" ? `${NAV_LAYOUT.WIDTH.EXPANDED}px` : `${NAV_LAYOUT.WIDTH.ICON}px`
+    if (safeMode === "desktop") return safeSidebar === "expanded" ? `${NAV_LAYOUT.WIDTH.EXPANDED}px` : `${NAV_LAYOUT.WIDTH.ICON}px`
     return "0px"
   }
 
@@ -37,8 +37,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (safeMode === "desktop") return "0px"
 
     const titleProgress = Math.min(1, p)
-    const baseHeight = motion.largeTitleEnabled ? UI_CONTRACT.TOPBAR_HEIGHT_PX : 60
-    const collapsedHeight = 60
+    const baseHeight = motion.largeTitleEnabled ? topbarHeight : NAV_LAYOUT.TOPBAR.COLLAPSED_PX
+    const collapsedHeight = NAV_LAYOUT.TOPBAR.COLLAPSED_PX
     const currentHeight = motion.largeTitleEnabled
       ? (baseHeight - (titleProgress * (baseHeight - collapsedHeight)))
       : collapsedHeight
@@ -47,13 +47,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   // Check if drawer is open (mobile mode with expanded sidebar)
-  const isDrawerOpen = safeMode === 'mobile' && safeSidebar === 'expanded'
+  const isDrawerOpen = drawerOpen
+
+  // Enforce "body" never scrolls — AppShell makes #content-scroll the only scroll container
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prevOverflow }
+  }, [])
 
   return (
     <div className="h-[100dvh] overflow-hidden bg-[rgb(var(--bg))]">
-      {/* NavigationLayer（fixed，左侧，h-screen） */}
-      <SidebarDesktop />
-      <DrawerOverlay />
+      {/* NavigationLayer（fixed） */}
+      <NavigationRoot />
 
       {/* TopBarLayer（fixed，顶部，含 safe-area） */}
       <TopBar />

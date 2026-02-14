@@ -127,8 +127,15 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   ): T => {
     if (result.status === 'fulfilled') {
       if (result.value.error) {
-        // Log the error for debugging purposes but continue with a default value
+        // Log and send lightweight telemetry for failed queries
         console.warn(`Supabase query error for ${label ?? 'unknown'}:`, result.value.error)
+        try {
+          import('./telemetry')
+            .then(({ reportSupabaseError }) => void reportSupabaseError(result.value.error, { label }))
+            .catch(() => {})
+        } catch {
+          // ignore telemetry failures
+        }
         return defaultValue
       }
 
