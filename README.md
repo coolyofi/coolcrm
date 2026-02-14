@@ -315,10 +315,10 @@ npm run test         # 运行测试（当前无测试）
 ---
 
 **Local Auth Bypass**
-- **Env var**: `NEXT_PUBLIC_BYPASS_AUTH`: 将其设置为 `true` 可在本地开发时绕过对受保护路由（如 `/edit`）的登录重定向。
-- **示例文件**: [.env.local.example](.env.local.example#L1-L20) 已包含该变量示例。
-- **启用方式**: 在项目根目录创建或更新 `.env.local`，添加 `NEXT_PUBLIC_BYPASS_AUTH=true`，然后以 `npm run dev` 启动开发服务器（仅在本地安全环境下使用）。
-- **安全提示**: 仅用于本地调试。切勿在生产或公开的预览环境中启用该变量。
+- **Env var**: `BYPASS_AUTH`: 将其设置为 `true` 可在本地开发或 CI/CD 环境时绕过对受保护路由（如 `/edit`）的登录重定向。
+- **安全说明**: 该变量不使用 `NEXT_PUBLIC_` 前缀，因此不会暴露给客户端代码，仅在服务器端可用。
+- **启用方式**: 在项目根目录创建或更新 `.env.local`，添加 `BYPASS_AUTH=true`，然后以 `npm run dev` 启动开发服务器（仅在本地安全环境下使用）。
+- **安全提示**: 仅用于本地调试或 CI/CD 流水线。切勿在生产或公开的预览环境中启用该变量。
 
 
 **CoolCRM** - 让客户关系管理变得简单而强大 🚀
