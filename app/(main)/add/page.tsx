@@ -41,18 +41,24 @@ export default function AddCustomer() {
         setLatitude(lat)
         setLongitude(lng)
 
-        // Enhanced: Better error handling for reverse geocoding with retry
+        // 使用高德地图逆地理编码API
         try {
-          const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh`)
+          const AMAP_KEY = process.env.NEXT_PUBLIC_AMAP_KEY || 'your_amap_key_here'
+          const response = await fetch(`https://restapi.amap.com/v3/geocode/regeo?key=${AMAP_KEY}&location=${lng},${lat}&extensions=base`)
           
           if (!response.ok) {
-            throw new Error(`Geocoding service unavailable (status: ${response.status})`)
+            throw new Error(`高德地图服务不可用 (status: ${response.status})`)
           }
           
           const data = await response.json()
-          const fullAddress = `${data.city || ''} ${data.locality || ''} ${data.principalSubdivision || ''}`.trim()
-          setAddress(fullAddress || "")
-          toast.success("位置获取成功")
+          if (data.status === '1' && data.regeocode) {
+            const address = data.regeocode.formatted_address || 
+              `${data.regeocode.addressComponent.province || ''} ${data.regeocode.addressComponent.city || ''} ${data.regeocode.addressComponent.district || ''}`.trim()
+            setAddress(address)
+            toast.success("位置获取成功")
+          } else {
+            throw new Error(data.info || '地址解析失败')
+          }
         } catch (error) {
           console.error("获取地址失败:", error)
           // More specific error message
