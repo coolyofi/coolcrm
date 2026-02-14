@@ -15,10 +15,23 @@
   /* spacing */
   --pad-page: 32px;
   --pad-card: 24px;
+  --nav-w: 260px; /* Default desktop width */
 
   /* elevation (shadow is subtle) */
   --shadow-1: 0 10px 30px rgba(0,0,0,0.08);
   --shadow-2: 0 18px 60px rgba(0,0,0,0.14);
+
+  /* Glass Tokens - Light (Default) */
+  --glass-tint: 255, 255, 255;
+  --glass-alpha: 0.72; /* Improved visibility as requested */
+  --glass-alpha-scrolled: 0.85;
+  --glass-blur: 18px;
+  --glass-blur-scrolled: 28px;
+  --glass-border: 255, 255, 255;
+  --glass-border-alpha: 0.45;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* ---------------- Dark (Liquid Glass) ---------------- */
@@ -31,10 +44,15 @@
   --primary: #4da3ff;
   --danger: #ff4d5e;
 
-  /* glass algo */
-  --glass-bg: rgba(255,255,255,0.08);
-  --glass-border: rgba(255,255,255,0.16);
+  /* Glass Tokens - Dark */
+  --glass-tint: 11, 16, 32;
+  --glass-alpha: 0.46;
+  --glass-alpha-scrolled: 0.62;
+  --glass-border: 255, 255, 255;
+  --glass-border-alpha: 0.14;
   --glass-blur: 18px;
+  --glass-blur-scrolled: 28px;
+
   --glass-shadow: var(--shadow-1);
   --glass-noise: 0.06;
 
@@ -98,22 +116,30 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background 0.3s ease, color 0.3s ease;
+  overflow-x: hidden; /* Fix iOS layout explosion */
 }
+* { min-width: 0; } /* Prevent flex children from overflowing */
 
 /* ---------------- Components ---------------- */
 
 .glass {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--r-card);
-  box-shadow: var(--glass-shadow);
-  backdrop-filter: blur(var(--glass-blur));
+  background: rgba(var(--glass-tint), var(--glass-alpha));
   -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid rgba(var(--glass-border), var(--glass-border-alpha));
+  box-shadow: var(--shadow-1);
+}
+
+.glass.scrolled {
+  background: rgba(var(--glass-tint), var(--glass-alpha-scrolled));
+  -webkit-backdrop-filter: blur(var(--glass-blur-scrolled));
+  backdrop-filter: blur(var(--glass-blur-scrolled));
+  box-shadow: var(--shadow-2);
 }
 
 .glass-strong {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: rgba(var(--glass-tint), var(--glass-alpha-scrolled));
+  border: 1px solid rgba(var(--glass-border), var(--glass-border-alpha));
   border-radius: var(--r-card);
   box-shadow: var(--glass-shadow);
   backdrop-filter: blur(var(--glass-blur));

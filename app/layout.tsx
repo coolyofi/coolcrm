@@ -1,7 +1,6 @@
 import "./globals.css"
 import { AuthProvider } from "@/components/AuthProvider"
 import { NavigationProvider } from "@/components/NavigationProvider"
-import { Navigation } from "@/components/Navigation"
 
 export default function RootLayout({
   children,
@@ -11,19 +10,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
       </head>
       <body>
         <div className="ambient-light" />
         <AuthProvider>
-          <NavigationProvider>
-            <div className="flex min-h-screen">
-              <Navigation />
-              <main className="flex-1 p-8 overflow-y-auto h-screen">
-                {children}
-              </main>
-            </div>
-          </NavigationProvider>
+            {children}
         </AuthProvider>
         <script
           dangerouslySetInnerHTML={{
