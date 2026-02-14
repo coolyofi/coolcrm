@@ -5,7 +5,17 @@ import { usePathname } from "next/navigation"
 import { useNav } from "./NavigationProvider"
 import { MENU_ITEMS } from "./constants"
 import { useScrollVelocity } from "../../hooks/useScrollVelocity"
+import { Z_INDEX, NAV_DIMENSIONS } from "./tokens"
 
+/**
+ * SidebarDesktop - Full-height sidebar for tablet/desktop
+ * 
+ * Requirements:
+ * - Fixed positioning from top to bottom (h-screen)
+ * - Menu area uses flex-1 for flexible height
+ * - Bottom actions use mt-auto to stick to bottom
+ * - Only renders on tablet/desktop (NavigationRoot handles this)
+ */
 export function SidebarDesktop() {
   const { mode, sidebar, toggle, motion } = useNav()
   const pathname = usePathname()
@@ -14,19 +24,23 @@ export function SidebarDesktop() {
   // Only show on tablet/desktop
   if (mode === "mobile") return null
 
-  // Velocity boost: only for apple motion level (we'll add this back later)
+  // Velocity boost: only for apple motion level
   const boost = Math.min(10, v * 6)
   const blur = 28 + boost
 
   const isExpanded = sidebar === "expanded"
   const collapsed = !isExpanded
 
+  const sidebarWidth = collapsed 
+    ? NAV_DIMENSIONS.SIDEBAR_COLLAPSED 
+    : NAV_DIMENSIONS.SIDEBAR_EXPANDED
+
   return (
     <aside
       className="fixed left-0 top-0 h-[100dvh] flex flex-col select-none transition-[width] ease-[var(--ease)]"
       style={{
-        width: collapsed ? 'var(--nav-w-collapsed)' : 'var(--nav-w-expanded)',
-        zIndex: 'var(--z-nav)',
+        width: `${sidebarWidth}px`,
+        zIndex: Z_INDEX.SIDEBAR,
         transitionDuration: `${motion.durations.base}ms`
       }}
     >

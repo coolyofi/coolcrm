@@ -4,9 +4,20 @@ import Link from "next/link"
 import { useNav } from "./NavigationProvider"
 import { usePathname } from "next/navigation"
 import { useScrollProgress } from "../../hooks/useScrollProgress"
+import { Z_INDEX, NAV_DIMENSIONS } from "./tokens"
 
 function clamp(v: number, min: number, max: number) { return Math.max(min, Math.min(max, v)) }
 
+/**
+ * TopBar - Mobile topbar with menu, title, and primary action
+ * 
+ * Requirements:
+ * - Only renders on mobile (NavigationRoot handles this)
+ * - Menu button opens drawer
+ * - Title collaborates with LargeTitle (future feature)
+ * - Primary action (+ button) for quick add
+ * - Height from tokens
+ */
 export function TopBar() {
   const { mode, open, motion } = useNav()
   const pathname = usePathname()
@@ -27,8 +38,8 @@ export function TopBar() {
   // Large title collapse: interpolate between large and compact heights
   const titleProgress = Math.min(1, p)
   const barHeight = motion.largeTitleEnabled 
-    ? (72 - (titleProgress * 12)) // 72px -> 60px
-    : 60
+    ? (NAV_DIMENSIONS.TOPBAR_HEIGHT_LARGE - (titleProgress * (NAV_DIMENSIONS.TOPBAR_HEIGHT_LARGE - NAV_DIMENSIONS.TOPBAR_HEIGHT)))
+    : NAV_DIMENSIONS.TOPBAR_HEIGHT
 
   // Only show on mobile/tablet
   if (mode === "desktop") return null
@@ -38,7 +49,7 @@ export function TopBar() {
       className="fixed top-0 left-0 right-0 glass scrolled border-b border-[var(--glass-border)] flex items-center justify-between px-4 safe-area-top backdrop-blur-md bg-[var(--glass-bg)] transition-all duration-200"
       style={{
         height: `${barHeight}px`,
-        zIndex: 'var(--z-topbar)',
+        zIndex: Z_INDEX.TOPBAR,
         "--glass-blur-scrolled": `${motion.topbarBlurPx}px`,
         opacity: motion.topbarAlpha
       } as React.CSSProperties}

@@ -1,6 +1,7 @@
 import "./globals.css"
 import { AuthProvider } from "@/components/AuthProvider"
-import { Navigation } from "@/components/Navigation"
+import { NavigationProvider } from "@/components/navigation/NavigationProvider"
+import { AppShell } from "@/components/navigation/AppShell"
 
 export default function RootLayout({
   children,
