@@ -1,87 +1,101 @@
-# CoolCRM - 客户关系管理系统
+# CoolCRM - 现代化客户关系管理系统
 
-一个现代化的客户关系管理系统，基于 Next.js 16、React 19 和 Supabase 构建。
+[![Next.js](https://img.shields.io/badge/Next.js-16.1.6-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.2.3-blue)](https://reactjs.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-2.95.3-green)](https://supabase.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.4-38B2AC)](https://tailwindcss.com/)
 
-## ✨ 功能特性
+一个基于 Next.js 16 和 Supabase 构建的现代化客户关系管理系统，提供完整的客户管理、拜访记录和数据分析功能。
 
-### 🔐 认证系统
-- 用户注册和登录
-- JWT令牌安全认证
-- 密码bcrypt哈希存储
-- 邮箱验证支持
+## ✨ 核心功能
+
+### 🔐 安全认证系统
+- 用户注册与登录
+- JWT 令牌认证
 - 自动会话管理
+- 密码安全存储
+- 邮箱验证支持
 
 ### 👥 客户管理
-- 添加新客户
-- 编辑客户信息
-- 查看客户历史记录
-- 客户数据隔离（用户只能访问自己的数据）
-- **地理位置支持**：自动获取当前位置，支持手动调整地址
-- **拜访记录**：记录每次拜访的位置、时间和备注
+- 新增客户信息
+- 编辑客户详情
+- 删除客户记录
+- 客户数据隔离（用户级权限控制）
+- **地理位置支持**：自动定位与手动地址输入
+- **意向等级跟踪**：1-5 级客户意向评估
 
-### 👤 用户设置
-- 修改密码
-- 设置昵称
-- 查看账户信息
-- 个人资料管理
+### 📅 拜访记录管理
+- 记录客户拜访详情
+- 地理位置追踪
+- 拜访时间与备注
+- 历史拜访查询
+- 与客户关联的拜访数据
 
-### 🎨 现代化UI
+### 📊 数据分析面板
+- 客户统计概览
+- 月度拜访数据
+- KPI 趋势分析
+- 活动时间线
+- 性能监控
+
+### 🎨 现代化用户界面
 - 暗色主题设计
-- 响应式布局
-- 骨架屏加载状态
-- Toast通知反馈
+- 响应式布局适配
+- 流畅动画效果
+- Toast 通知系统
 - 无障碍性支持
 
-### 🛡️ 安全特性
+### 🛡️ 企业级安全
 - 数据库行级安全 (RLS)
-- 输入验证 (Zod)
-- XSS防护
-- CSRF保护
+- 输入数据验证 (Zod)
+- XSS 与 CSRF 防护
+- 敏感数据加密
 
 ## 🚀 快速开始
 
-### 环境要求
-- Node.js 18+
-- npm 或 yarn 或 pnpm
+### 系统要求
+- Node.js 18.0 或更高版本
+- npm / yarn / pnpm 包管理器
+- Supabase 账户
 
-### 安装依赖
+### 1. 克隆项目
+```bash
+git clone https://github.com/coolyofi/coolcrm.git
+cd coolcrm
+```
+
+### 2. 安装依赖
 ```bash
 npm install
 ```
 
-### 环境配置
-1. 复制环境变量文件：
-```bash
-cp .env.local.example .env.local
-```
+### 3. 环境配置
 
-2. 配置 Supabase：
-   - 访问 [Supabase](https://supabase.com) 创建新项目
-   - 在 `.env.local` 中设置：
+#### 创建 Supabase 项目
+1. 访问 [Supabase](https://supabase.com) 创建新项目
+2. 在项目设置中获取 URL 和 API 密钥
+
+#### 配置环境变量
+创建 `.env.local` 文件并添加以下配置：
+
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+# Supabase 配置
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-建议在 `.env.local` 中还包含以下可选/服务端变量（仅在服务器端使用）：
-
-```env
-# 服务端角色密钥，具有更高权限，仅用于服务器端操作（API route / server action）
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-# 可选：在部署时设置 NODE_ENV=production
-# 以及任何第三方服务的 API keys（不要将其暴露为 NEXT_PUBLIC_*）
+# 可选：Vercel Analytics
+# NEXT_PUBLIC_VERCEL_ANALYTICS=true
 ```
 
-> **⚠️ 安全警告：服务端密钥保护**
-> 
-> - `SUPABASE_SERVICE_ROLE_KEY` 具有最高权限，**绝不能** 在客户端组件中使用或导入。
-> - 仅在服务器端代码中通过 `createAdminSupabase()` 函数使用，用于管理员操作。
-> - 对于用户会话上下文，使用 `createServerSupabase()` (Server Components)、`createRouteSupabase()` (API Routes) 或 `createMiddlewareSupabase()` (Middleware)。
-> - 这些函数来自 `@supabase/ssr` 包，自动安全管理 cookies 和会话，无需手动处理密钥。
-> - 切勿将服务端密钥暴露给浏览器。始终使用适当的客户端函数进行客户端操作。
+> **安全提醒**：
+> - `SUPABASE_SERVICE_ROLE_KEY` 仅在服务端使用，切勿在客户端代码中暴露
+> - 生产环境请使用强密码和 HTTPS
 
-3. 创建数据库表：
+#### 数据库初始化
+在 Supabase SQL 编辑器中执行以下 SQL 脚本创建表结构：
+
 ```sql
 -- 客户表
 CREATE TABLE customers (
@@ -112,15 +126,12 @@ CREATE TABLE visits (
   notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-```
 
-4. 启用行级安全：
-```sql
--- 启用RLS
+-- 启用行级安全
 ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE visits ENABLE ROW LEVEL SECURITY;
 
--- 客户表策略
+-- 客户表访问策略
 CREATE POLICY "Users can view own customers" ON customers
   FOR SELECT USING (auth.uid() = user_id);
 
@@ -133,7 +144,7 @@ CREATE POLICY "Users can update own customers" ON customers
 CREATE POLICY "Users can delete own customers" ON customers
   FOR DELETE USING (auth.uid() = user_id);
 
--- 拜访记录策略
+-- 拜访记录访问策略
 CREATE POLICY "Users can view own visits" ON visits
   FOR SELECT USING (auth.uid() = user_id);
 
@@ -147,92 +158,160 @@ CREATE POLICY "Users can delete own visits" ON visits
   FOR DELETE USING (auth.uid() = user_id);
 ```
 
-### 运行项目
+### 4. 启动开发服务器
 ```bash
 npm run dev
 ```
 
-打开 [http://localhost:3000](http://localhost:3000) 开始使用。
+访问 [http://localhost:3000](http://localhost:3000) 开始使用应用。
 
 ## 📁 项目结构
 
 ```
 coolcrm/
-├── app/                    # Next.js App Router
-│   ├── add/               # 添加客户页面
-│   ├── edit/[id]/         # 编辑客户页面
-│   ├── history/           # 客户历史记录
-│   ├── login/             # 登录页面
-│   ├── settings/          # 用户设置页面
-│   ├── layout.tsx         # 根布局
-│   ├── page.tsx           # 首页
-│   └── globals.css        # 全局样式
-├── components/            # React组件
-│   ├── AuthProvider.tsx   # 认证上下文
-│   ├── ErrorBoundary.tsx  # 错误边界
-│   └── Navigation.tsx     # 导航组件
-├── lib/                   # 工具库
-│   └── supabase.ts        # Supabase客户端配置
-├── middleware.ts          # Next.js中间件
-└── SECURITY_GUIDE.md      # 安全配置指南
+├── app/                          # Next.js App Router
+│   ├── (auth)/                   # 认证路由组
+│   │   └── login/               # 登录页面
+│   ├── (main)/                   # 主应用路由组
+│   │   ├── add/                 # 添加客户
+│   │   ├── edit/[id]/           # 编辑客户
+│   │   ├── history/             # 历史记录
+│   │   ├── settings/            # 用户设置
+│   │   ├── visits/              # 拜访管理
+│   │   └── layout.tsx           # 主布局
+│   ├── globals.css              # 全局样式
+│   ├── layout.tsx               # 根布局
+│   └── page.tsx                 # 首页仪表板
+├── components/                   # React 组件
+│   ├── AuthProvider.tsx         # 认证上下文提供者
+│   ├── ErrorBoundary.tsx        # 错误边界
+│   ├── PageHeader.tsx           # 页面头部
+│   ├── SWRProvider.tsx          # SWR 配置提供者
+│   ├── dashboard/               # 仪表板组件
+│   │   ├── ActivityFeed.tsx     # 活动时间线
+│   │   ├── DashboardHeader.tsx  # 仪表板头部
+│   │   ├── GoalsSection.tsx     # 目标部分
+│   │   ├── KpiCard.tsx          # KPI 卡片
+│   │   └── ...
+│   ├── navigation/              # 导航组件
+│   │   ├── AppShell.tsx         # 应用外壳
+│   │   ├── NavigationProvider.tsx # 导航上下文
+│   │   ├── SidebarDesktop.tsx   # 桌面侧边栏
+│   │   ├── TopBar.tsx           # 顶部栏
+│   │   └── ...
+│   └── ...
+├── lib/                         # 工具库
+│   ├── api/                     # API 客户端
+│   │   ├── customers.ts         # 客户 API
+│   │   └── visits.ts            # 拜访 API
+│   ├── dashboard-optimized.ts   # 仪表板数据优化
+│   └── supabase.ts              # Supabase 客户端配置
+├── hooks/                       # 自定义 Hooks
+│   ├── useScrollProgress.ts     # 滚动进度
+│   └── useScrollVelocity.ts     # 滚动速度
+├── eslint-rules/                # ESLint 规则
+├── middleware.ts                # Next.js 中间件
+├── tailwind.config.js           # Tailwind 配置
+├── tsconfig.json                # TypeScript 配置
+├── package.json                 # 项目依赖
+└── README.md                    # 项目文档
 ```
 
 ## 🛠️ 技术栈
 
-- **Frontend**: Next.js 16, React 19, TypeScript
-- **Styling**: Tailwind CSS
-- **Backend**: Supabase (PostgreSQL, Auth, Storage)
-- **Forms**: React Hook Form + Zod
-- **State**: SWR (数据缓存)
-- **Notifications**: React Hot Toast
-- **Icons**: Heroicons
+### 前端框架
+- **Next.js 16** - React 全栈框架
+- **React 19** - 用户界面库
+- **TypeScript 5** - 类型安全
+
+### 样式与 UI
+- **Tailwind CSS** - 实用优先的 CSS 框架
+- **Heroicons** - 精美的 SVG 图标
+
+### 后端服务
+- **Supabase** - 开源 Firebase 替代方案
+  - PostgreSQL 数据库
+  - 实时订阅
+  - 文件存储
+  - 身份认证
+
+### 数据管理
+- **SWR** - React 数据获取库
+- **React Hook Form** - 表单状态管理
+- **Zod** - TypeScript 优先的模式验证
+
+### 开发工具
+- **ESLint** - 代码质量检查
+- **PostCSS** - CSS 处理
+- **Autoprefixer** - CSS 浏览器兼容性
 
 ## 📜 可用脚本
 
 ```bash
-npm run dev      # 启动开发服务器
-npm run build    # 构建生产版本
-npm run start    # 启动生产服务器
-npm run lint     # 运行ESLint检查
+npm run dev          # 启动开发服务器
+npm run build        # 构建生产版本
+npm run start        # 启动生产服务器
+npm run lint         # 运行 ESLint 代码检查
+npm run type-check   # TypeScript 类型检查
+npm run test         # 运行测试（当前无测试）
 ```
 
-## 🔒 安全配置
+## 🚀 部署指南
 
-详细的安全配置请参考 [SECURITY_GUIDE.md](./SECURITY_GUIDE.md)
+### Vercel 部署（推荐）
+1. 连接 GitHub 仓库到 Vercel
+2. 配置环境变量
+3. 自动部署和预览
 
-### 关键安全措施
-- ✅ 密码bcrypt哈希
-- ✅ JWT令牌认证
-- ✅ 数据库行级安全
-- ✅ 输入验证和消毒
-- ✅ HTTPS强制 (生产环境)
+### 其他平台部署
+- **Netlify**: 设置构建命令为 `npm run build`，发布目录为 `.next`
+- **Railway**: 连接 GitHub 仓库，自动检测 Next.js 项目
+- **Docker**: 使用提供的 Dockerfile（如果有）
 
-## 🚀 部署
+确保在部署平台上设置所有必需的环境变量。
 
-### Vercel (推荐)
-1. 连接GitHub仓库
-2. 设置环境变量
-3. 自动部署
+## 🔧 开发指南
 
-### 其他平台
-确保设置正确的环境变量和数据库连接。
+### 代码规范
+- 使用 TypeScript 进行类型安全开发
+- 遵循 ESLint 配置的代码规范
+- 使用 Prettier 格式化代码（如果配置）
 
-## 🤝 贡献
+### API 设计
+- RESTful API 设计原则
+- 使用 Supabase RLS 确保数据安全
+- 客户端和服务端分离的架构
 
-1. Fork 项目
+### 性能优化
+- 使用 SWR 进行数据缓存
+- 图片懒加载和优化
+- 代码分割和动态导入
+
+## 🤝 贡献指南
+
+欢迎贡献！请遵循以下步骤：
+
+1. Fork 本项目
 2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 创建 Pull Request
 
+### 开发环境设置
+- 确保 Node.js 版本 >= 18
+- 安装依赖后运行 `npm run dev`
+- 提交前运行 `npm run lint` 和 `npm run type-check`
+
 ## 📄 许可证
 
 本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
 
-## 📞 支持
+## 📞 支持与反馈
 
-如有问题，请提交 [Issue](https://github.com/yourusername/coolcrm/issues) 或联系开发团队。
+- 🐛 发现问题？请提交 [Issue](https://github.com/coolyofi/coolcrm/issues)
+- 💡 有建议？欢迎在 Discussions 中分享
+- 📧 联系我们：通过 GitHub Issues 或 Pull Requests
 
 ---
 
-由 Next.js 和 Supabase 构建的现代化CRM系统。
+**CoolCRM** - 让客户关系管理变得简单而强大 🚀

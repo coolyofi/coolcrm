@@ -120,9 +120,19 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
 
   // Helper function to safely extract data with defaults
   const safeExtract = <T>(result: PromiseSettledResult<{ data?: T; count?: number; error?: SupabaseError | null }>, defaultValue: T): T => {
-    if (result.status === 'fulfilled' && !result.value.error) {
+    if (result.status === 'fulfilled') {
+      if (result.value.error) {
+        // Log the error for debugging purposes
+        console.error('Supabase query error:', result.value.error)
+        throw new Error(`Supabase query failed: ${result.value.error.message}`)
+      }
       // For count queries, return count; for data queries, return data
       return ('count' in result.value ? (result.value.count ?? defaultValue) : (result.value.data ?? defaultValue)) as T
+    }
+    // If the promise was rejected, throw the rejection reason
+    if (result.status === 'rejected') {
+      console.error('Promise rejected:', result.reason)
+      throw result.reason
     }
     return defaultValue
   }
