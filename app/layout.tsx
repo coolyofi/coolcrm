@@ -2,6 +2,7 @@ import "./globals.css"
 import Link from "next/link"
 import { AuthProvider } from "@/components/AuthProvider"
 import { Navigation } from "@/components/Navigation"
+import { Analytics } from "@vercel/analytics/next"
 
 export default function RootLayout({
   children,
@@ -19,6 +20,7 @@ export default function RootLayout({
             </main>
           </div>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   )
