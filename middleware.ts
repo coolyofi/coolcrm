@@ -17,14 +17,14 @@ export async function middleware(req: NextRequest) {
 
   // Enhanced error handling for session retrieval with timeout protection
   // Allow bypass during local development or when explicitly enabled via env var.
-  // NEVER enable this in production. Set `NEXT_PUBLIC_BYPASS_AUTH=true` only for
-  // safe local testing environments.
+  // NEVER enable this in production. Set `BYPASS_AUTH=true` only for
+  // safe local testing environments or CI/CD pipelines.
   const isLocalHost =
     req.nextUrl.hostname === 'localhost' || req.nextUrl.hostname === '127.0.0.1' ||
     (req.headers.get('host') || '').startsWith('localhost')
 
   const isBypassEnabled =
-    process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true' ||
+    process.env.BYPASS_AUTH === 'true' ||
     (process.env.NODE_ENV === 'development' && isLocalHost)
 
   if (!isBypassEnabled) {
@@ -46,8 +46,7 @@ export async function middleware(req: NextRequest) {
     }
   } else {
     // Helpful debug message when bypass is active (only appears in dev/local)
-    // eslint-disable-next-line no-console
-    console.debug('Auth bypass enabled for local development or via NEXT_PUBLIC_BYPASS_AUTH')
+    console.debug('Auth bypass enabled for local development or via BYPASS_AUTH')
   }
 
   // Add basic security headers
@@ -57,10 +56,15 @@ export async function middleware(req: NextRequest) {
   headers.set('Referrer-Policy', 'no-referrer-when-downgrade')
   headers.set('Permissions-Policy', "geolocation=()")
   headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
-  // A conservative CSP; adjust as your app needs (fonts, images, scripts, styles)
+  
+  // Strengthen CSP for production environments
+  // In development, we allow 'unsafe-inline' for styles to support Next.js hot reload
+  const isDevelopment = process.env.NODE_ENV === 'development'
+  const styleSource = isDevelopment ? "'self' 'unsafe-inline'" : "'self'"
+  
   headers.set(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'"
+    `default-src 'self'; script-src 'self'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; style-src ${styleSource}`
   )
 
   return res
