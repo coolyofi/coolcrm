@@ -238,7 +238,11 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   const toggle = useCallback(() => {
     setUserOverride(current => {
       const actual = current ?? baseSidebar
-      return actual === "closed" ? "expanded" : "closed"
+      // Toggle between expanded and the base state (or closed if base is also expanded)
+      if (actual === "expanded") {
+        return baseSidebar === "expanded" ? "icon" : baseSidebar
+      }
+      return "expanded"
     })
   }, [baseSidebar])
 
