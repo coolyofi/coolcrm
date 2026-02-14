@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { createServerComponentClient, createRouteHandlerClient, createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createServerClient } from '@supabase/ssr'
 
 // Placeholder values used when environment variables are not set
 const PLACEHOLDER_URL = 'https://placeholder.supabase.co'
@@ -33,10 +32,13 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
  * This client automatically handles cookies and user authentication.
  * Safe to use in Server Components, Server Actions, and other server-side contexts.
  */
-export function createServerSupabase() {
+export async function createServerSupabase() {
+  // Lazily import `cookies` so this module can be imported by client-side code
+  // without pulling in `next/headers` at module-evaluation time.
+  const { cookies } = await import('next/headers')
   const cookieStore = cookies()
-  
-  return createServerComponentClient({
+
+  return createServerClient({
     cookies: () => cookieStore,
   })
 }
@@ -47,10 +49,9 @@ export function createServerSupabase() {
  * Safe to use in API Routes.
  */
 export function createRouteSupabase(request: Request, response: Response) {
-  return createRouteHandlerClient({
-    cookies: () => request.cookies,
-  }, {
-    cookies: () => response.cookies,
+  // Use createServerClient for route handlers; provide cookie accessors from the Request/Response
+  return createServerClient({
+    cookies: () => (request as any).cookies,
   })
 }
 
@@ -60,9 +61,8 @@ export function createRouteSupabase(request: Request, response: Response) {
  * Safe to use in Middleware.
  */
 export function createMiddlewareSupabase(request: Request) {
-  // Use createServerClient as replacement for middleware client.
   return createServerClient({
-    cookies: () => request.cookies,
+    cookies: () => (request as any).cookies,
   })
 }
 
