@@ -19,6 +19,7 @@ type NavContextValue = {
   navWidthPx: number // Used for content padding-left
   elevated: boolean // Apple animation enhancement: content scale when drawer open
   reducedMotion: boolean
+  motionLevel: 'stable' | 'apple'
 
   // Actions
   openDrawer: () => void
@@ -28,6 +29,7 @@ type NavContextValue = {
   setExpanded: () => void
   setIcon: () => void
   toggleSidebar: () => void
+  setMotionLevel: (level: 'stable' | 'apple') => void
 }
 
 const NavContext = createContext<NavContextValue | null>(null)
@@ -47,6 +49,26 @@ function writePersisted(v: PersistedState) {
   if (typeof window === 'undefined') return
   try {
     localStorage.setItem(NAV_STORAGE_KEY, v)
+  } catch {
+    // ignore
+  }
+}
+
+function readMotionLevel(): 'stable' | 'apple' {
+  if (typeof window === 'undefined') return 'stable'
+  try {
+    const raw = localStorage.getItem('coolcrm.motion')
+    if (raw === 'apple') return 'apple'
+    return 'stable'
+  } catch {
+    return 'stable'
+  }
+}
+
+function writeMotionLevel(level: 'stable' | 'apple') {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem('coolcrm.motion', level)
   } catch {
     // ignore
   }
@@ -73,6 +95,9 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   
   // Proximity expand for desktop/tablet-compact
   const [proximity, setProximity] = useState(false)
+  
+  // Motion level
+  const [motionLevel, setMotionLevel] = useState<'stable' | 'apple'>(() => readMotionLevel())
   
   // Hydrate persistence after mount to match hydration
   useEffect(() => {
@@ -205,6 +230,11 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     })
   }, [mode])
 
+  const setMotionLevelCallback = useCallback((level: 'stable' | 'apple') => {
+    setMotionLevel(level)
+    writeMotionLevel(level)
+  }, [])
+
   const navWidthPx = useMemo(() => {
     const effectiveState = proximity && state === "icon" ? "expanded" : state
     return getNavWidth(mode, effectiveState)
@@ -221,13 +251,15 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     navWidthPx,
     elevated,
     reducedMotion,
+    motionLevel,
     openDrawer,
     closeDrawer,
     toggleDrawer,
     setExpanded,
     setIcon,
     toggleSidebar,
-  }), [mode, state, drawerOpen, navWidthPx, elevated, reducedMotion, openDrawer, closeDrawer, toggleDrawer, setExpanded, setIcon, toggleSidebar])
+    setMotionLevel: setMotionLevelCallback,
+  }), [mode, state, drawerOpen, navWidthPx, elevated, reducedMotion, motionLevel, openDrawer, closeDrawer, toggleDrawer, setExpanded, setIcon, toggleSidebar, setMotionLevelCallback])
 
   return <NavContext.Provider value={value}>{children}</NavContext.Provider>
 }

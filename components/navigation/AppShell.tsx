@@ -6,9 +6,10 @@ import { TopBar } from "./TopBar"
 import { Drawer } from "./Drawer"
 import { usePathname } from "next/navigation"
 import { CommandBar } from "../CommandBar"
+import { useEffect } from "react"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { navWidthPx, elevated, mode } = useNav()
+  const { mode, state, drawerOpen, navWidthPx } = useNav()
   const pathname = usePathname()
   
   // Don't wrap login page with shell
@@ -16,52 +17,47 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return <>{children}</>
   }
 
+  const showDrawer = mode === 'mobile' && drawerOpen
+
+  // Lock body when drawer is open on mobile
+  useEffect(() => {
+    if (showDrawer) {
+      document.documentElement.style.overflow = "hidden"
+      document.body.style.overflow = "hidden"
+      return () => {
+        document.documentElement.style.overflow = ""
+        document.body.style.overflow = ""
+      }
+    }
+  }, [showDrawer])
+
   return (
-    <>
-      {/* 
-        Strict Rendering Logic:
-        - Mobile: TopBar + Drawer
-        - Tablet-expanded (iPad portrait): TopBar + Drawer  
-        - Tablet-compact (iPad landscape) / Desktop: Sidebar
-        
-        This prevents "Double Rendering" ghosts.
-      */}
-      {(mode === 'tablet-compact' || mode === 'desktop') && <Sidebar />}
+    <div className="relative h-[100dvh] w-full overflow-hidden bg-[rgb(var(--bg))]">
+      {/* TopBar: mobile/tablet only */}
+      {(mode === 'mobile' || mode === 'tablet-expanded') && <TopBar />}
       
-      {(mode === 'mobile' || mode === 'tablet-expanded') && (
-        <>
-            <TopBar />
-            <Drawer />
-        </>
+      {/* Nav: Single instance rendering */}
+      {mode === 'mobile' ? (
+        showDrawer && <Drawer />
+      ) : (
+        <Sidebar />
       )}
       
+      {/* Content scroll container */}
       <main
-        className="min-h-[100svh] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+        id="content-scroll"
+        className="h-[100dvh] overflow-y-auto overscroll-contain"
         style={{
-          paddingLeft: `${navWidthPx}px`,
+          paddingLeft: mode === 'mobile' ? '0px' : `${navWidthPx}px`,
           paddingTop: (mode === 'mobile' || mode === 'tablet-expanded') ? '60px' : '0px',
-          transform: elevated ? 'scale(0.985) translateY(10px)' : 'none',
-          transformOrigin: 'top center',
-          borderRadius: elevated ? '24px' : '0px',
-          overflow: elevated ? 'hidden' : 'visible',
-          // Optional: Add shadow when elevated to enhance depth
-          boxShadow: elevated ? '0 25px 50px -12px rgba(0, 0, 0, 0.25)' : 'none'
         }}
       >
-        <div 
-          id="content-scroll"
-          className="h-full overflow-y-auto"
-          style={{
-            height: (mode === 'mobile' || mode === 'tablet-expanded') ? 'calc(100vh - 60px)' : '100vh'
-          }}
-        >
-          <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
-            {children}
-          </div>
+        <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
+          {children}
         </div>
       </main>
 
       <CommandBar />
-    </>
+    </div>
   )
 }
