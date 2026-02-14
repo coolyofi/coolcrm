@@ -243,11 +243,7 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     close,
     toggle,
     setMotionLevel: setMotionLevelCallback,
-    state: sidebar,
-    toggleSidebar: toggle,
-    navWidthPx,
-    proximity: mouseNear,
-  }), [mode, sidebar, drawerOpen, motion, motionLevel, open, close, toggle, setMotionLevelCallback, navWidthPx, mouseNear])
+  }), [mode, sidebar, drawerOpen, motion, motionLevel, open, close, toggle, setMotionLevelCallback])
 
   return (
     <NavigationContext.Provider value={value}>
