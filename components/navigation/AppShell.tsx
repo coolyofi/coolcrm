@@ -5,7 +5,6 @@ import { useNav } from "./NavigationProvider"
 import { TopBar } from "./TopBar"
 import { DrawerOverlay } from "./DrawerOverlay"
 import { SidebarDesktop } from "./SidebarDesktop"
-import { CommandBar } from "../CommandBar"
 import { MotionLevelToggle } from "../MotionLevelToggle"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -47,7 +46,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </main>
 
-      <CommandBar />
       <MotionLevelToggle />
     </div>
   )
