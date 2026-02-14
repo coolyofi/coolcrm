@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import React, { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 
 // Navigation State Machine Types
 export type NavMode = "mobile" | "tablet" | "desktop"
@@ -62,7 +62,6 @@ function useNavMode(): NavMode {
   useEffect(() => {
     const handler = () => {
       const w = window.innerWidth
-      const h = window.innerHeight
       const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
 
       // iPad-like detection: medium screen + touch support
@@ -87,11 +86,13 @@ function useNavMode(): NavMode {
 
 // Hook: Detect user's motion preferences
 function usePrefersReducedMotion() {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  })
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setPrefersReducedMotion(mediaQuery.matches)
 
     const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
     mediaQuery.addEventListener('change', handler)
@@ -99,6 +100,25 @@ function usePrefersReducedMotion() {
   }, [])
 
   return prefersReducedMotion
+}
+
+// Hook: Mouse proximity expand for desktop
+function useMouseProximity(enabled: boolean) {
+  const [nearLeft, setNearLeft] = useState(false)
+
+  useEffect(() => {
+    if (!enabled) return
+
+    const move = (e: MouseEvent) => {
+      if (e.clientX < 48) setNearLeft(true)
+      else if (e.clientX > 280) setNearLeft(false)
+    }
+
+    window.addEventListener("mousemove", move)
+    return () => window.removeEventListener("mousemove", move)
+  }, [enabled])
+
+  return nearLeft
 }
 
 // Motion Policy: Pure function that returns motion tokens based on level and physics
@@ -190,8 +210,12 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   const prefersReducedMotion = usePrefersReducedMotion()
 
   // Hydration safety
+  const isHydratedRef = useRef(false)
   const [isHydrated, setIsHydrated] = useState(false)
-  useEffect(() => setIsHydrated(true), [])
+  useLayoutEffect(() => {
+    isHydratedRef.current = true
+    setIsHydrated(true)
+  }, [])
 
   // Proximity (desktop only)
   const mouseNear = useMouseProximity(mode === "desktop" && getMotionPolicy(motionLevel).proximityEnabled)
