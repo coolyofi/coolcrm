@@ -23,10 +23,10 @@ export function SidebarDesktop() {
 
   return (
     <aside
-      className="fixed left-0 top-0 h-[100dvh] select-none transition-[width] ease-[var(--ease)]"
+      className="fixed left-0 top-0 h-[100dvh] flex flex-col select-none transition-[width] ease-[var(--ease)]"
       style={{
-        width: collapsed ? '72px' : '260px',
-        zIndex: 'var(--z-topbar)',
+        width: collapsed ? 'var(--nav-w-collapsed)' : 'var(--nav-w-expanded)',
+        zIndex: 'var(--z-nav)',
         transitionDuration: `${motion.durations.base}ms`
       }}
     >
@@ -47,8 +47,8 @@ export function SidebarDesktop() {
             </div>
           </div>
 
-          {/* Nav items */}
-          <nav className="mt-3 flex-1 px-2 space-y-1">
+          {/* Nav items - flex-1 for menu area */}
+          <nav className="mt-3 flex-1 px-2 space-y-1 overflow-y-auto">
             {MENU_ITEMS.map((item) => {
               const isActive = pathname === item.path
               return (
@@ -82,15 +82,15 @@ export function SidebarDesktop() {
             })}
           </nav>
 
-          {/* Bottom actions */}
-          <div className="mt-auto p-2">
+          {/* Bottom actions - mt-auto 固定到底 */}
+          <div className="mt-auto p-2 border-t border-[var(--border)]">
             <button
               className="h-11 w-full rounded-xl flex items-center justify-center gap-2 hover:bg-black/5 text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors"
               onClick={toggle}
               title={isExpanded ? "Collapse Sidebar" : "Expand Sidebar"}
             >
               <svg
-                className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? "rotate-180" : "rotate-0"}`}
+                className={`w-5 h-5 transition-colors ${isExpanded ? "rotate-180" : "rotate-0"}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
