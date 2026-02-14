@@ -39,6 +39,8 @@ export async function fetchVisits(client = supabase) {
   if (error) throw error
   
   // Normalize customers field to always be an array for type consistency
+  // Supabase may return either a single object or array depending on the relationship configuration
+  // This normalization ensures consistent behavior regardless of Supabase's runtime return type
   const normalized = (data || []).map(visit => ({
     ...visit,
     customers: visit.customers 
