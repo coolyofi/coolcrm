@@ -35,7 +35,7 @@ export async function updateCustomer(id: string, payload: Partial<Customer>, cli
 }
 
 export async function deleteCustomer(id: string, client = supabase) {
-  const { error } = await client.from('customers').delete().eq('id', id)
+  const { data, error } = await client.from('customers').delete().eq('id', id).select().single()
   if (error) throw error
-  return true
+  return data as Customer
 }

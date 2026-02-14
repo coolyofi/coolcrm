@@ -13,7 +13,7 @@ export type DashboardVisit = {
   id: string
   visit_date: string
   notes: string | null
-  customers: { company_name: string } | Array<{ company_name: string }>
+  customers: { company_name: string }[]
 }
 
 export type KpiTrend = {
@@ -192,7 +192,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   const visitsMapped: ActivityItem[] = (recentVisits || []).map((v: DashboardVisit) => ({
     type: 'visit' as const,
     id: v.id,
-    title: `Visited ${Array.isArray(v.customers) ? v.customers[0]?.company_name : v.customers?.company_name || 'Unknown'}`,
+    title: `Visited ${v.customers?.[0]?.company_name || 'Unknown'}`,
     subtitle: v.notes || 'No notes',
     date: v.visit_date
   }))
