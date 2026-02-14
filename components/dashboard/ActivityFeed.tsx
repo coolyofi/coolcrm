@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import Link from "next/link"
 
 interface ActivityItem {
@@ -11,27 +12,18 @@ interface ActivityItem {
 }
 
 export function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
-  if (activities.length === 0) {
-    return (
-        <div className="glass-strong p-6 rounded-2xl flex flex-col items-center justify-center py-12 text-center text-[var(--fg-muted)]">
-            <div className="w-12 h-12 rounded-full bg-[var(--surface-solid)] flex items-center justify-center mb-4">
-                 <svg className="w-6 h-6 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            </div>
-            <p className="font-medium">No recent activity</p>
-            <p className="text-sm opacity-80 mt-1">Actions you take will appear here timeline.</p>
-        </div>
-    )
-  }
+  // Memoize grouped activities to avoid recalculation on every render
+  const groupedActivities = React.useMemo(() => {
+    return activities.reduce((groups, activity) => {
+      const date = new Date(activity.date).toDateString()
+      if (!groups[date]) groups[date] = []
+      groups[date].push(activity)
+      return groups
+    }, {} as Record<string, ActivityItem[]>)
+  }, [activities])
 
-  // Group activities by date for higher information density
-  const groupedActivities = activities.reduce((groups, activity) => {
-    const date = new Date(activity.date).toDateString()
-    if (!groups[date]) groups[date] = []
-    groups[date].push(activity)
-    return groups
-  }, {} as Record<string, ActivityItem[]>)
-
-  const getRelativeDateLabel = (dateStr: string) => {
+  // Memoize relative date labels
+  const getRelativeDateLabel = React.useCallback((dateStr: string) => {
     const date = new Date(dateStr)
     const today = new Date()
     const yesterday = new Date(today)
@@ -45,7 +37,7 @@ export function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
 
     if (diffDays <= 7) return `${diffDays} days ago`
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-  }
+  }, [])
   
   return (
     <div className="space-y-4">

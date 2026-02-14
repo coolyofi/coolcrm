@@ -6,6 +6,7 @@ function clamp(v: number, min: number, max: number) { return Math.max(min, Math.
 
 export function useScrollProgress(scrollElId = "content-scroll", distance = 56) {
   const [y, setY] = React.useState(0)
+  const yRef = React.useRef(0)
 
   React.useEffect(() => {
     const el = document.getElementById(scrollElId)
@@ -14,7 +15,14 @@ export function useScrollProgress(scrollElId = "content-scroll", distance = 56) 
     let raf = 0
     const onScroll = () => {
       cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(() => setY(el.scrollTop))
+      raf = requestAnimationFrame(() => {
+        const newY = el.scrollTop
+        // Only update state if value actually changed to prevent unnecessary renders
+        if (Math.abs(newY - yRef.current) > 0.5) {
+          yRef.current = newY
+          setY(newY)
+        }
+      })
     }
 
     el.addEventListener("scroll", onScroll, { passive: true })

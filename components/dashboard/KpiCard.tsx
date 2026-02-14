@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import Link from "next/link"
 
 interface KpiCardProps {
@@ -26,7 +27,8 @@ export function KpiCard({
   showStorytelling = true
 }: KpiCardProps) {
 
-    const getStorytelling = () => {
+    // Memoize storytelling calculation
+    const storytelling = React.useMemo(() => {
       if (trendPercent === null || previousValue === null) return null
 
       const percent = Math.abs(trendPercent)
@@ -43,7 +45,7 @@ export function KpiCard({
         return "📊 Slight dip, keep pushing"
       }
       return "📊 Holding steady"
-    }
+    }, [trendPercent, previousValue])
 
     // Status: EMPTY
     // Logic: If value is 0 (or specifically "no data" but we simplify to 0 for now)
@@ -80,7 +82,7 @@ export function KpiCard({
         ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /> // Up
         : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" /> // Down (or handle neutral)
 
-    const storytelling = showStorytelling ? getStorytelling() : null
+    const finalStorytelling = showStorytelling ? storytelling : null
 
     return (
         <div className="glass-strong p-6 flex flex-col justify-between h-[160px]">
@@ -116,9 +118,9 @@ export function KpiCard({
                 )}
 
                 {/* Storytelling */}
-                {storytelling && (
+                {finalStorytelling && (
                     <div className="text-xs text-[var(--fg-muted)] font-medium mt-1">
-                        {storytelling}
+                        {finalStorytelling}
                     </div>
                 )}
             </div>

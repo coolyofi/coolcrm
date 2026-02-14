@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { useAuth } from "@/components/AuthProvider"
-import { getDashboardData, type DashboardData } from "@/lib/dashboard"
+import { getDashboardData, type DashboardData } from "@/lib/dashboard-optimized"
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader"
 import { KpiCard } from "@/components/dashboard/KpiCard"
 import { GoalsSection } from "@/components/dashboard/GoalsSection"
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed"
+import { PerformanceMonitor } from "@/components/PerformanceMonitor"
 
 export default function Home() {
   const { user } = useAuth()
@@ -44,7 +45,8 @@ export default function Home() {
   const visits = data.visits.thisMonth
 
   return (
-    <div className="space-y-10 pb-10">
+    <PerformanceMonitor>
+      <div className="space-y-10 pb-10">
       
       {/* 1. Header with Intelligence */}
       <DashboardHeader 
@@ -133,6 +135,7 @@ export default function Home() {
       {/* 4. Activity Feed Timeline */}
       <ActivityFeed activities={data.activity} />
 
-    </div>
+      </div>
+    </PerformanceMonitor>
   )
 }

@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import Link from "next/link"
 import { PageHeader } from "../PageHeader"
 
@@ -13,7 +14,8 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ nickname, stats }: DashboardHeaderProps) {
-  const getDynamicGreeting = () => {
+  // Memoize dynamic greeting calculation
+  const greeting = React.useMemo(() => {
     const now = new Date()
     const hour = now.getHours()
     const dayOfWeek = now.getDay()
@@ -50,10 +52,10 @@ export function DashboardHeader({ nickname, stats }: DashboardHeaderProps) {
     }
 
     return timeGreeting
-  }
+  }, [stats.newCustomersThisWeek, stats.hasCustomers])
 
-  // Smart Contextual Insight with storytelling
-  const getSubtitle = () => {
+  // Memoize subtitle calculation
+  const subtitle = React.useMemo(() => {
     if (!stats.hasCustomers) {
       return "Ready to build something amazing? Let's add your first customer."
     }
@@ -70,7 +72,7 @@ export function DashboardHeader({ nickname, stats }: DashboardHeaderProps) {
     }
 
     return "Here's your customer activity overview."
-  }
+  }, [stats.hasCustomers, stats.newCustomersThisWeek, stats.hasVisitsRecent])
 
   const greetingName = nickname ? `, ${nickname}` : ""
 
@@ -93,8 +95,8 @@ export function DashboardHeader({ nickname, stats }: DashboardHeaderProps) {
 
   return (
     <PageHeader
-      title={`${getDynamicGreeting()}${greetingName}`}
-      subtitle={getSubtitle()}
+      title={`${greeting}${greetingName}`}
+      subtitle={subtitle}
       actions={actions}
     />
   )
