@@ -9,6 +9,7 @@ import toast, { Toaster } from "react-hot-toast"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/components/AuthProvider"
 import ErrorBoundary from "@/components/ErrorBoundary"
+import { PageHeader } from "@/components/PageHeader"
 
 const profileSchema = z.object({
   nickname: z.string().min(1, "昵称不能为空").max(50, "昵称不能超过50个字符"),
@@ -195,10 +196,10 @@ export default function Settings() {
     <ErrorBoundary>
       <Toaster position="top-right" />
       <div className="max-w-2xl mx-auto space-y-8 p-6">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--fg)]">Settings</h1>
-          <p className="text-[var(--fg-muted)] mt-1">Manage your account and preferences</p>
-        </div>
+        <PageHeader
+          title="Settings"
+          subtitle="Manage your account and preferences"
+        />
 
         {/* Theme Settings */}
         <div className="glass p-6">

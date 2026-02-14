@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo, useCallback } from "react"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import toast, { Toaster } from "react-hot-toast"
+import { PageHeader } from "@/components/PageHeader"
 
 interface Customer {
   id: string
@@ -89,23 +90,21 @@ export default function History() {
       <Toaster position="top-center" />
       
       {/* 1. Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 py-2">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--fg)] tracking-tight">客户 / 历史记录</h1>
-          <p className="text-[var(--fg-muted)] text-sm mt-1">
-            管理所有客户拜访与意向数据
-          </p>
-        </div>
-        <Link
-          href="/add"
-          className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-[var(--primary)] text-white font-medium text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-blue-500/25"
-        >
-          <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          新增客户
-        </Link>
-      </div>
+      <PageHeader
+        title="客户 / 历史记录"
+        subtitle="管理所有客户拜访与意向数据"
+        actions={
+          <Link
+            href="/add"
+            className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-[var(--primary)] text-white font-medium text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-blue-500/25"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            新增客户
+          </Link>
+        }
+      />
 
       {/* 2. Filter Bar (Glass) */}
       <div className="glass px-6 py-4 rounded-[20px] flex flex-col sm:flex-row gap-4 sm:items-center">

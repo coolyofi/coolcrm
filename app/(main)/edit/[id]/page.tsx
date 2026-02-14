@@ -11,6 +11,7 @@ import { format, parseISO } from "date-fns"
 import useSWR from "swr"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/components/AuthProvider"
+import { PageHeader } from "@/components/PageHeader"
 
 const customerSchema = z.object({
   company_name: z.string().min(1, "公司名称不能为空"),
@@ -189,14 +190,10 @@ export default function EditCustomer() {
     <main className="max-w-[720px] mx-auto min-h-screen p-6 sm:p-8">
       <Toaster position="top-center" />
       
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-            <h1 className="text-2xl font-bold text-[var(--fg)] tracking-tight">编辑客户</h1>
-            <p className="text-[var(--fg-muted)] text-sm mt-1">更新客户档案与跟进状态</p>
-        </div>
-        
-        {/* Quick action to record a new visit log later? For now just edit */}
-      </div>
+      <PageHeader
+        title="编辑客户"
+        subtitle="更新客户档案与跟进状态"
+      />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Section A: Basic Info */}

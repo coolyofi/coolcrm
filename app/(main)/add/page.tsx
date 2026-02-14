@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import toast, { Toaster } from "react-hot-toast"
 import { supabase } from "@/lib/supabase"
+import { PageHeader } from "@/components/PageHeader"
 
 export default function AddCustomer() {
   const [company, setCompany] = useState("")
@@ -121,10 +122,10 @@ export default function AddCustomer() {
     <main className="max-w-[720px] mx-auto min-h-screen p-6 sm:p-8">
       <Toaster position="top-center" />
       
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[var(--fg)] tracking-tight">新增客户</h1>
-        <p className="text-[var(--fg-muted)] text-sm mt-1">录入新的拜访与意向信息</p>
-      </div>
+      <PageHeader
+        title="新增客户"
+        subtitle="录入新的拜访与意向信息"
+      />
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Section A: Basic Info */}
