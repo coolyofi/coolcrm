@@ -2,6 +2,7 @@ import "./globals.css"
 import { AuthProvider } from "@/components/AuthProvider"
 import { NavigationProvider } from "@/components/navigation/NavigationProvider"
 import { AppShell } from "@/components/navigation/AppShell"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export default function RootLayout({
   children,
@@ -49,6 +50,7 @@ export default function RootLayout({
             `,
           }}
         />
+        <SpeedInsights />
       </body>
     </html>
   )
