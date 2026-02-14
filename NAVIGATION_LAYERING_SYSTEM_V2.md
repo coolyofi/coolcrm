@@ -1,6 +1,6 @@
 # Navigation Layering System v2 Specification
 
-**Status**: OS Layer Stabilization Phase 1 ✓ | Phase 2 Pending | Phase 3 Pending
+**Status**: OS Layer Stabilization ✓ | Sidebar Geometry ✓ | Apple Motion ✓
 **Last Updated**: 2024
 **Owner**: CoolCRM Engineering Team
 
@@ -231,6 +231,113 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 - ✅ Type-check: Passes (`npx tsc --noEmit`)
 - ✅ Single Navigation Instance: Confirmed (only AppShell renders components)
 - ✅ Z-Index Standardization: All components use CSS variables
+
+---
+
+## Phase 2: Sidebar Geometry - Full Height OS Sidebar (✓ Completed)
+
+### Executive Summary
+Successfully implemented sidebar geometry fixes to ensure iPad/desktop sidebars are true "OS layers" from top to bottom, eliminating visual discontinuity and icon inconsistency.
+
+### Changes Implemented
+
+#### 1. Icon Unification (SidebarDesktop.tsx)
+```tsx
+// All icons now use consistent w-6 h-6 (24px)
+<svg className="w-6 h-6 shrink-0 transition-colors" ...>
+// Collapse button also w-6 h-6 with smooth rotation
+<svg className={`w-6 h-6 transition-all duration-200 ${isExpanded ? "rotate-180" : "rotate-0"}`} ...>
+```
+
+**Why**: Previously collapse button used w-5 h-5 while menu items used w-6 h-6. Unified all navigation icons to 24px for visual consistency.
+
+#### 2. Tablet Mode Default to Expanded (NavigationProvider.tsx)
+```typescript
+if (mode === "tablet") return sidebarOverride ?? "expanded"  // Was "icon"
+```
+
+**Why**: iPad/tablet devices have sufficient screen real estate for expanded sidebar by default, providing better UX than collapsed state.
+
+#### 3. Proximity Expand Threshold Optimization (NavigationProvider.tsx)
+```typescript
+if (e.clientX < 60) setNearLeft(true)   // Expand threshold
+else if (e.clientX > 300) setNearLeft(false)  // Collapse threshold
+```
+
+**Why**: Previous thresholds (48px/280px) were too sensitive. New thresholds provide better balance between responsiveness and stability.
+
+### Bug Categories Eliminated
+- ✅ **D. Sidebar Geometry Drift**: OS layer implementation ensures full-height continuity
+- ✅ Icon unification prevents visual inconsistency
+
+### Verification Results
+- ✅ Build: Passes (`npm run build`)
+- ✅ Lint: No errors (`npm run lint`) 
+- ✅ TypeScript: Passes (`npx tsc --noEmit`)
+- ✅ iPad/Desktop Testing: Sidebar maintains full height and proper transitions
+
+---
+
+## Phase 3: Apple Motion - Dynamic UX Features (✓ Completed)
+
+### Executive Summary
+Implemented Apple-inspired motion features including proximity expand, large title collapse, and velocity-based blur effects, only active in "apple" motion level for enterprise stability.
+
+### Changes Implemented
+
+#### 1. Large Title Collapse (TopBar.tsx + AppShell.tsx)
+```tsx
+// TopBar height interpolation
+const barHeight = motion.largeTitleEnabled 
+  ? (72 - (titleProgress * 12)) // 72px -> 60px
+  : 60
+
+// Dynamic content padding
+const currentHeight = motion.largeTitleEnabled 
+  ? (baseHeight - (titleProgress * (baseHeight - collapsedHeight)))
+  : collapsedHeight
+```
+
+**Why**: iOS-style large title that collapses from 72px to 60px as user scrolls, with content adjusting accordingly to prevent overlap.
+
+#### 2. Proximity Expand (NavigationProvider.tsx)
+```typescript
+// Only enabled on desktop with pointer events
+const mouseNear = useMouseProximity(mode === "desktop" && motion.proximityEnabled)
+```
+
+**Why**: Mouse proximity automatically expands sidebar when cursor approaches left edge, providing smooth desktop UX.
+
+#### 3. Velocity-Based Blur (NavigationProvider.tsx)
+```typescript
+// Apple motion level
+const velocityBoost = Math.min(12, scrollVelocity * 8)
+topbarBlurPx: 18 + velocityBoost,  // Dynamic blur based on scroll speed
+```
+
+**Why**: Glass morphism blur intensifies during fast scrolling, providing visual feedback and perceived performance.
+
+#### 4. Motion Level Toggle (MotionLevelToggle.tsx)
+```tsx
+// Development-only toggle between 'stable' and 'apple' motion
+<button onClick={() => setMotionLevel(motionLevel === 'stable' ? 'apple' : 'stable')}>
+  Motion: {motionLevel}
+</button>
+```
+
+**Why**: Allows users to switch between conservative enterprise UX and enhanced Apple-style motion.
+
+### Feature Activation
+- **Proximity Expand**: Only on desktop, only in apple motion level
+- **Large Title Collapse**: Only on mobile/tablet, only in apple motion level  
+- **Velocity Blur**: Only on navigation/topbar glass layers, only in apple motion level
+
+### Verification Results
+- ✅ Build: Passes (`npm run build`)
+- ✅ Lint: No errors (`npm run lint`)
+- ✅ TypeScript: Passes (`npx tsc --noEmit`)
+- ✅ Motion Toggle: Functional in development mode
+- ✅ Performance: No impact on stable motion level
 
 ---
 
@@ -612,6 +719,8 @@ git push -u origin fix/nav-os-layer-stable-v1
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.3     | 2024 | Apple Motion Phase 3: Large title collapse, proximity expand, velocity blur, motion level toggles. |
+| 2.2     | 2024 | Sidebar Geometry Phase 2: Icon unification, tablet expanded default, proximity threshold optimization. |
 | 2.1     | 2024 | OS Layer Stabilization Phase 1: Three-layer OS architecture, unified z-index tokens, content offset contracts. Eliminates bugs A, B, F. |
 | 2.0     | 2024 | Phase 1 Implementation: Glass isolation, glow containment, drawer freeze |
 | 1.0     | 2024 | Initial navigation architecture |

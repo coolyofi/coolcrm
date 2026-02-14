@@ -11,7 +11,6 @@ export function TopBar() {
   const { mode, open, motion } = useNav()
   const pathname = usePathname()
   const { p } = useScrollProgress("content-scroll", 56)
-  // Remove unused variable 'v'
 
   const getCompactTitle = () => {
     if (pathname === '/') return 'Dashboard'
@@ -24,14 +23,21 @@ export function TopBar() {
   }
 
   const compactOpacity = clamp((p - 0.2) / 0.8, 0, 1)
+  
+  // Large title collapse: interpolate between large and compact heights
+  const titleProgress = Math.min(1, p)
+  const barHeight = motion.largeTitleEnabled 
+    ? (72 - (titleProgress * 12)) // 72px -> 60px
+    : 60
 
   // Only show on mobile/tablet
   if (mode === "desktop") return null
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 h-[60px] glass scrolled border-b border-[var(--glass-border)] flex items-center justify-between px-4 safe-area-top backdrop-blur-md bg-[var(--glass-bg)]"
+      className="fixed top-0 left-0 right-0 glass scrolled border-b border-[var(--glass-border)] flex items-center justify-between px-4 safe-area-top backdrop-blur-md bg-[var(--glass-bg)] transition-all duration-200"
       style={{
+        height: `${barHeight}px`,
         zIndex: 'var(--z-topbar)',
         "--glass-blur-scrolled": `${motion.topbarBlurPx}px`,
         opacity: motion.topbarAlpha

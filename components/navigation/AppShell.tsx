@@ -6,10 +6,12 @@ import { TopBar } from "./TopBar"
 import { DrawerOverlay } from "./DrawerOverlay"
 import { SidebarDesktop } from "./SidebarDesktop"
 import { MotionLevelToggle } from "../MotionLevelToggle"
+import { useScrollProgress } from "../../hooks/useScrollProgress"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { mode, sidebar } = useNav()
+  const { mode, sidebar, motion } = useNav()
   const pathname = usePathname()
+  const { p } = useScrollProgress("content-scroll", 56)
 
   // Don't wrap login page with shell
   if (pathname === '/login') {
@@ -22,6 +24,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (mode === "tablet") return sidebar === "expanded" ? "260px" : "72px"
     if (mode === "desktop") return sidebar === "expanded" ? "260px" : "72px"
     return "0px"
+  }
+
+  // Calculate dynamic top padding for large title collapse
+  const getContentPaddingTop = () => {
+    if (mode === "desktop") return "0px"
+    
+    const titleProgress = Math.min(1, p)
+    const baseHeight = motion.largeTitleEnabled ? 72 : 60
+    const collapsedHeight = 60
+    const currentHeight = motion.largeTitleEnabled 
+      ? (baseHeight - (titleProgress * (baseHeight - collapsedHeight)))
+      : collapsedHeight
+    
+    return `${currentHeight}px`
   }
 
   // Check if drawer is open (mobile mode with expanded sidebar)
@@ -43,7 +59,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         data-drawer-open={isDrawerOpen ? "true" : "false"}
         style={{
           marginLeft: getContentMarginLeft(),
-          paddingTop: mode !== 'desktop' ? 'var(--topbar-h)' : '0px',
+          paddingTop: getContentPaddingTop(),
           zIndex: 'var(--z-content)',
           pointerEvents: isDrawerOpen ? 'none' : 'auto'
         }}
