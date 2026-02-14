@@ -21,7 +21,7 @@ export function Navigation() {
 
   if (loading) {
     return (
-      <aside className="w-64 bg-white/10 dark:bg-gray-800/10 backdrop-blur-xl border-r border-white/20 dark:border-gray-700/20 p-6 hidden md:block">
+      <aside className="w-64 bg-white/10 dark:bg-gray-800/10 backdrop-blur-xl glass-strong border-r border-white/20 dark:border-gray-700/20 p-6 hidden md:block">
         <div className="animate-pulse">
           <div className="h-6 bg-white/20 dark:bg-gray-700/20 rounded mb-6"></div>
           <div className="space-y-4">
@@ -69,7 +69,7 @@ export function Navigation() {
       <aside className={`
         fixed md:static inset-y-0 left-0 z-50
         w-48 md:w-64 bg-white/10 dark:bg-gray-800/10 backdrop-blur-xl border-r border-white/20 dark:border-gray-700/20
-        transform transition-all duration-300 ease-in-out shadow-2xl shadow-black/20 dark:shadow-gray-900/20
+        transform transition-all duration-300 ease-in-out shadow-2xl shadow-black/20 dark:shadow-gray-900/20 glass-strong
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0 md:block
       `}>
@@ -81,7 +81,7 @@ export function Navigation() {
             </h1>
             <button
               onClick={signOut}
-              className="text-white/70 dark:text-gray-600 hover:text-white dark:hover:text-gray-800 text-sm transition-all duration-200 p-2 rounded-xl hover:bg-white/10 dark:hover:bg-gray-200 backdrop-blur-sm border border-white/10 dark:border-gray-300"
+              className="text-white/70 dark:text-gray-600 hover:text-white dark:hover:text-gray-800 text-sm transition-all duration-200 p-2 rounded-xl hover:bg-white/10 dark:hover:bg-gray-200 backdrop-blur-sm glass-strong border border-white/10 dark:border-gray-300"
               title="登出"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -40,19 +40,17 @@ export default function Home() {
 
       {/* 统计卡片 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-        <div className="bg-white/10 dark:bg-gray-100/10 backdrop-blur-xl border border-white/20 dark:border-gray-300/20 rounded-xl p-4 md:p-6 shadow-lg hover:bg-white/15 dark:hover:bg-gray-100/15 transition-all duration-300">
+        <div className="bg-white/10 dark:bg-gray-100/10 backdrop-blur-xl glass-strong border border-white/20 dark:border-gray-300/20 rounded-xl p-4 md:p-6 shadow-lg hover:bg-white/15 dark:hover:bg-gray-100/15 transition-all duration-300">
           <h3 className="text-base md:text-lg font-semibold mb-2 text-white/90 dark:text-gray-800/90">总客户数</h3>
           <p className="text-2xl md:text-3xl font-bold text-blue-300 dark:text-blue-600">{customers.length}</p>
         </div>
-
-        <div className="bg-white/10 dark:bg-gray-100/10 backdrop-blur-xl border border-white/20 dark:border-gray-300/20 rounded-xl p-4 md:p-6 shadow-lg hover:bg-white/15 dark:hover:bg-gray-100/15 transition-all duration-300">
+        <div className="bg-white/10 dark:bg-gray-100/10 backdrop-blur-xl glass-strong border border-white/20 dark:border-gray-300/20 rounded-xl p-4 md:p-6 shadow-lg hover:bg-white/15 dark:hover:bg-gray-100/15 transition-all duration-300">
           <Link href="/add" className="block h-full">
             <h3 className="text-base md:text-lg font-semibold mb-2 text-white/90 dark:text-gray-800/90">新增客户</h3>
             <p className="text-blue-300 dark:text-blue-600 hover:text-blue-200 dark:hover:text-blue-700 text-sm md:text-base">点击添加新客户</p>
           </Link>
         </div>
-
-        <div className="bg-white/10 dark:bg-gray-100/10 backdrop-blur-xl border border-white/20 dark:border-gray-300/20 rounded-xl p-4 md:p-6 shadow-lg hover:bg-white/15 dark:hover:bg-gray-100/15 transition-all duration-300">
+        <div className="bg-white/10 dark:bg-gray-100/10 backdrop-blur-xl glass-strong border border-white/20 dark:border-gray-300/20 rounded-xl p-4 md:p-6 shadow-lg hover:bg-white/15 dark:hover:bg-gray-100/15 transition-all duration-300">
           <Link href="/history" className="block h-full">
             <h3 className="text-base md:text-lg font-semibold mb-2 text-white/90 dark:text-gray-800/90">历史记录</h3>
             <p className="text-blue-300 dark:text-blue-600 hover:text-blue-200 dark:hover:text-blue-700 text-sm md:text-base">查看全部客户</p>
@@ -64,35 +62,35 @@ export default function Home() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <Link
           href="/add"
-          className="bg-green-500/20 dark:bg-green-100/20 backdrop-blur-xl hover:bg-green-500/30 dark:hover:bg-green-100/30 text-green-200 dark:text-green-700 hover:text-green-100 dark:hover:text-green-800 p-4 rounded-xl text-center transition-all duration-300 border border-green-400/30 dark:border-green-600/30 hover:border-green-400/50 dark:hover:border-green-600/50 shadow-lg hover:shadow-xl transform hover:scale-105"
+          className="bg-green-500/20 dark:bg-green-100/20 backdrop-blur-xl glass-strong hover:bg-green-500/30 dark:hover:bg-green-100/30 text-green-200 dark:text-green-700 hover:text-green-100 dark:hover:text-green-800 p-4 rounded-xl text-center transition-all duration-300 border border-green-400/30 dark:border-green-600/30 hover:border-green-400/50 dark:hover:border-green-600/50 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
           <div className="text-sm font-medium">新增客户</div>
         </Link>
 
         <Link
           href="/history"
-          className="bg-blue-500/20 dark:bg-blue-100/20 backdrop-blur-xl hover:bg-blue-500/30 dark:hover:bg-blue-100/30 text-blue-200 dark:text-blue-700 hover:text-blue-100 dark:hover:text-blue-800 p-4 rounded-xl text-center transition-all duration-300 border border-blue-400/30 dark:border-blue-600/30 hover:border-blue-400/50 dark:hover:border-blue-600/50 shadow-lg hover:shadow-xl transform hover:scale-105"
+          className="bg-blue-500/20 dark:bg-blue-100/20 backdrop-blur-xl glass-strong hover:bg-blue-500/30 dark:hover:bg-blue-100/30 text-blue-200 dark:text-blue-700 hover:text-blue-100 dark:hover:text-blue-800 p-4 rounded-xl text-center transition-all duration-300 border border-blue-400/30 dark:border-blue-600/30 hover:border-blue-400/50 dark:hover:border-blue-600/50 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
           <div className="text-sm font-medium">客户列表</div>
         </Link>
 
         <Link
           href="/visits"
-          className="bg-purple-500/20 dark:bg-purple-100/20 backdrop-blur-xl hover:bg-purple-500/30 dark:hover:bg-purple-100/30 text-purple-200 dark:text-purple-700 hover:text-purple-100 dark:hover:text-purple-800 p-4 rounded-xl text-center transition-all duration-300 border border-purple-400/30 dark:border-purple-600/30 hover:border-purple-400/50 dark:hover:border-purple-600/50 shadow-lg hover:shadow-xl transform hover:scale-105"
+          className="bg-purple-500/20 dark:bg-purple-100/20 backdrop-blur-xl glass-strong hover:bg-purple-500/30 dark:hover:bg-purple-100/30 text-purple-200 dark:text-purple-700 hover:text-purple-100 dark:hover:text-purple-800 p-4 rounded-xl text-center transition-all duration-300 border border-purple-400/30 dark:border-purple-600/30 hover:border-purple-400/50 dark:hover:border-purple-600/50 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
           <div className="text-sm font-medium">拜访记录</div>
         </Link>
 
         <Link
           href="/settings"
-          className="bg-gray-500/20 dark:bg-gray-200/20 backdrop-blur-xl hover:bg-gray-500/30 dark:hover:bg-gray-200/30 text-gray-200 dark:text-gray-700 hover:text-gray-100 dark:hover:text-gray-800 p-4 rounded-xl text-center transition-all duration-300 border border-gray-400/30 dark:border-gray-600/30 hover:border-gray-400/50 dark:hover:border-gray-600/50 shadow-lg hover:shadow-xl transform hover:scale-105"
+          className="bg-gray-500/20 dark:bg-gray-200/20 backdrop-blur-xl glass-strong hover:bg-gray-500/30 dark:hover:bg-gray-200/30 text-gray-200 dark:text-gray-700 hover:text-gray-100 dark:hover:text-gray-800 p-4 rounded-xl text-center transition-all duration-300 border border-gray-400/30 dark:border-gray-600/30 hover:border-gray-400/50 dark:hover:border-gray-600/50 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
           <div className="text-sm font-medium">设置</div>
         </Link>
       </div>
 
       {/* 最近客户 */}
-      <div className="bg-white/10 dark:bg-gray-100/10 backdrop-blur-xl border border-white/20 dark:border-gray-300/20 rounded-xl p-4 md:p-6 shadow-lg">
+      <div className="bg-white/10 dark:bg-gray-100/10 backdrop-blur-xl glass-strong border border-white/20 dark:border-gray-300/20 rounded-xl p-4 md:p-6 shadow-lg">
         <h3 className="text-lg font-semibold mb-4 text-white/90 dark:text-gray-800/90">最近客户</h3>
         {loading ? (
           <div className="text-center py-8">

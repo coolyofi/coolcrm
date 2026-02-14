@@ -58,7 +58,7 @@ export default function Login() {
     <>
       <Toaster position="top-right" />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 dark:from-gray-100 dark:via-gray-200 dark:to-gray-300 via-slate-800 to-slate-900">
-        <div className="max-w-md w-full p-8 bg-white/10 dark:bg-gray-100/10 backdrop-blur-xl border border-white/20 dark:border-gray-300/20 rounded-xl shadow-2xl">
+        <div className="max-w-md w-full p-8 bg-white/10 dark:bg-gray-100/10 backdrop-blur-xl glass-strong border border-white/20 dark:border-gray-300/20 rounded-xl shadow-2xl">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white dark:text-gray-800 drop-shadow-sm mb-2">CoolCRM</h1>
             <p className="text-white/60 dark:text-gray-600">客户关系管理系统</p>
@@ -148,15 +148,7 @@ export default function Login() {
                 isLogin ? "登录" : "注册"
               )}
             </button>
-              {loading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  {isLogin ? "登录中..." : "注册中..."}
-                </div>
-              ) : (
-                isLogin ? "登录" : "注册"
-              )}
-            </button>
+            
           </form>
 
           {isLogin && (
