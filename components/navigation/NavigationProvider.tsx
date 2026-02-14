@@ -45,20 +45,36 @@ type NavContextValue = {
   close: () => void
   toggle: () => void
   setMotionLevel: (level: MotionLevel) => void
+
+  // Computed values for components
+  state: SidebarState
+  toggleSidebar: () => void
+  navWidthPx: number
+  proximity: boolean
 }
 
 const NavigationContext = createContext<NavContextValue | null>(null)
 
-// Hook: Device-based mode detection
+// Hook: Device-based mode detection with touch support
 function useNavMode(): NavMode {
   const [mode, setMode] = useState<NavMode>("desktop")
 
   useEffect(() => {
     const handler = () => {
       const w = window.innerWidth
-      if (w < 768) setMode("mobile")
-      else if (w < 1024) setMode("tablet")
-      else setMode("desktop")
+      const h = window.innerHeight
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+
+      // iPad-like detection: medium screen + touch support
+      if (w >= 768 && w < 1024 && isTouch) {
+        setMode("tablet") // iPad gets tablet mode for better touch UX
+      } else if (w < 768) {
+        setMode("mobile")
+      } else if (w < 1024) {
+        setMode("tablet")
+      } else {
+        setMode("desktop")
+      }
     }
 
     handler()
@@ -69,31 +85,47 @@ function useNavMode(): NavMode {
   return mode
 }
 
-// Hook: Mouse proximity expand for desktop
-function useMouseProximity(enabled: boolean) {
-  const [nearLeft, setNearLeft] = useState(false)
+// Hook: Detect user's motion preferences
+function usePrefersReducedMotion() {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
 
   useEffect(() => {
-    if (!enabled) return
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setPrefersReducedMotion(mediaQuery.matches)
 
-    const move = (e: MouseEvent) => {
-      if (e.clientX < 48) setNearLeft(true)
-      else if (e.clientX > 280) setNearLeft(false)
-    }
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
+    mediaQuery.addEventListener('change', handler)
+    return () => mediaQuery.removeEventListener('change', handler)
+  }, [])
 
-    window.addEventListener("mousemove", move)
-    return () => window.removeEventListener("mousemove", move)
-  }, [enabled])
-
-  return nearLeft
+  return prefersReducedMotion
 }
 
 // Motion Policy: Pure function that returns motion tokens based on level and physics
 function getMotionPolicy(
   motionLevel: MotionLevel,
   scrollVelocity: number = 0,
-  scrollTop: number = 0
+  scrollTop: number = 0,
+  prefersReducedMotion: boolean = false
 ): MotionTokens {
+  // Respect user's motion preferences
+  if (prefersReducedMotion) {
+    return {
+      topbarBlurPx: 18,
+      topbarAlpha: 0.85,
+      shadowLevel: 1,
+      durations: {
+        fast: 0,
+        base: 0,
+        slow: 0
+      },
+      easing: "linear",
+      largeTitleEnabled: false,
+      drawerDragEnabled: false,
+      proximityEnabled: true
+    }
+  }
+
   if (motionLevel === "stable") {
     // Enterprise stable: Conservative, predictable, zero-surprise
     return {
@@ -154,6 +186,13 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   const [scrollVelocity, setScrollVelocity] = useState(0)
   const [scrollTop, setScrollTop] = useState(0)
 
+  // User preferences
+  const prefersReducedMotion = usePrefersReducedMotion()
+
+  // Hydration safety
+  const [isHydrated, setIsHydrated] = useState(false)
+  useEffect(() => setIsHydrated(true), [])
+
   // Proximity (desktop only)
   const mouseNear = useMouseProximity(mode === "desktop" && getMotionPolicy(motionLevel).proximityEnabled)
 
@@ -206,8 +245,8 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
 
   // Motion tokens (computed from policy)
   const motion = useMemo(() =>
-    getMotionPolicy(motionLevel, scrollVelocity, scrollTop),
-    [motionLevel, scrollVelocity, scrollTop]
+    getMotionPolicy(motionLevel, scrollVelocity, scrollTop, prefersReducedMotion),
+    [motionLevel, scrollVelocity, scrollTop, prefersReducedMotion]
   )
 
   // Computed values
@@ -236,20 +275,20 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   }, [])
 
   const value = useMemo<NavContextValue>(() => ({
-    mode,
-    sidebar,
+    mode: isHydrated ? mode : "desktop",
+    sidebar: isHydrated ? sidebar : "icon",
     drawerOpen,
-    motion,
-    motionLevel,
+    motion: isHydrated ? motion : getMotionPolicy("stable"),
+    motionLevel: isHydrated ? motionLevel : "stable",
     open,
     close,
     toggle,
     setMotionLevel: setMotionLevelCallback,
-    state: sidebar,
+    state: isHydrated ? sidebar : "icon",
     toggleSidebar: toggle,
-    navWidthPx,
-    proximity: mouseNear,
-  }), [mode, sidebar, drawerOpen, motion, motionLevel, open, close, toggle, setMotionLevelCallback, navWidthPx, mouseNear])
+    navWidthPx: isHydrated ? navWidthPx : 72,
+    proximity: isHydrated ? mouseNear : false
+  }), [mode, sidebar, drawerOpen, motion, motionLevel, open, close, toggle, setMotionLevelCallback, navWidthPx, mouseNear, isHydrated])
 
   return (
     <NavigationContext.Provider value={value}>

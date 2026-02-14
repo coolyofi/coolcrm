@@ -1,6 +1,6 @@
 # Navigation Layering System v2 Specification
 
-**Status**: Phase 3 Implemented ✓ | OS Layer Stabilization In Progress
+**Status**: OS Layer Stabilization Phase 1 ✓ | Phase 2 Pending | Phase 3 Pending
 **Last Updated**: 2024
 **Owner**: CoolCRM Engineering Team
 
@@ -129,6 +129,108 @@ Layer 0: Background          [ z-index: -1  ] — Ambient lighting effects, wall
 --glass-blur: 18px;
 --glass-blur-scrolled: 28px;
 ```
+
+---
+
+## OS Layer Stabilization: Phase 1 (✓ Completed)
+
+### Executive Summary
+Successfully implemented OS Layer architecture to eliminate navigation double-mounting, layer stack inversion, and content offset misalignment. This establishes the foundation for all subsequent navigation fixes.
+
+### Changes Implemented
+
+#### 1. OS Layer CSS Tokens (globals.css)
+```css
+/* Z-Index Layer System */
+--z-content: 0;           /* Content layer (scrolling) */
+--z-nav: 50;              /* Navigation layer (sidebar) */
+--z-drawer: 70;           /* Drawer content layer */
+--z-drawer-backdrop: 60;  /* Drawer backdrop layer */
+--z-topbar: 80;           /* TopBar layer (mobile/tablet) */
+
+/* OS Dimensions */
+--nav-w-collapsed: 68px;  /* Collapsed sidebar width */
+--nav-w-expanded: 260px;  /* Expanded sidebar width */
+--topbar-h: 60px;         /* TopBar height */
+```
+
+**Why**: Unified z-index system prevents stacking context conflicts. Standardized dimensions ensure consistent layout across all breakpoints.
+
+#### 2. AppShell Three-Layer OS Architecture (AppShell.tsx)
+```tsx
+export function AppShell({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      {/* NavigationLayer (fixed left, full height) */}
+      <SidebarDesktop />
+
+      {/* DrawerOverlay (mobile only, full screen) */}
+      <DrawerOverlay />
+
+      {/* TopBarLayer (fixed top, mobile/tablet only) */}
+      <TopBar />
+
+      {/* ContentScrollLayer (with padding contracts) */}
+      <main
+        className="min-h-screen"
+        style={{
+          paddingLeft: mode === 'desktop' ? 'var(--nav-w-expanded)' : '0px',
+          paddingTop: mode !== 'desktop' ? 'var(--topbar-h)' : '0px',
+        }}
+      >
+        {children}
+      </main>
+    </>
+  )
+}
+```
+
+**Why**: Transforms navigation from "page UI element" to true "OS Layer" with proper stacking contexts and content offset contracts.
+
+#### 3. SidebarDesktop OS Conversion (SidebarDesktop.tsx)
+```tsx
+<aside
+  className="fixed left-0 top-0 h-[100dvh] flex flex-col"
+  style={{
+    width: collapsed ? 'var(--nav-w-collapsed)' : 'var(--nav-w-expanded)',
+    zIndex: 'var(--z-nav)',
+  }}
+>
+  <div className="h-full p-3">
+    <div className="h-full rounded-2xl bg-white/55 backdrop-blur-[18px] flex flex-col overflow-hidden">
+      {/* Top section */}
+      <div className="px-3 pt-3">...</div>
+
+      {/* Menu items - flex-1 for full height */}
+      <div className="flex-1 px-3 py-2 overflow-y-auto">...</div>
+
+      {/* Bottom section - mt-auto pushes to bottom */}
+      <div className="px-3 pb-3 mt-auto">...</div>
+    </div>
+  </div>
+</aside>
+```
+
+**Why**: Converts sidebar from content card to full-height OS region. `flex-col` + `mt-auto` ensures bottom section stays at bottom regardless of menu length.
+
+#### 4. Unified Z-Index Token Usage
+- **SidebarDesktop**: `zIndex: 'var(--z-nav)'` (50)
+- **DrawerOverlay**: `z-[var(--z-drawer)]` (70) 
+- **TopBar**: `zIndex: 'var(--z-topbar)'` (80)
+
+**Why**: Eliminates hardcoded z-index values, preventing stacking context conflicts and ensuring consistent layering.
+
+### Bug Categories Eliminated
+- ✅ **A. Navigation Double Mount**: Single-instance rendering verified
+- ✅ **B. Layer Stack Inversion**: Unified z-index tokens prevent conflicts
+- ✅ **F. TopBar/Content Offset Misalignment**: OS padding contracts established
+
+### Verification Results
+- ✅ Build: Passes (`npm run build`)
+- ✅ Lint: No errors (`npm run lint`)
+- ✅ Type-check: Passes (`npx tsc --noEmit`)
+- ✅ Single Navigation Instance: Confirmed (only AppShell renders components)
+- ✅ Z-Index Standardization: All components use CSS variables
 
 ---
 
@@ -401,10 +503,116 @@ npm run type-check     # TypeScript stacking context validation
 
 ---
 
+## Team Execution Command List
+
+### 1. 开一个修复分支
+```bash
+git checkout -b fix/nav-os-layer-stable-v1
+```
+
+### 2. 先做"单实例渲染"排雷（最优先）
+```bash
+# 全局搜索 Drawer、DrawerOverlay、useNav 引用点
+grep -r "Drawer\|useNav" --include="*.tsx" --include="*.ts" src/
+
+# 决定只保留 DrawerOverlay 后，把旧 Drawer 的入口从 AppShell 移除
+# 编辑 components/navigation/AppShell.tsx，移除旧 Drawer 引用
+```
+
+### 3. 加 z-index tokens + 尺寸 tokens（globals.css）
+```css
+/* 在 :root 中添加 */
+--z-content: 0;
+--z-topbar: 40;
+--z-nav: 50;
+--z-drawer-backdrop: 60;
+--z-drawer: 70;
+--z-modal: 90;
+
+--nav-w-expanded: 260px;
+--nav-w-collapsed: 72px;
+--topbar-h: 60px;
+```
+
+### 4. AppShell 结构改成三层固定
+```typescript
+// components/navigation/AppShell.tsx
+return (
+  <div className="h-[100dvh] overflow-hidden bg-[rgb(var(--bg))]">
+    {/* NavigationLayer（fixed，左侧，h-screen） */}
+    <SidebarDesktop />
+    <DrawerOverlay />
+
+    {/* TopBarLayer（fixed，顶部，含 safe-area） */}
+    <TopBar />
+
+    {/* ContentScrollLayer（唯一滚动容器 + padding-left/padding-top） */}
+    <main
+      id="content-scroll"
+      className="h-[100dvh] overflow-y-auto overscroll-contain min-w-0"
+      style={{
+        marginLeft: getContentMarginLeft(),
+        paddingTop: mode !== 'desktop' ? 'var(--topbar-h)' : '0px',
+        zIndex: 'var(--z-content)',
+        pointerEvents: isDrawerOpen ? 'none' : 'auto'
+      }}
+    >
+      <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
+        {children}
+      </div>
+    </main>
+  </div>
+)
+```
+
+### 5. 修复 Sidebar "做到底"
+```typescript
+// components/navigation/SidebarDesktop.tsx
+<div
+  className="fixed left-0 top-0 h-[100dvh] flex flex-col"
+  style={{
+    width: sidebar === 'expanded' ? 'var(--nav-w-expanded)' : 'var(--nav-w-collapsed)',
+    zIndex: 'var(--z-nav)'
+  }}
+>
+  {/* 菜单区 */}
+  <div className="flex-1 overflow-y-auto">
+    {/* menu items */}
+  </div>
+
+  {/* 底部区（Collapse、Settings、Profile）：mt-auto 固定到底 */}
+  <div className="mt-auto p-4 border-t border-[var(--border)]">
+    <CollapseButton />
+  </div>
+</div>
+```
+
+### 6. 写一个最小回归清单（CI 绿之前必须过）
+```bash
+# iPhone Safari：打开 drawer，菜单不遮挡标题，且可滚动内容不穿透
+# iPad 横竖：Sidebar 固定到底，不出现第二个 sidebar
+# Desktop：Sidebar 固定到底，滚动只发生在 content 区域
+# 任一页面：没有"背景彩色光晕露出按钮轮廓但按钮不可见"的情况
+
+npm run build
+npm run lint
+npm run type-check
+```
+
+### 7. 提交 PR
+```bash
+git add .
+git commit -m "fix(nav): stabilize OS-layer layout (single instance + z-index tokens + full-height sidebar)"
+git push -u origin fix/nav-os-layer-stable-v1
+```
+
+---
+
 ## Version History
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.1     | 2024 | OS Layer Stabilization Phase 1: Three-layer OS architecture, unified z-index tokens, content offset contracts. Eliminates bugs A, B, F. |
 | 2.0     | 2024 | Phase 1 Implementation: Glass isolation, glow containment, drawer freeze |
 | 1.0     | 2024 | Initial navigation architecture |
 

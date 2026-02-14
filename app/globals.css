@@ -52,11 +52,17 @@
      Never create new stacking context at content level
      Content must always be lower than Navigation
   */
-  --z-content: 1;
+  --z-content: 0;
   --z-topbar: 40;
-  --z-overlay: 50;
-  --z-drawer: 60;
-  --z-modal: 80;
+  --z-nav: 50;
+  --z-drawer-backdrop: 60;
+  --z-drawer: 70;
+  --z-modal: 90;
+
+  /* OS Layer Dimensions */
+  --nav-w-expanded: 260px;
+  --nav-w-collapsed: 72px;
+  --topbar-h: 60px;
 }
 
 /* ---------------- Dark (Liquid Glass) ---------------- */
