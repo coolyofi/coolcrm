@@ -6,6 +6,14 @@ export type KpiTrend = {
   trendPercent: number | null // null if no previous data
 }
 
+export type ActivityItem = {
+  id: string
+  type: 'visit' | 'customer'
+  title: string
+  subtitle: string
+  date: string
+}
+
 export type DashboardData = {
   profile: { nickname: string | null } | null
   customers: {
@@ -16,7 +24,7 @@ export type DashboardData = {
     thisMonth: KpiTrend
     recent: unknown[]
   }
-  activity: unknown[] // Mixed timeline
+  activity: ActivityItem[] // Mixed timeline
 }
 
 // Helper: Get start/end of current and last month
@@ -117,16 +125,16 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     .order("visit_date", { ascending: false })
     .limit(5)
 
-  const customersMapped = (recentCustomers || []).map((c: { id: string; company_name: string; created_at: string }) => ({
-    type: 'customer',
+  const customersMapped: ActivityItem[] = (recentCustomers || []).map((c: { id: string; company_name: string; created_at: string }) => ({
+    type: 'customer' as const,
     id: c.id,
     title: `Added new customer`,
     subtitle: c.company_name,
     date: c.created_at
   }))
 
-  const visitsMapped = (recentVisits || []).map((v: { id: string; customers: { company_name: string } | { company_name: string }[]; notes?: string; visit_date: string }) => ({
-    type: 'visit',
+  const visitsMapped: ActivityItem[] = (recentVisits || []).map((v: { id: string; customers: { company_name: string } | { company_name: string }[]; notes?: string; visit_date: string }) => ({
+    type: 'visit' as const,
     id: v.id,
     title: `Visited ${Array.isArray(v.customers) ? v.customers[0]?.company_name : v.customers?.company_name || 'Unknown'}`,
     subtitle: v.notes || 'No notes',

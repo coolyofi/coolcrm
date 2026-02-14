@@ -20,18 +20,21 @@ export function Sidebar() {
 
   return (
     <aside
-      className="fixed left-0 top-0 bottom-0 z-40 glass scrolled border-r border-[var(--border)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col backdrop-blur-xl"
-      style={{ width: navWidthPx, ["--glass-blur-scrolled" as any]: `${blur}px` }}
+      className={[
+        "fixed left-0 top-0 z-40 h-[100dvh] select-none",
+        "transition-[width] duration-[var(--motion-base)] ease-[var(--ease)]",
+        collapsed ? "w-[72px]" : "w-[260px]"
+      ].join(' ')}
     >
-      {/* Header / Brand */}
-      <div className="h-[60px] flex items-center justify-center px-4 border-b border-[var(--border)] shrink-0">
-        {isExpanded ? (
-          <div className="flex items-center gap-2">
-            <svg className="w-6 h-6 text-[var(--primary)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <div className="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--fg)] to-[var(--fg-muted)] overflow-hidden whitespace-nowrap">
-              CoolCRM
+      <div className="h-full p-3">
+        <div className="h-full rounded-2xl border border-white/20 bg-white/55 backdrop-blur-[18px] shadow-[var(--shadow-elev-1)] flex flex-col overflow-hidden" style={{ ["--glass-blur-scrolled" as any]: `${blur}px` }}>
+          {/* Top */}
+          <div className="px-3 pt-3">
+            <div className="h-11 flex items-center gap-2">
+              <svg className="h-9 w-9 rounded-xl bg-black/10 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              {!collapsed && <div className="min-w-0 font-semibold truncate text-[var(--fg)]">CoolCRM</div>}
             </div>
           </div>
 
