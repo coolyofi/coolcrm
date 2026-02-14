@@ -107,6 +107,8 @@ export default function EditCustomer() {
 
   const onSubmit = async (data: CustomerForm) => {
     setSaving(true)
+    
+    // Enhanced: Better error handling with specific error messages
     try {
       const updateData = {
         ...data,
@@ -121,12 +123,21 @@ export default function EditCustomer() {
         .eq("id", id)
 
       if (error) throw error
+      
       toast.success("更新成功")
       mutate()
       router.push("/history")
     } catch (error) {
-      toast.error("更新失败: " + (error as Error).message)
-      console.error(error)
+      console.error("更新失败:", error)
+      // Enhanced: More specific error messages
+      const errorMessage = error instanceof Error ? error.message : '未知错误'
+      if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        toast.error("网络错误，请检查连接后重试")
+      } else if (errorMessage.includes('not found')) {
+        toast.error("客户不存在，可能已被删除")
+      } else {
+        toast.error(`更新失败: ${errorMessage}`)
+      }
     } finally {
       setSaving(false)
     }
@@ -141,6 +152,7 @@ export default function EditCustomer() {
     setLocationLoading(true)
     setIsLocationExpanded(true)
     
+    // Enhanced error handling with better user feedback
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const lat = position.coords.latitude.toString()
@@ -148,21 +160,41 @@ export default function EditCustomer() {
         setValue("latitude", lat)
         setValue("longitude", lng)
 
+        // Enhanced: Better error handling for reverse geocoding
         try {
           const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh`)
+          
+          if (!response.ok) {
+            throw new Error('Geocoding service unavailable')
+          }
+          
           const data = await response.json()
           const fullAddress = `${data.city || ''} ${data.locality || ''} ${data.principalSubdivision || ''}`.trim()
           setValue("address", fullAddress || "")
           toast.success("位置已更新")
         } catch (error) {
           console.error("获取地址失败:", error)
-          toast.error("地址解析失败，请手动输入")
+          const errorMessage = error instanceof Error ? error.message : '未知错误'
+          toast.error(`地址解析失败 (${errorMessage})，请手动输入`)
         }
         setLocationLoading(false)
       },
       (error) => {
         console.error("获取位置失败:", error)
-        toast.error("获取位置失败: " + error.message)
+        // Enhanced: More detailed error messages
+        let errorMessage = "获取位置失败"
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "位置权限被拒绝，请在浏览器设置中允许位置访问"
+            break
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "位置信息不可用，请检查设备定位服务"
+            break
+          case error.TIMEOUT:
+            errorMessage = "获取位置超时，请重试"
+            break
+        }
+        toast.error(errorMessage)
         setLocationLoading(false)
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }

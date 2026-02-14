@@ -136,9 +136,11 @@ function getMotionPolicy(
 export function NavigationProvider({ children }: { children: React.ReactNode }) {
   const mode = useNavMode()
 
+  // Track user overrides for sidebar state (when user manually changes it)
+  const [userSidebarOverride, setUserSidebarOverride] = useState<SidebarState | null>(null)
+
   // Core state
-  const [sidebar, setSidebar] = useState<SidebarState>("closed")
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerOpen] = useState(false)
 
   // Motion system
   const [motionLevel, setMotionLevel] = useState<MotionLevel>(() => {
@@ -158,19 +160,23 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   // Proximity (desktop only)
   const mouseNear = useMouseProximity(mode === "desktop" && getMotionPolicy(motionLevel).proximityEnabled)
 
-  // Auto-rules: Device → Mode → Sidebar
-  useEffect(() => {
-    if (mode === "mobile") setSidebar("closed")
-    if (mode === "tablet") setSidebar("icon")
-    if (mode === "desktop") setSidebar("expanded")
-  }, [mode])
+  // Fixed: Derive sidebar state from mode and proximity instead of using setState in effects
+  // This prevents cascading renders and follows React best practices
+  const sidebar = useMemo<SidebarState>(() => {
+    // If user has manually overridden, respect that temporarily
+    if (userSidebarOverride !== null) return userSidebarOverride
 
-  // Mouse proximity expand (desktop only)
-  useEffect(() => {
-    if (mode !== "desktop") return
-    if (mouseNear && sidebar === "icon") setSidebar("expanded")
-    else if (!mouseNear && sidebar === "expanded") setSidebar("icon")
-  }, [mode, mouseNear, sidebar])
+    // Auto-rules: Device → Mode → Sidebar
+    if (mode === "mobile") return "closed"
+    if (mode === "tablet") return "icon"
+    
+    // Desktop with proximity hover
+    if (mode === "desktop") {
+      return mouseNear ? "expanded" : "icon"
+    }
+    
+    return "expanded"
+  }, [mode, mouseNear, userSidebarOverride])
 
   // Scroll physics (apple mode only)
   useEffect(() => {
@@ -208,20 +214,23 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     [motionLevel, scrollVelocity, scrollTop]
   )
 
-  // Computed values
-  const navWidthPx = useMemo(() => {
-    switch (sidebar) {
-      case "expanded": return 260
-      case "icon": return 72
-      case "closed": return 72
-    }
-  }, [sidebar])
+  // Computed values (kept for potential future use, but currently unused)
+  // const navWidthPx = useMemo(() => {
+  //   switch (sidebar) {
+  //     case "expanded": return 260
+  //     case "icon": return 72
+  //     case "closed": return 72
+  //   }
+  // }, [sidebar])
 
-  // Actions
-  const open = useCallback(() => setSidebar("expanded"), [])
-  const close = useCallback(() => setSidebar("closed"), [])
+  // Actions - Updated to use override state
+  const open = useCallback(() => setUserSidebarOverride("expanded"), [])
+  const close = useCallback(() => setUserSidebarOverride("closed"), [])
   const toggle = useCallback(() =>
-    setSidebar(s => s === "closed" ? "expanded" : "closed"), []
+    setUserSidebarOverride(prev => {
+      const current = prev !== null ? prev : sidebar
+      return current === "closed" ? "expanded" : "closed"
+    }), [sidebar]
   )
 
   const setMotionLevelCallback = useCallback((level: MotionLevel) => {

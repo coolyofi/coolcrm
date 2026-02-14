@@ -31,7 +31,12 @@ export function SidebarDesktop() {
       }}
     >
       <div className="h-full p-3">
-        <div className="h-full rounded-2xl border border-white/20 bg-white/55 backdrop-blur-[18px] shadow-[var(--shadow-elev-1)] flex flex-col overflow-hidden" style={{ ["--glass-blur-scrolled" as any]: `${blur}px` }}>
+        <div 
+          className="h-full rounded-2xl border border-white/20 bg-white/55 backdrop-blur-[18px] shadow-[var(--shadow-elev-1)] flex flex-col overflow-hidden" 
+          style={{ 
+            "--glass-blur-scrolled": `${blur}px`
+          } as React.CSSProperties}
+        >
           {/* Top */}
           <div className="px-3 pt-3">
             <div className="h-14 flex items-center gap-2">

@@ -21,13 +21,22 @@ export async function middleware(req: NextRequest) {
     }
   )
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  // Enhanced error handling for session retrieval with timeout protection
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
 
-  if (!session && req.nextUrl.pathname.startsWith("/edit")) {
-    // Redirect unauthenticated users trying to access protected routes
-    return NextResponse.redirect(new URL("/login", req.url))
+    if (!session && req.nextUrl.pathname.startsWith("/edit")) {
+      // Redirect unauthenticated users trying to access protected routes
+      return NextResponse.redirect(new URL("/login", req.url))
+    }
+  } catch (error) {
+    // Log session fetch error and redirect to login for protected routes
+    console.error('Session retrieval failed:', error)
+    if (req.nextUrl.pathname.startsWith("/edit")) {
+      return NextResponse.redirect(new URL("/login", req.url))
+    }
   }
 
   // Add basic security headers

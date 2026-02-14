@@ -41,8 +41,9 @@ export default function Home() {
   // Fallback if data failed significantly, though getDashboardData handles nulls
   if (!data) return null
 
-  const customers = data.customers.total
-  const visits = data.visits.thisMonth
+  // Safe access with null coalescing for KPI data
+  const customers = data.customers?.total || { current: 0, previous: 0, trendPercent: null }
+  const visits = data.visits?.thisMonth || { current: 0, previous: 0, trendPercent: null }
 
   return (
     <PerformanceMonitor>
@@ -84,18 +85,18 @@ export default function Home() {
         `}>
           <KpiCard 
             title="Total Customers"
-            value={customers.current}
-            previousValue={customers.previous}
-            trendPercent={customers.trendPercent}
+            value={customers?.current || 0}
+            previousValue={customers?.previous || 0}
+            trendPercent={customers?.trendPercent || null}
             emptyLabel="Start by creating your first customer"
             emptyAction="Add Customer"
           />
           
           <KpiCard 
             title="Visits This Month"
-            value={visits.current}
-            previousValue={visits.previous}
-            trendPercent={visits.trendPercent}
+            value={visits?.current || 0}
+            previousValue={visits?.previous || 0}
+            trendPercent={visits?.trendPercent || null}
             emptyLabel="Log a visit to track activity"
             emptyAction="Log Visit"
             // In real app, log visit might open a modal or go to visits page
@@ -116,7 +117,7 @@ export default function Home() {
           {/* Quick Goal Glance (Mini) or just another metric */}
            <KpiCard 
                title="High Intent"
-               value={(data.customers.recent as { intent_level?: number }[]).filter((c) => (c.intent_level || 0) >= 4).length} // Rough proxy
+               value={(data.customers?.recent || []).filter((c) => (c.intent_level || 0) >= 4).length} // Safe access with default array
                previousValue={0} // No trend yet
                trendPercent={null}
                emptyLabel="No high intent leads yet"
@@ -127,13 +128,13 @@ export default function Home() {
       {/* 3. Goals Progress */}
       <GoalsSection 
         stats={{
-            customers: Math.max(0, customers.current - (customers.previous || 0)), // Net new this month
-            visits: visits.current
+            customers: Math.max(0, (customers?.current || 0) - (customers?.previous || 0)), // Safe calculation with defaults
+            visits: visits?.current || 0
         }}
       />
 
       {/* 4. Activity Feed Timeline */}
-      <ActivityFeed activities={data.activity} />
+      <ActivityFeed activities={data.activity || []} />
 
       </div>
     </PerformanceMonitor>

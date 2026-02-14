@@ -4,7 +4,6 @@ import Link from "next/link"
 import { useNav } from "./NavigationProvider"
 import { usePathname } from "next/navigation"
 import { useScrollProgress } from "../../hooks/useScrollProgress"
-import { useScrollVelocity } from "../../hooks/useScrollVelocity"
 
 function clamp(v: number, min: number, max: number) { return Math.max(min, Math.min(max, v)) }
 
@@ -12,7 +11,7 @@ export function TopBar() {
   const { mode, open, motion } = useNav()
   const pathname = usePathname()
   const { p } = useScrollProgress("content-scroll", 56)
-  const v = useScrollVelocity("content-scroll")
+  // Remove unused variable 'v'
 
   const getCompactTitle = () => {
     if (pathname === '/') return 'Dashboard'

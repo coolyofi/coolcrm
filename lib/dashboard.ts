@@ -1,4 +1,8 @@
-// Optimized code with improved type annotations
+// Type-safe data fetching with proper type annotations
+// Import Customer and Visit types for type safety
+
+import type { Customer } from '@/lib/api/customers'
+import type { Visit } from '@/lib/api/visits'
 
 // Example of improved type annotations
 function fetchData<T>(url: string): Promise<T> {
@@ -16,7 +20,11 @@ interface User {
     email: string;
 }
 
-async function getUserData(userId: number): Promise<User> {
+// Example function demonstrating type-safe data fetching (exported for use in other modules)
+export async function getUserData(userId: number): Promise<User> {
     const data = await fetchData<User>(`https://api.example.com/users/${userId}`);
     return data;
 }
+
+// Export types for use in other modules
+export type { Customer, Visit }
