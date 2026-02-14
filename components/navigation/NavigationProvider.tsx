@@ -62,7 +62,10 @@ const NavigationContext = createContext<NavContextValue | null>(null)
 function useNavMode(): NavMode {
   const [mode, setMode] = useState<NavMode>(() => {
     // SSR-safe initialization: check window availability
-    if (typeof window === "undefined") return "desktop"
+    // Default to mobile on the server to avoid sending a desktop-heavy layout that
+    // will jump to mobile on hydration. Mobile-first rendering reduces layout shifts
+    // for the majority of mobile users and is a safer default for hydration.
+    if (typeof window === "undefined") return "mobile"
     const w = window.innerWidth
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
 

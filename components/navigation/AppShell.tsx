@@ -7,20 +7,22 @@ import { DrawerOverlay } from "./DrawerOverlay"
 import { SidebarDesktop } from "./SidebarDesktop"
 import { MotionLevelToggle } from "../MotionLevelToggle"
 import { useScrollProgress } from "../../hooks/useScrollProgress"
+import { UI_CONTRACT } from "./constants"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { mode, sidebar, motion, isHydrated } = useNav()
   const pathname = usePathname()
-  const { p } = useScrollProgress("content-scroll", 56)
+  const { p } = useScrollProgress("content-scroll", UI_CONTRACT.PAGE_HEADER_SCROLL_DISTANCE)
 
   // Don't wrap login page with shell
   if (pathname === '/login') {
     return <>{children}</>
   }
 
-  // During hydration, render with desktop defaults to prevent mismatch
-  const safeMode = isHydrated ? mode : "desktop"
-  const safeSidebar = isHydrated ? sidebar : "icon"
+  // During hydration, avoid assuming desktop on the server (prevents desktop->mobile jump).
+  // Use a mobile-first default until the client hydrates and determines the real mode.
+  const safeMode = isHydrated ? mode : "mobile"
+  const safeSidebar = isHydrated ? sidebar : "closed"
 
   // Calculate content margin based on navigation state
   const getContentMarginLeft = () => {
@@ -33,14 +35,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Calculate dynamic top padding for large title collapse
   const getContentPaddingTop = () => {
     if (safeMode === "desktop") return "0px"
-    
+
     const titleProgress = Math.min(1, p)
-    const baseHeight = motion.largeTitleEnabled ? 72 : 60
+    const baseHeight = motion.largeTitleEnabled ? UI_CONTRACT.TOPBAR_HEIGHT_PX : 60
     const collapsedHeight = 60
-    const currentHeight = motion.largeTitleEnabled 
+    const currentHeight = motion.largeTitleEnabled
       ? (baseHeight - (titleProgress * (baseHeight - collapsedHeight)))
       : collapsedHeight
-    
+
     return `${currentHeight}px`
   }
 

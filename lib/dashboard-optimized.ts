@@ -119,31 +119,39 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   const recentVisitsResult = results[6] as PromiseSettledResult<{ data: DashboardVisit[] | null, error: SupabaseError | null }>
 
   // Helper function to safely extract data with defaults
-  const safeExtract = <T>(result: PromiseSettledResult<{ data?: T; count?: number; error?: SupabaseError | null }>, defaultValue: T): T => {
+  // DON'T throw on single query failures — return sensible defaults and log useful diagnostics.
+  const safeExtract = <T>(
+    result: PromiseSettledResult<{ data?: T; count?: number; error?: SupabaseError | null }>,
+    defaultValue: T,
+    label?: string
+  ): T => {
     if (result.status === 'fulfilled') {
       if (result.value.error) {
-        // Log the error for debugging purposes
-        console.error('Supabase query error:', result.value.error)
-        throw new Error(`Supabase query failed: ${result.value.error.message}`)
+        // Log the error for debugging purposes but continue with a default value
+        console.warn(`Supabase query error for ${label ?? 'unknown'}:`, result.value.error)
+        return defaultValue
       }
+
       // For count queries, return count; for data queries, return data
       return ('count' in result.value ? (result.value.count ?? defaultValue) : (result.value.data ?? defaultValue)) as T
     }
-    // If the promise was rejected, throw the rejection reason
+
+    // If the promise was rejected, log and return default instead of throwing
     if (result.status === 'rejected') {
-      console.error('Promise rejected:', result.reason)
-      throw result.reason
+      console.warn(`Supabase promise rejected for ${label ?? 'unknown'}:`, result.reason)
+      return defaultValue
     }
+
     return defaultValue
   }
 
-  const profile = safeExtract(profileResult, null)
-  const totalCustomers = safeExtract(totalCustomersResult, 0) as number
-  const countBeforeThisMonth = safeExtract(countBeforeThisMonthResult, 0) as number
-  const visitsThisMonth = safeExtract(visitsThisMonthResult, 0) as number
-  const visitsLastMonth = safeExtract(visitsLastMonthResult, 0) as number
-  const recentCustomers = safeExtract(recentCustomersResult, []) as Customer[]
-  const recentVisits = safeExtract(recentVisitsResult, []) as DashboardVisit[]
+  const profile = safeExtract(profileResult, null, 'profile')
+  const totalCustomers = safeExtract(totalCustomersResult, 0, 'totalCustomers') as number
+  const countBeforeThisMonth = safeExtract(countBeforeThisMonthResult, 0, 'countBeforeThisMonth') as number
+  const visitsThisMonth = safeExtract(visitsThisMonthResult, 0, 'visitsThisMonth') as number
+  const visitsLastMonth = safeExtract(visitsLastMonthResult, 0, 'visitsLastMonth') as number
+  const recentCustomers = safeExtract(recentCustomersResult, [], 'recentCustomers') as Customer[]
+  const recentVisits = safeExtract(recentVisitsResult, [], 'recentVisits') as DashboardVisit[]
 
   const currentTotal = totalCustomers || 0
   const prevTotal = countBeforeThisMonth || 0
