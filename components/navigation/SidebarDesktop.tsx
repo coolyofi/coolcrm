@@ -90,7 +90,7 @@ export function SidebarDesktop() {
               title={isExpanded ? "Collapse Sidebar" : "Expand Sidebar"}
             >
               <svg
-                className={`w-5 h-5 transition-colors ${isExpanded ? "rotate-180" : "rotate-0"}`}
+                className={`w-6 h-6 transition-all duration-200 ${isExpanded ? "rotate-180" : "rotate-0"}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

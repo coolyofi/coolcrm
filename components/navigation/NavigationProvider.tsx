@@ -110,8 +110,8 @@ function useMouseProximity(enabled: boolean) {
     if (!enabled) return
 
     const move = (e: MouseEvent) => {
-      if (e.clientX < 48) setNearLeft(true)
-      else if (e.clientX > 280) setNearLeft(false)
+      if (e.clientX < 60) setNearLeft(true)  // Expand when mouse within 60px of left edge
+      else if (e.clientX > 300) setNearLeft(false)  // Collapse when mouse beyond 300px
     }
 
     window.addEventListener("mousemove", move)
@@ -209,12 +209,10 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   // User preferences
   const prefersReducedMotion = usePrefersReducedMotion()
 
-  // Hydration safety
+  // Hydration safety - use ref instead of state to avoid setState in effect
   const isHydratedRef = useRef(false)
-  const [isHydrated, setIsHydrated] = useState(false)
-  useLayoutEffect(() => {
+  useEffect(() => {
     isHydratedRef.current = true
-    setIsHydrated(true)
   }, [])
 
   // Proximity (desktop only)
@@ -224,8 +222,8 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   const sidebar = useMemo<SidebarState>(() => {
     // Mobile: always closed
     if (mode === "mobile") return "closed"
-    // Tablet: icon or expanded (if overridden)
-    if (mode === "tablet") return sidebarOverride ?? "icon"
+    // Tablet: expanded by default (better for iPad UX)
+    if (mode === "tablet") return sidebarOverride ?? "expanded"
     // Desktop: icon/expanded based on mouse proximity or override
     if (mode === "desktop") {
       if (sidebarOverride) return sidebarOverride
@@ -299,20 +297,20 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   }, [])
 
   const value = useMemo<NavContextValue>(() => ({
-    mode: isHydrated ? mode : "desktop",
-    sidebar: isHydrated ? sidebar : "icon",
+    mode,
+    sidebar,
     drawerOpen,
-    motion: isHydrated ? motion : getMotionPolicy("stable"),
-    motionLevel: isHydrated ? motionLevel : "stable",
+    motion,
+    motionLevel,
     open,
     close,
     toggle,
     setMotionLevel: setMotionLevelCallback,
-    state: isHydrated ? sidebar : "icon",
+    state: sidebar,
     toggleSidebar: toggle,
-    navWidthPx: isHydrated ? navWidthPx : 72,
-    proximity: isHydrated ? mouseNear : false
-  }), [mode, sidebar, drawerOpen, motion, motionLevel, open, close, toggle, setMotionLevelCallback, navWidthPx, mouseNear, isHydrated])
+    navWidthPx,
+    proximity: mouseNear
+  }), [mode, sidebar, drawerOpen, motion, motionLevel, open, close, toggle, setMotionLevelCallback, navWidthPx, mouseNear])
 
   return (
     <NavigationContext.Provider value={value}>
