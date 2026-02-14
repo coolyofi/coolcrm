@@ -56,6 +56,7 @@ export default function Settings() {
   const [loading, setLoading] = useState(true)
   const [savingProfile, setSavingProfile] = useState(false)
   const [changingPassword, setChangingPassword] = useState(false)
+  const [currentTheme, setCurrentTheme] = useState('auto')
 
   const profileForm = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -71,7 +72,23 @@ export default function Settings() {
       return
     }
     fetchProfile()
+    
+    // Initial theme check
+    const saved = localStorage.getItem('themeMode') || 'auto'
+    setCurrentTheme(saved)
   }, [user, router])
+
+  const handleThemeChange = (mode: string) => {
+    setCurrentTheme(mode)
+    localStorage.setItem('themeMode', mode)
+    
+    let themeToApply = mode
+    if (mode === 'auto') {
+      const hour = new Date().getHours()
+      themeToApply = (hour >= 19 || hour < 7) ? 'dark' : 'light'
+    }
+    document.documentElement.setAttribute('data-theme', themeToApply)
+  }
 
   const fetchProfile = async () => {
     if (!user) return
@@ -183,15 +200,40 @@ export default function Settings() {
       <Toaster position="top-right" />
       <div className="max-w-2xl mx-auto space-y-8 p-6">
         <div>
-          <h1 className="text-2xl font-bold text-white drop-shadow-sm">账户设置</h1>
-          <p className="text-white/60 mt-1">管理你的账户信息和安全设置</p>
+          <h1 className="text-2xl font-bold text-[var(--fg)]">Settings</h1>
+          <p className="text-[var(--fg-muted)] mt-1">Manage your account and preferences</p>
+        </div>
+
+        {/* Theme Settings */}
+        <div className="glass p-6">
+          <h2 className="text-xl font-semibold mb-4 text-[var(--fg)]">Appearance</h2>
+          <div className="grid grid-cols-3 gap-4">
+            {['auto', 'light', 'dark'].map((mode) => (
+              <button
+                key={mode}
+                onClick={() => handleThemeChange(mode)}
+                className={`
+                  flex flex-col items-center justify-center p-4 rounded-xl border transition-all capitalized
+                  ${currentTheme === mode 
+                    ? 'bg-[var(--primary)] text-white border-transparent shadow-lg' 
+                    : 'bg-white/5 border-[var(--border)] text-[var(--fg-muted)] hover:bg-white/10'
+                  }
+                `}
+              >
+                <span className="capitalize font-medium">{mode}</span>
+              </button>
+            ))}
+          </div>
+          <div className="mt-4 text-sm text-[var(--fg-muted)]">
+            Auto mode switches to Dark at 7 PM and Light at 7 AM.
+          </div>
         </div>
 
         {/* 昵称设置 */}
-        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 shadow-lg">
-          <h2 className="text-xl font-semibold mb-4 text-white/90">个人资料</h2>
+        <div className="glass p-6">
+          <h2 className="text-xl font-semibold mb-4 text-[var(--fg)]">Profile</h2>
           <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
-            <FormField label="昵称" error={profileForm.formState.errors.nickname?.message}>
+            <FormField label="Nickname" error={profileForm.formState.errors.nickname?.message}>
               <Controller
                 name="nickname"
                 control={profileForm.control}
@@ -199,37 +241,12 @@ export default function Settings() {
                   <input
                     {...field}
                     type="text"
-                    placeholder="输入你的昵称"
-                    className="w-full px-4 py-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
-                  />
-                )}
-              />
-            </FormField>
-
-            <div className="flex gap-4">
-              <button
-                type="submit"
-                disabled={savingProfile}
-                className="flex-1 bg-blue-500/20 backdrop-blur-xl hover:bg-blue-500/30 disabled:bg-gray-500/20 text-blue-200 hover:text-blue-100 disabled:text-gray-400 font-medium py-3 px-4 rounded-xl transition-all duration-300 border border-blue-400/30 hover:border-blue-400/50 disabled:border-gray-400/30 shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                {savingProfile ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    保存中...
-                  </div>
-                ) : (
-                  "保存昵称"
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* 密码修改 */}
-        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 shadow-lg">
-          <h2 className="text-xl font-semibold mb-4 text-white/90">修改密码</h2>
+                    placeholder="Enter nickname"
+                    className="w-full px-4 py-3 rounded-lg transition-all duration-300"
+                  />glass p-6">
+          <h2 className="text-xl font-semibold mb-4 text-[var(--fg)]">Change Password</h2>
           <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
-            <FormField label="当前密码" error={passwordForm.formState.errors.currentPassword?.message}>
+            <FormField label="Current Password" error={passwordForm.formState.errors.currentPassword?.message}>
               <Controller
                 name="currentPassword"
                 control={passwordForm.control}
@@ -237,14 +254,14 @@ export default function Settings() {
                   <input
                     {...field}
                     type="password"
-                    placeholder="输入当前密码"
-                    className="w-full px-4 py-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
+                    placeholder="Current password"
+                    className="w-full px-4 py-3 rounded-lg transition-all duration-300"
                   />
                 )}
               />
             </FormField>
 
-            <FormField label="新密码" error={passwordForm.formState.errors.newPassword?.message}>
+            <FormField label="New Password" error={passwordForm.formState.errors.newPassword?.message}>
               <Controller
                 name="newPassword"
                 control={passwordForm.control}
@@ -252,14 +269,14 @@ export default function Settings() {
                   <input
                     {...field}
                     type="password"
-                    placeholder="输入新密码（至少6位）"
-                    className="w-full px-4 py-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
+                    placeholder="Min 6 chars"
+                    className="w-full px-4 py-3 rounded-lg transition-all duration-300"
                   />
                 )}
               />
             </FormField>
 
-            <FormField label="确认新密码" error={passwordForm.formState.errors.confirmPassword?.message}>
+            <FormField label="Confirm Password" error={passwordForm.formState.errors.confirmPassword?.message}>
               <Controller
                 name="confirmPassword"
                 control={passwordForm.control}
@@ -267,8 +284,8 @@ export default function Settings() {
                   <input
                     {...field}
                     type="password"
-                    placeholder="再次输入新密码"
-                    className="w-full px-4 py-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
+                    placeholder="Confirm new password"
+                    className="w-full px-4 py-3 rounded-lg transition-all duration-300"
                   />
                 )}
               />
@@ -278,21 +295,27 @@ export default function Settings() {
               <button
                 type="submit"
                 disabled={changingPassword}
-                className="flex-1 bg-red-500/20 backdrop-blur-xl hover:bg-red-500/30 disabled:bg-gray-500/20 text-red-200 hover:text-red-100 disabled:text-gray-400 font-medium py-3 px-4 rounded-xl transition-all duration-300 border border-red-400/30 hover:border-red-400/50 disabled:border-gray-400/30 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="btn-primary py-3 px-6 bg-red-500 hover:brightness-110 shadow-red-500/30 w-full"
+                style={{ background: 'var(--danger)' }}
               >
-                {changingPassword ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    修改中...
-                  </div>
-                ) : (
-                  "修改密码"
-                )}
+                {changingPassword ? "Updating..." : "Update Password"}
               </button>
             </div>
           </form>
         </div>
 
+        {/* 账户信息 */}
+        <div className="glass p-6">
+          <h2 className="text-xl font-semibold mb-4 text-[var(--fg)]">Account Info</h2>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-[var(--fg-muted)]">Email</label>
+              <p className="text-[var(--fg)]">{user.email}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[var(--fg-muted)]">Registered</label>
+              <p className="text-[var(--fg)]">
+                {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown
         {/* 账户信息 */}
         <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 shadow-lg">
           <h2 className="text-xl font-semibold mb-4 text-white/90">账户信息</h2>

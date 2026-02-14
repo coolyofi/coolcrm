@@ -63,6 +63,16 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
+建议在 `.env.local` 中还包含以下可选/服务端变量（仅在服务器端使用）：
+
+```env
+# 服务端角色密钥，具有更高权限，仅用于服务器端操作（API route / server action）
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# 可选：在部署时设置 NODE_ENV=production
+# 以及任何第三方服务的 API keys（不要将其暴露为 NEXT_PUBLIC_*）
+```
+
 3. 创建数据库表：
 ```sql
 -- 客户表

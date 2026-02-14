@@ -26,8 +26,22 @@ export async function middleware(req: NextRequest) {
   } = await supabase.auth.getSession()
 
   if (!session && req.nextUrl.pathname.startsWith("/edit")) {
+    // Redirect unauthenticated users trying to access protected routes
     return NextResponse.redirect(new URL("/login", req.url))
   }
+
+  // Add basic security headers
+  const headers = res.headers
+  headers.set('X-Frame-Options', 'DENY')
+  headers.set('X-Content-Type-Options', 'nosniff')
+  headers.set('Referrer-Policy', 'no-referrer-when-downgrade')
+  headers.set('Permissions-Policy', "geolocation=()")
+  headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
+  // A conservative CSP; adjust as your app needs (fonts, images, scripts, styles)
+  headers.set(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'"
+  )
 
   return res
 }
