@@ -242,8 +242,24 @@ export default function Settings() {
                     {...field}
                     type="text"
                     placeholder="Enter nickname"
-                    className="w-full px-4 py-3 rounded-lg transition-all duration-300"
-                  />glass p-6">
+                    className="w-full px-4 py-3 rounded-lg transition-all duration-300 bg-[var(--surface-solid)] border border-[var(--glass-border)] text-[var(--fg)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
+                  />
+                )}
+              />
+            </FormField>
+
+            <button
+              type="submit"
+              disabled={savingProfile}
+              className="btn-primary py-3 px-6 w-full"
+            >
+              {savingProfile ? "Saving..." : "Update Profile"}
+            </button>
+          </form>
+        </div>
+
+        {/* Password Settings */}
+        <div className="glass p-6">
           <h2 className="text-xl font-semibold mb-4 text-[var(--fg)]">Change Password</h2>
           <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
             <FormField label="Current Password" error={passwordForm.formState.errors.currentPassword?.message}>
@@ -255,7 +271,7 @@ export default function Settings() {
                     {...field}
                     type="password"
                     placeholder="Current password"
-                    className="w-full px-4 py-3 rounded-lg transition-all duration-300"
+                    className="w-full px-4 py-3 rounded-lg transition-all duration-300 bg-[var(--surface-solid)] border border-[var(--glass-border)] text-[var(--fg)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
                   />
                 )}
               />
@@ -270,7 +286,7 @@ export default function Settings() {
                     {...field}
                     type="password"
                     placeholder="Min 6 chars"
-                    className="w-full px-4 py-3 rounded-lg transition-all duration-300"
+                    className="w-full px-4 py-3 rounded-lg transition-all duration-300 bg-[var(--surface-solid)] border border-[var(--glass-border)] text-[var(--fg)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
                   />
                 )}
               />
@@ -285,7 +301,7 @@ export default function Settings() {
                     {...field}
                     type="password"
                     placeholder="Confirm new password"
-                    className="w-full px-4 py-3 rounded-lg transition-all duration-300"
+                    className="w-full px-4 py-3 rounded-lg transition-all duration-300 bg-[var(--surface-solid)] border border-[var(--glass-border)] text-[var(--fg)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
                   />
                 )}
               />
@@ -304,7 +320,7 @@ export default function Settings() {
           </form>
         </div>
 
-        {/* 账户信息 */}
+        {/* Account Info */}
         <div className="glass p-6">
           <h2 className="text-xl font-semibold mb-4 text-[var(--fg)]">Account Info</h2>
           <div className="space-y-3">
@@ -315,25 +331,13 @@ export default function Settings() {
             <div>
               <label className="block text-sm font-medium text-[var(--fg-muted)]">Registered</label>
               <p className="text-[var(--fg)]">
-                {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown
-        {/* 账户信息 */}
-        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 shadow-lg">
-          <h2 className="text-xl font-semibold mb-4 text-white/90">账户信息</h2>
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-white/60">邮箱地址</label>
-              <p className="text-white/80">{user.email}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-white/60">注册时间</label>
-              <p className="text-white/80">
-                {user.created_at ? new Date(user.created_at).toLocaleDateString('zh-CN') : '未知'}
+                {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-white/60">最后登录</label>
-              <p className="text-white/80">
-                {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString('zh-CN') : '未知'}
+              <label className="block text-sm font-medium text-[var(--fg-muted)]">Last Login</label>
+              <p className="text-[var(--fg)]">
+                {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : 'Unknown'}
               </p>
             </div>
           </div>
