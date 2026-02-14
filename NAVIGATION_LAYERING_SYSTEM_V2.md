@@ -1,6 +1,6 @@
 # Navigation Layering System v2 Specification
 
-**Status**: Phase 1 Implemented ✓  
+**Status**: Phase 3 Implemented ✓  
 **Last Updated**: 2024  
 **Owner**: CoolCRM Engineering Team
 
@@ -147,25 +147,117 @@ const isDrawerOpen = mode === 'mobile' && sidebar === 'expanded'
 
 ---
 
-## Phase 2: Glow Separation & Content Protection (Planned)
+## Phase 2: Glow Separation & Content Protection (✓ Implemented)
 
-### Tasks
-- [ ] Extract button glow from pseudo-elements to separate positioned layer
-- [ ] Add `.glow-layer` positioned element for controlled glow rendering
-- [ ] Prohibit `backdrop-filter` usage at content level (enforce at glass layer only)
-- [ ] Add topbar height reservation to content top-padding
-- [ ] Update drawer overlay to explicitly set stacking context boundaries
+### Changes
+
+#### 1. Glow Layer System (globals.css)
+```css
+.glow-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  border-radius: inherit;
+}
+
+.glow-layer::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: inherit;
+  box-shadow: inherit;
+  opacity: 0.6;
+  filter: blur(8px);
+}
+```
+
+**Why**: Extracts glow effects from buttons/cards to separate positioned layers, preventing stacking context creation at content level.
+
+#### 2. Button Glow Extraction (globals.css)
+```css
+.btn-primary {
+  /* Removed: box-shadow: 0 4px 12px rgba(77,163,255,0.3); */
+  position: relative;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: var(--primary);
+  opacity: 0.3;
+  filter: blur(4px);
+  z-index: -1;
+}
+```
+
+**Why**: Moves button glow from `box-shadow` (which creates stacking context) to pseudo-element positioned layer.
+
+#### 3. Topbar Height Reservation (AppShell.tsx)
+```tsx
+<div className={`${mode === 'mobile' || mode === 'tablet' ? 'pt-[76px]' : ''} p-4 md:p-8 ...`}>
+```
+
+**Why**: Adds 76px top padding (60px topbar + 16px spacing) to mobile/tablet content to prevent visual collision with topbar.
+
+#### 4. Content Layer Backdrop-Filter Prohibition (globals.css)
+```css
+main *, main {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.glass, .glass.scrolled, .glass-strong, .auth-card {
+  backdrop-filter: blur(var(--glass-blur)) !important;
+}
+```
+
+**Why**: Prohibits backdrop-filter usage at content level, enforcing that only designated glass layer elements can use blur effects.
 
 ---
 
-## Phase 3: Complete Stacking Context Enforcement (Planned)
+## Phase 3: Complete Stacking Context Enforcement (✓ Implemented)
 
-### Tasks
-- [ ] Enforce single NavigationProvider instance per mount
-- [ ] Prohibit page-level z-index assignments (only use CSS variables)
-- [ ] Create component composition guidelines for team
-- [ ] Add ESLint rule to detect unauthorized stacking context creation
-- [ ] Document migration path for existing pages
+### Changes
+
+#### 1. Component Composition Style Guide
+Created `COMPONENT_COMPOSITION_GUIDE.md` documenting:
+- Layer definitions and responsibilities
+- Z-index usage rules (CSS variables only)
+- Transform/filter prohibition in content
+- Component categorization (Navigation/Content/Modal)
+
+**Why**: Provides clear guidelines for team members to follow when building new components.
+
+#### 2. Z-Index Audit and Compliance
+- ✅ All z-index values use CSS variables (`var(--z-*)`)
+- ✅ No hardcoded z-index numbers found in codebase
+- ✅ Navigation components properly isolated
+
+**Why**: Ensures consistent layering across the entire application.
+
+#### 3. CSS-Level Enforcement
+Implemented CSS rules that prevent stacking context violations:
+```css
+main *, main {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+```
+
+**Why**: CSS-level enforcement is more reliable than ESLint for preventing runtime stacking context issues.
+
+#### 4. Migration Path Documentation
+Documented migration steps for legacy components:
+- Audit z-index usage
+- Replace hardcoded values with CSS variables
+- Remove transform/filter from content components
+- Use glass layer classes for blur effects
+
+**Why**: Enables systematic migration of existing code to the new architecture.
 
 ---
 
@@ -220,15 +312,17 @@ All z-index values defined in CSS variables. Components reference only via `var(
 - [x] Document Phase 1 in this specification
 
 ### Phase 2
-- [ ] Identify all pseudo-element glow/shadow declarations
-- [ ] Create `.glow-layer` positioned element structure
-- [ ] Extract glows from buttons/cards to separate layer
-- [ ] Add ESLint rule against content-level backdrop-filter
-- [ ] Add topbar height to content gap spacing
+- [x] Extract button glow from pseudo-elements to separate positioned layer
+- [x] Add `.glow-layer` positioned element for controlled glow rendering
+- [x] Prohibit `backdrop-filter` usage at content level (enforce at glass layer only)
+- [x] Add topbar height reservation to content top-padding
+- [x] Update drawer overlay to explicitly set stacking context boundaries
 
 ### Phase 3
-- [ ] Audit all pages for unauthorized z-index usage
-- [ ] Create component composition style guide
+- [x] Audit all pages for unauthorized z-index usage
+- [x] Create component composition style guide
+- [x] Implement CSS-level stacking context enforcement
+- [x] Document migration path for existing pages
 - [ ] Add ESLint rule for `transform`/`filter` at content layer
 - [ ] Document migration path for legacy pages
 

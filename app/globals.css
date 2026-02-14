@@ -266,7 +266,8 @@ html, body {
   border-radius: 9999px; /* Capsule */
   font-weight: 500;
   transition: transform 0.1s ease, filter 0.2s ease;
-  box-shadow: 0 4px 12px rgba(77,163,255,0.3);
+  position: relative;
+  /* Remove box-shadow from button itself - moved to glow-layer */
 }
 
 .btn-primary:hover {
@@ -275,6 +276,23 @@ html, body {
 
 .btn-primary:active {
   transform: scale(0.98);
+}
+
+/* Button glow extracted to separate layer */
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: var(--primary);
+  opacity: 0.3;
+  filter: blur(4px);
+  z-index: -1;
+  transition: opacity 0.2s ease;
+}
+
+.btn-primary:hover::before {
+  opacity: 0.5;
 }
 
 /* Ambient Background Light */
@@ -301,6 +319,30 @@ html, body {
    overflow:hidden clips inner glow to card bounds. */
 .card {
   overflow: hidden;
+}
+
+/* ===== CONTENT LAYER BACKDROP-FILTER PROHIBITION ===== 
+   Phase 2 Fix: Prohibit backdrop-filter usage at content level.
+   Only glass layer elements may use backdrop-filter effects.
+   Content elements must not create new stacking contexts. */
+main *,
+main {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Re-enable for glass layer elements only */
+.glass,
+.glass.scrolled,
+.glass-strong,
+.auth-card {
+  backdrop-filter: blur(var(--glass-blur)) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
+}
+
+.glass.scrolled {
+  backdrop-filter: blur(var(--glass-blur-scrolled)) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur-scrolled)) !important;
 }
 
 /* ===== DRAWER STATE CONTENT FREEZE ===== 

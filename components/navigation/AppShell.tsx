@@ -45,7 +45,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           pointerEvents: isDrawerOpen ? 'none' : 'auto'
         }}
       >
-        <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
+        <div className={`${mode === 'mobile' || mode === 'tablet' ? 'pt-[76px]' : ''} p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-fade-in`}>
           {children}
         </div>
       </main>
