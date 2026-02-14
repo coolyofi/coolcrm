@@ -38,7 +38,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         className="h-[100dvh] overflow-y-auto overscroll-contain min-w-0"
         style={{
           marginLeft: getContentMarginLeft(),
-          zIndex: 'var(--z-content)'
+          zIndex: 'var(--z-content)',
+          pointerEvents: mode === 'mobile' && sidebar === 'expanded' ? 'none' : 'auto'
         }}
       >
         <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
