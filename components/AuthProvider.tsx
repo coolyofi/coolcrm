@@ -27,11 +27,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (mounted) {
           setUser(user)
           setLoading(false)
+          // If no user after loading, redirect to login
+          if (!user) {
+            router.push('/login')
+          }
         }
       } catch (error) {
         console.error('Error getting user:', error)
         if (mounted) {
           setLoading(false)
+          // On error, redirect to login
+          router.push('/login')
         }
       }
     }
@@ -43,6 +49,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (mounted) {
           setUser(session?.user ?? null)
           setLoading(false)
+          // If user is signed out, redirect to login
+          if (!session?.user && event !== 'INITIAL_SESSION') {
+            router.push('/login')
+          }
         }
       }
     )

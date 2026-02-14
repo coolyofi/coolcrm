@@ -5,6 +5,7 @@ import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import toast, { Toaster } from "react-hot-toast"
 import { PageHeader } from "@/components/PageHeader"
+import { getIntentLevelLabel } from "@/lib/utils"
 
 interface Customer {
   id: string
@@ -228,7 +229,7 @@ export default function History() {
                                 c.intent_level >= 4 ? 'bg-green-500' :
                                 c.intent_level === 3 ? 'bg-yellow-500' : 'bg-red-500'
                             }`}></span>
-                            <span className="text-sm font-medium text-[var(--fg)]">{c.intent_level}级</span>
+                            <span className="text-sm font-medium text-[var(--fg)]">{getIntentLevelLabel(c.intent_level || 1)}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-[var(--fg-muted)] tabular-nums">
@@ -266,7 +267,7 @@ export default function History() {
                         c.intent_level >= 4 ? 'bg-green-500/10 text-green-500' :
                         c.intent_level === 3 ? 'bg-yellow-500/10 text-yellow-500' : 'bg-red-500/10 text-red-500'
                     }`}>
-                        {c.intent_level}级意向
+                        {getIntentLevelLabel(c.intent_level || 1)}意向
                     </span>
                   </div>
                   

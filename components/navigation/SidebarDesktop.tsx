@@ -7,12 +7,12 @@ import { MENU_ITEMS } from "./constants"
 import { useScrollVelocity } from "../../hooks/useScrollVelocity"
 
 export function SidebarDesktop() {
-  const { mode, sidebar, toggle, motion } = useNav()
+  const { mode, sidebar, toggle, motion, isHydrated } = useNav()
   const pathname = usePathname()
   const v = useScrollVelocity("content-scroll")
 
-  // Only show on tablet/desktop
-  if (mode === "mobile") return null
+  // Only show on tablet/desktop, but hide during hydration to prevent mismatch
+  if (!isHydrated || mode === "mobile") return null
 
   // Velocity boost: only for apple motion level (we'll add this back later)
   const boost = Math.min(10, v * 6)

@@ -8,7 +8,7 @@ import { useScrollProgress } from "../../hooks/useScrollProgress"
 function clamp(v: number, min: number, max: number) { return Math.max(min, Math.min(max, v)) }
 
 export function TopBar() {
-  const { mode, open, motion } = useNav()
+  const { mode, open, motion, isHydrated } = useNav()
   const pathname = usePathname()
   const { p } = useScrollProgress("content-scroll", 56)
 
@@ -30,8 +30,8 @@ export function TopBar() {
     ? (72 - (titleProgress * 12)) // 72px -> 60px
     : 60
 
-  // Only show on mobile/tablet
-  if (mode === "desktop") return null
+  // Only show on mobile/tablet, but hide during hydration to prevent mismatch
+  if (!isHydrated || mode === "desktop") return null
 
   return (
     <div

@@ -7,7 +7,7 @@ interface KpiCardProps {
   title: string
   value: number
   previousValue: number | null // null means no previous data
-  trendPercent: number | null
+  trendPercent: number
   emptyLabel?: string
   emptyAction?: string
   emptyHref?: string
@@ -29,7 +29,7 @@ export function KpiCard({
 
     // Memoize storytelling calculation
     const storytelling = React.useMemo(() => {
-      if (trendPercent === null || previousValue === null) return null
+      if (previousValue === null) return null
 
       const percent = Math.abs(trendPercent)
       const isPositive = trendPercent > 0
@@ -75,7 +75,7 @@ export function KpiCard({
     }
 
     // Status: HAS DATA (Partial or Full)
-    const isPositive = (trendPercent || 0) > 0
+    const isPositive = trendPercent > 0
     const isNeutral = trendPercent === 0
     const trendColor = isPositive ? "text-emerald-500" : isNeutral ? "text-[var(--fg-muted)]" : "text-amber-500"
     const TrendIcon = isPositive 
@@ -96,7 +96,7 @@ export function KpiCard({
                 </span>
                 
                 {/* Comparison Logic */}
-                {trendPercent !== null && previousValue !== 0 ? (
+                {previousValue !== null ? (
                     <div className={`flex items-center gap-1.5 text-sm font-medium ${trendColor}`}>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             {isNeutral 

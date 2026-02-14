@@ -73,6 +73,14 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 # 以及任何第三方服务的 API keys（不要将其暴露为 NEXT_PUBLIC_*）
 ```
 
+> **⚠️ 安全警告：服务端密钥保护**
+> 
+> - `SUPABASE_SERVICE_ROLE_KEY` 具有最高权限，**绝不能** 在客户端组件中使用或导入。
+> - 仅在服务器端代码中通过 `createAdminSupabase()` 函数使用，用于管理员操作。
+> - 对于用户会话上下文，使用 `createServerSupabase()` (Server Components)、`createRouteSupabase()` (API Routes) 或 `createMiddlewareSupabase()` (Middleware)。
+> - 这些函数来自 `@supabase/ssr` 包，自动安全管理 cookies 和会话，无需手动处理密钥。
+> - 切勿将服务端密钥暴露给浏览器。始终使用适当的客户端函数进行客户端操作。
+
 3. 创建数据库表：
 ```sql
 -- 客户表

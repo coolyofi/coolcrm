@@ -1,6 +1,13 @@
 import { supabase } from "@/lib/supabase"
 import type { Customer } from "@/lib/api/customers"
 
+// Type for Supabase query errors
+type SupabaseError = {
+  message: string
+  details?: string
+  hint?: string
+}
+
 // Partial Visit type for dashboard use (only includes fields we query)
 export type DashboardVisit = {
   id: string
@@ -12,7 +19,7 @@ export type DashboardVisit = {
 export type KpiTrend = {
   current: number
   previous: number
-  trendPercent: number | null // null if no previous data
+  trendPercent: number // percentage change, 100 for initial growth from 0
 }
 
 export type ActivityItem = {
@@ -54,15 +61,8 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   const { startOfCurrent, startOfLast } = getMonthRanges()
 
   // Execute all queries in parallel for better performance
-  const [
-    profileResult,
-    totalCustomersResult,
-    countBeforeThisMonthResult,
-    visitsThisMonthResult,
-    visitsLastMonthResult,
-    recentCustomersResult,
-    recentVisitsResult
-  ] = await Promise.all([
+  // Use Promise.allSettled to prevent one failure from breaking the entire dashboard
+  const results = await Promise.allSettled([
     // 1. Profile
     supabase
       .from("profiles")
@@ -109,14 +109,31 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
       .limit(5)
   ])
 
-  // Extract data from results
-  const { data: profile } = profileResult
-  const { count: totalCustomers } = totalCustomersResult
-  const { count: countBeforeThisMonth } = countBeforeThisMonthResult
-  const { count: visitsThisMonth } = visitsThisMonthResult
-  const { count: visitsLastMonth } = visitsLastMonthResult
-  const { data: recentCustomers } = recentCustomersResult
-  const { data: recentVisits } = recentVisitsResult
+  // Extract data from results with error handling
+  const profileResult = results[0] as PromiseSettledResult<{ data: { nickname: string | null } | null, error: SupabaseError | null }>
+  const totalCustomersResult = results[1] as PromiseSettledResult<{ count: number | null, error: SupabaseError | null }>
+  const countBeforeThisMonthResult = results[2] as PromiseSettledResult<{ count: number | null, error: SupabaseError | null }>
+  const visitsThisMonthResult = results[3] as PromiseSettledResult<{ count: number | null, error: SupabaseError | null }>
+  const visitsLastMonthResult = results[4] as PromiseSettledResult<{ count: number | null, error: SupabaseError | null }>
+  const recentCustomersResult = results[5] as PromiseSettledResult<{ data: Customer[] | null, error: SupabaseError | null }>
+  const recentVisitsResult = results[6] as PromiseSettledResult<{ data: DashboardVisit[] | null, error: SupabaseError | null }>
+
+  // Helper function to safely extract data with defaults
+  const safeExtract = <T>(result: PromiseSettledResult<{ data?: T; count?: number; error?: SupabaseError | null }>, defaultValue: T): T => {
+    if (result.status === 'fulfilled' && !result.value.error) {
+      // For count queries, return count; for data queries, return data
+      return ('count' in result.value ? (result.value.count ?? defaultValue) : (result.value.data ?? defaultValue)) as T
+    }
+    return defaultValue
+  }
+
+  const profile = safeExtract(profileResult, null)
+  const totalCustomers = safeExtract(totalCustomersResult, 0) as number
+  const countBeforeThisMonth = safeExtract(countBeforeThisMonthResult, 0) as number
+  const visitsThisMonth = safeExtract(visitsThisMonthResult, 0) as number
+  const visitsLastMonth = safeExtract(visitsLastMonthResult, 0) as number
+  const recentCustomers = safeExtract(recentCustomersResult, []) as Customer[]
+  const recentVisits = safeExtract(recentVisitsResult, []) as DashboardVisit[]
 
   const currentTotal = totalCustomers || 0
   const prevTotal = countBeforeThisMonth || 0
@@ -126,7 +143,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     previous: prevTotal,
     trendPercent: prevTotal > 0
       ? ((currentTotal - prevTotal) / prevTotal) * 100
-      : null
+      : currentTotal > 0 ? 100 : 0
   }
 
   const visitTrend = {
@@ -134,7 +151,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     previous: visitsLastMonth || 0,
     trendPercent: (visitsLastMonth || 0) > 0
       ? (((visitsThisMonth || 0) - (visitsLastMonth || 0)) / (visitsLastMonth || 0)) * 100
-      : null
+      : (visitsThisMonth || 0) > 0 ? 100 : 0
   }
 
   // Type-safe mapping using Customer type

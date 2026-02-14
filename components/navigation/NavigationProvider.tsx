@@ -40,6 +40,9 @@ type NavContextValue = {
   motion: MotionTokens
   motionLevel: MotionLevel
 
+  // Hydration safety
+  isHydrated: boolean
+
   // Actions
   open: () => void
   close: () => void
@@ -57,7 +60,23 @@ const NavigationContext = createContext<NavContextValue | null>(null)
 
 // Hook: Device-based mode detection with touch support
 function useNavMode(): NavMode {
-  const [mode, setMode] = useState<NavMode>("desktop")
+  const [mode, setMode] = useState<NavMode>(() => {
+    // SSR-safe initialization: check window availability
+    if (typeof window === "undefined") return "desktop"
+    const w = window.innerWidth
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+
+    // iPad-like detection: medium screen + touch support
+    if (w >= 768 && w < 1024 && isTouch) {
+      return "tablet" // iPad gets tablet mode for better touch UX
+    } else if (w < 768) {
+      return "mobile"
+    } else if (w < 1024) {
+      return "tablet"
+    } else {
+      return "desktop"
+    }
+  })
 
   useEffect(() => {
     const handler = () => {
@@ -209,10 +228,10 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   // User preferences
   const prefersReducedMotion = usePrefersReducedMotion()
 
-  // Hydration safety - use ref instead of state to avoid setState in effect
-  const isHydratedRef = useRef(false)
+  // Hydration safety
+  const [isHydrated, setIsHydrated] = useState(false)
   useEffect(() => {
-    isHydratedRef.current = true
+    setIsHydrated(true)
   }, [])
 
   // Proximity (desktop only)
@@ -302,6 +321,7 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     drawerOpen,
     motion,
     motionLevel,
+    isHydrated,
     open,
     close,
     toggle,
@@ -310,7 +330,7 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     toggleSidebar: toggle,
     navWidthPx,
     proximity: mouseNear
-  }), [mode, sidebar, drawerOpen, motion, motionLevel, open, close, toggle, setMotionLevelCallback, navWidthPx, mouseNear])
+  }), [mode, sidebar, drawerOpen, motion, motionLevel, isHydrated, open, close, toggle, setMotionLevelCallback, navWidthPx, mouseNear])
 
   return (
     <NavigationContext.Provider value={value}>
