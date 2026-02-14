@@ -6,6 +6,7 @@ import { TopBar } from "./TopBar"
 import { DrawerOverlay } from "./DrawerOverlay"
 import { SidebarDesktop } from "./SidebarDesktop"
 import { CommandBar } from "../CommandBar"
+import { MotionLevelToggle } from "../MotionLevelToggle"
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -34,6 +35,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </main>
 
         <CommandBar />
+        <MotionLevelToggle />
       </div>
     </NavigationProvider>
   )

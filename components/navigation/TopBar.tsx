@@ -9,7 +9,7 @@ import { useScrollVelocity } from "../../hooks/useScrollVelocity"
 function clamp(v: number, min: number, max: number) { return Math.max(min, Math.min(max, v)) }
 
 export function TopBar() {
-  const { mode, open } = useNav()
+  const { mode, open, motion } = useNav()
   const pathname = usePathname()
   const { p } = useScrollProgress("content-scroll", 56)
   const v = useScrollVelocity("content-scroll")
@@ -30,11 +30,12 @@ export function TopBar() {
   if (mode === "desktop") return null
 
   return (
-    <div 
+    <div
       className="fixed top-0 left-0 right-0 h-[60px] glass scrolled border-b border-[var(--glass-border)] flex items-center justify-between px-4 safe-area-top backdrop-blur-md bg-[var(--glass-bg)]"
-      style={{ 
+      style={{
         zIndex: 'var(--z-topbar)',
-        "--glass-blur-scrolled": `${blur}px` 
+        "--glass-blur-scrolled": `${motion.topbarBlurPx}px`,
+        opacity: motion.topbarAlpha
       } as React.CSSProperties}
     >
       {/* Menu Trigger */}

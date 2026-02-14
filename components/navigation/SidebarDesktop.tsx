@@ -7,7 +7,7 @@ import { MENU_ITEMS } from "./constants"
 import { useScrollVelocity } from "../../hooks/useScrollVelocity"
 
 export function SidebarDesktop() {
-  const { mode, sidebar, toggle } = useNav()
+  const { mode, sidebar, toggle, motion } = useNav()
   const pathname = usePathname()
   const v = useScrollVelocity("content-scroll")
 
@@ -23,10 +23,11 @@ export function SidebarDesktop() {
 
   return (
     <aside
-      className="fixed left-0 top-0 h-[100dvh] select-none transition-[width] duration-[var(--motion-base)] ease-[var(--ease)]"
+      className="fixed left-0 top-0 h-[100dvh] select-none transition-[width] ease-[var(--ease)]"
       style={{
         width: collapsed ? '72px' : '260px',
-        zIndex: 'var(--z-topbar)'
+        zIndex: 'var(--z-topbar)',
+        transitionDuration: `${motion.durations.base}ms`
       }}
     >
       <div className="h-full p-3">

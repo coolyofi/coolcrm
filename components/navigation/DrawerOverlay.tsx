@@ -9,7 +9,7 @@ import { useScrollVelocity } from "../../hooks/useScrollVelocity"
 import React from "react"
 
 export function DrawerOverlay() {
-  const { mode, sidebar, close } = useNav()
+  const { mode, sidebar, close, motion } = useNav()
   const { signOut } = useAuth()
   const pathname = usePathname()
   const v = useScrollVelocity("content-scroll")
@@ -23,13 +23,14 @@ export function DrawerOverlay() {
   const boost = Math.min(10, v * 6)
   const blur = 28 + boost
 
-  // Swipe state
+// Swipe state (only enabled for apple motion)
   const [translateX, setTranslateX] = React.useState(0)
   const [isDragging, setIsDragging] = React.useState(false)
   const startXRef = React.useRef<{ x: number; startTime: number } | null>(null)
   const startTranslateRef = React.useRef(0)
 
   const handlePointerDown = (e: React.PointerEvent) => {
+    if (!motion.drawerDragEnabled) return
     setIsDragging(true)
     startXRef.current = { x: e.clientX, startTime: performance.now() }
     startTranslateRef.current = translateX
@@ -37,14 +38,14 @@ export function DrawerOverlay() {
   }
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging || !startXRef.current) return
+    if (!isDragging || !startXRef.current || !motion.drawerDragEnabled) return
     const deltaX = e.clientX - startXRef.current.x
     const newTranslateX = Math.max(-100, Math.min(0, startTranslateRef.current + deltaX))
     setTranslateX(newTranslateX)
   }
 
   const handlePointerUp = (e: React.PointerEvent) => {
-    if (!isDragging || !startXRef.current) return
+    if (!isDragging || !startXRef.current || !motion.drawerDragEnabled) return
     setIsDragging(false)
 
     const deltaX = e.clientX - startXRef.current.x
@@ -76,11 +77,12 @@ export function DrawerOverlay() {
         className="absolute top-[60px] left-0 right-0 glass scrolled border-b border-[var(--glass-border)] rounded-b-[24px] shadow-2xl p-4 animate-slide-down flex flex-col gap-2 transition-transform duration-200 pointer-events-auto"
         style={{
           "--glass-blur-scrolled": `${blur}px`,
-          transform: `translateX(${translateX}%)`
+          transform: `translateX(${translateX}%)`,
+          transitionDuration: `${motion.durations.base}ms`
         } as React.CSSProperties}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
+        onPointerDown={motion.drawerDragEnabled ? handlePointerDown : undefined}
+        onPointerMove={motion.drawerDragEnabled ? handlePointerMove : undefined}
+        onPointerUp={motion.drawerDragEnabled ? handlePointerUp : undefined}
       >
         {MENU_ITEMS.map((item) => {
           const isActive = pathname === item.path
