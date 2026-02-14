@@ -3,24 +3,23 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useAuth } from "@/components/AuthProvider"
-import { useNav } from "./NavigationProvider"
+import { useNavigation } from "./NavigationProvider"
 import { MENU_ITEMS } from "./constants"
 import { useScrollVelocity } from "../../hooks/useScrollVelocity"
-import { Z_INDEX } from "./tokens"
 import React from "react"
 
 /**
  * DrawerOverlay - Mobile drawer with proper interaction blocking
- * 
+ *
  * Requirements:
  * - Only renders on mobile (NavigationRoot handles this)
  * - Backdrop blocks interaction when open (pointer-events: auto)
  * - Backdrop allows interaction when closed (pointer-events: none)
  * - Drawer panel prevents touch propagation
- * - Uses z-index tokens (no magic numbers)
+ * - Uses z-index tokens via CSS variables
  */
 export function DrawerOverlay() {
-  const { mode, sidebar, close, motion } = useNav()
+  const { deviceMode, navMode, drawerOpen, closeDrawer, motion, isHydrated } = useNavigation()
   const { signOut } = useAuth()
   const pathname = usePathname()
   const v = useScrollVelocity("content-scroll")
@@ -31,10 +30,10 @@ export function DrawerOverlay() {
   const startXRef = React.useRef<{ x: number; startTime: number } | null>(null)
   const startTranslateRef = React.useRef(0)
 
-  // Only show on mobile
-  if (mode !== "mobile") return null
+  // Only show on mobile (drawer mode), but hide during hydration to prevent mismatch
+  if (!isHydrated || navMode !== "drawer") return null
 
-  const open = sidebar === "expanded"
+  const open = drawerOpen
 
   // Velocity boost: 0~2 -> 0~10px
   const boost = Math.min(10, v * 6)
@@ -66,29 +65,34 @@ export function DrawerOverlay() {
     if (progress > 0.3 || velocity > 0.6) {
       // Close
       setTranslateX(-110)
-      setTimeout(close, 200)
+      setTimeout(closeDrawer, 200)
     } else {
       // Snap back
       setTranslateX(0)
     }
   }
 
-  // When closed, don't render to save resources and prevent pointer-events issues
+  const handlePointerCancel = (e: React.PointerEvent) => {
+    // Treat pointer cancel the same as pointer up
+    if (!isDragging) return
+    setIsDragging(false)
+    setTranslateX(0)
+    try {
+      ;(e.target as Element).releasePointerCapture?.(e.pointerId)
+    } catch {}
+  }
+
   if (!open) return null
 
   return (
     <div 
       className="fixed inset-0"
-      style={{ zIndex: Z_INDEX.DRAWER_BACKDROP }}
+      style={{ zIndex: 'var(--z-drawer)' }}
     >
       {/* Backdrop - blocks interaction when open, allows when closed */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
-        style={{
-          pointerEvents: open ? 'auto' : 'none',
-          opacity: open ? 1 : 0
-        }}
-        onClick={close}
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity pointer-events-auto opacity-100"
+        onClick={closeDrawer}
       />
 
       {/* Drawer Content */}
@@ -98,12 +102,13 @@ export function DrawerOverlay() {
           "--glass-blur-scrolled": `${blur}px`,
           transform: `translateX(${translateX}%)`,
           transitionDuration: `${motion.durations.base}ms`,
-          zIndex: Z_INDEX.DRAWER,
+          zIndex: 'var(--z-drawer)',
           pointerEvents: 'auto' // Drawer panel always captures events to prevent propagation
         } as React.CSSProperties}
-        onPointerDown={motion.drawerDragEnabled ? handlePointerDown : undefined}
-        onPointerMove={motion.drawerDragEnabled ? handlePointerMove : undefined}
-        onPointerUp={motion.drawerDragEnabled ? handlePointerUp : undefined}
+          onPointerDown={motion.drawerDragEnabled ? handlePointerDown : undefined}
+          onPointerMove={motion.drawerDragEnabled ? handlePointerMove : undefined}
+          onPointerUp={motion.drawerDragEnabled ? handlePointerUp : undefined}
+          onPointerCancel={motion.drawerDragEnabled ? handlePointerCancel : undefined}
       >
         {MENU_ITEMS.map((item) => {
           const isActive = pathname === item.path
@@ -111,7 +116,7 @@ export function DrawerOverlay() {
             <Link
               key={item.path}
               href={item.path}
-              onClick={close}
+              onClick={closeDrawer}
               className={`
                 flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200
                 ${isActive
@@ -132,7 +137,7 @@ export function DrawerOverlay() {
 
         <button
           onClick={() => {
-            close()
+            closeDrawer()
             signOut()
           }}
           className="flex items-center gap-4 px-4 py-3 rounded-xl text-[var(--danger)] hover:bg-[var(--danger)]/5 transition-all w-full text-left"

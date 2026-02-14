@@ -42,8 +42,8 @@ export default function Home() {
   if (!data) return null
 
   // Safe access with null coalescing for KPI data
-  const customers = data.customers?.total || { current: 0, previous: 0, trendPercent: null }
-  const visits = data.visits?.thisMonth || { current: 0, previous: 0, trendPercent: null }
+  const customers = data.customers?.total || { current: 0, previous: 0, trendPercent: 0 }
+  const visits = data.visits?.thisMonth || { current: 0, previous: 0, trendPercent: 0 }
 
   return (
     <PerformanceMonitor>
@@ -87,7 +87,7 @@ export default function Home() {
             title="Total Customers"
             value={customers.current || 0}
             previousValue={customers.previous || 0}
-            trendPercent={customers.trendPercent || null}
+            trendPercent={customers.trendPercent}
             emptyLabel="Start by creating your first customer"
             emptyAction="Add Customer"
           />
@@ -96,7 +96,7 @@ export default function Home() {
             title="Visits This Month"
             value={visits.current || 0}
             previousValue={visits.previous || 0}
-            trendPercent={visits.trendPercent || null}
+            trendPercent={visits.trendPercent}
             emptyLabel="Log a visit to track activity"
             emptyAction="Log Visit"
             // In real app, log visit might open a modal or go to visits page
@@ -109,19 +109,19 @@ export default function Home() {
                title="Conversion Rate"
                value={0}
                previousValue={null}
-               trendPercent={null}
+               trendPercent={0}
                formatValue={(v) => `${v}%`}
                emptyLabel="Track deals to see conversion"
           />
 
           {/* Quick Goal Glance (Mini) or just another metric */}
-           <KpiCard 
+             <KpiCard 
                title="High Intent"
                value={(data.customers.recent || []).filter((c) => (c.intent_level || 0) >= 4).length} // Safe access with default array
                previousValue={0} // No trend yet
-               trendPercent={null}
+               trendPercent={0}
                emptyLabel="No high intent leads yet"
-          />
+            />
         </div>
       </div>
 

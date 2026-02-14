@@ -4,39 +4,50 @@ import type { NextRequest } from "next/server"
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return req.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            res.cookies.set(name, value, options)
-          })
-        },
-      },
-    }
-  )
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+  // Use the typed middleware adapter so we don't need to cast to `any` everywhere
+  const { middlewareCookiesAdapter } = await import('./lib/cookie-adapter')
+  const cookieProvider = middlewareCookiesAdapter(req, res)
+
+  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: cookieProvider as any,
+  })
 
   // Enhanced error handling for session retrieval with timeout protection
-  try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
+  // Allow bypass during local development or when explicitly enabled via env var.
+  // NEVER enable this in production. Set `NEXT_PUBLIC_BYPASS_AUTH=true` only for
+  // safe local testing environments.
+  const isLocalHost =
+    req.nextUrl.hostname === 'localhost' || req.nextUrl.hostname === '127.0.0.1' ||
+    (req.headers.get('host') || '').startsWith('localhost')
 
-    if (!session && req.nextUrl.pathname.startsWith("/edit")) {
-      // Redirect unauthenticated users trying to access protected routes
-      return NextResponse.redirect(new URL("/login", req.url))
+  const isBypassEnabled =
+    process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true' ||
+    (process.env.NODE_ENV === 'development' && isLocalHost)
+
+  if (!isBypassEnabled) {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session && req.nextUrl.pathname.startsWith('/edit')) {
+        // Redirect unauthenticated users trying to access protected routes
+        return NextResponse.redirect(new URL('/login', req.url))
+      }
+    } catch (error) {
+      // Log session fetch error and redirect to login for protected routes
+      console.error('Session retrieval failed:', error)
+      if (req.nextUrl.pathname.startsWith('/edit')) {
+        return NextResponse.redirect(new URL('/login', req.url))
+      }
     }
-  } catch (error) {
-    // Log session fetch error and redirect to login for protected routes
-    console.error('Session retrieval failed:', error)
-    if (req.nextUrl.pathname.startsWith("/edit")) {
-      return NextResponse.redirect(new URL("/login", req.url))
-    }
+  } else {
+    // Helpful debug message when bypass is active (only appears in dev/local)
+    // eslint-disable-next-line no-console
+    console.debug('Auth bypass enabled for local development or via NEXT_PUBLIC_BYPASS_AUTH')
   }
 
   // Add basic security headers

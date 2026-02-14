@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* UI layer z-index tokens to enforce a three-layer shell and consistent stacking */
+:root {
+  /* Primary content (scrolling area) */
+  --z-content: 0;
+  /* Navigation (sidebar) sits above content but below topbar */
+  --z-nav: 10;
+  /* Top bar sits above nav and content */
+  --z-topbar: 20;
+  /* Drawer overlays (mobile) sit above topbar */
+  --z-drawer: 30;
+  /* Floating overlays (modals, dev toggles) sit highest */
+  --z-overlay: 40;
+}
+
 :root {
   /* motion */
   --dur-1: 120ms;

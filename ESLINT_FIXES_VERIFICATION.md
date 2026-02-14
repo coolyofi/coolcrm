@@ -14,7 +14,7 @@
 ```tsx
 // ❌ Before (Rule of Hooks violation)
 export function DrawerOverlay() {
-  const { mode, sidebar, close, motion } = useNav()
+  const { mode, sidebar, close, motion } = useNavigation()
   if (mode !== "mobile") return null  // ← Conditional before hooks!
   const [translateX, setTranslateX] = React.useState(0)
   // ...
@@ -22,7 +22,7 @@ export function DrawerOverlay() {
 
 // ✅ After (Compliant)
 export function DrawerOverlay() {
-  const { mode, sidebar, close, motion } = useNav()
+  const { mode, sidebar, close, motion } = useNavigation()
   
   // All hooks declared at top level BEFORE any return
   const [translateX, setTranslateX] = React.useState(0)

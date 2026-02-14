@@ -1,20 +1,22 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { useNav } from "./NavigationProvider"
+import { useEffect } from "react"
+import { useNavigation } from "./NavigationProvider"
+import { TopBar } from "./TopBar"
 import { NavigationRoot } from "./NavigationRoot"
 import { MotionLevelToggle } from "../MotionLevelToggle"
 import { useScrollProgress } from "../../hooks/useScrollProgress"
-import { Z_INDEX, NAV_DIMENSIONS } from "./tokens"
+import { UI_CONTRACT, NAV_LAYOUT } from "./constants"
 
 /**
  * AppShell - OS Layer Three-Layer Structure
- * 
+ *
  * Enforces the contract:
  * 1. NavigationLayer (fixed, managed by NavigationRoot)
  * 2. TopBarLayer (fixed, only on mobile)
  * 3. ContentScroll (only scrollable container)
- * 
+ *
  * Rules:
  * - Body never scrolls (locked in globals.css)
  * - Only #content-scroll scrolls
@@ -22,48 +24,60 @@ import { Z_INDEX, NAV_DIMENSIONS } from "./tokens"
  * - z-index uses tokens (no magic numbers)
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { mode, sidebar, motion } = useNav()
+  const { deviceMode, sidebarState, motion, isHydrated, topbarHeight, drawerOpen } = useNavigation()
   const pathname = usePathname()
-  const { p } = useScrollProgress("content-scroll", 56)
+  const { p } = useScrollProgress("content-scroll", UI_CONTRACT.PAGE_HEADER_SCROLL_DISTANCE)
 
-  // Don't wrap login page with shell
-  if (pathname === '/login') {
+  // Don't wrap login page with shell. Also avoid rendering shell until
+  // hydration completes to keep server and client markup identical on first load.
+  if (pathname === '/login' || !isHydrated) {
     return <>{children}</>
   }
 
+  // During hydration, avoid assuming desktop on the server (prevents desktop->mobile jump).
+  // Use a mobile-first default until the client hydrates and determines the real mode.
+  const safeMode = isHydrated ? deviceMode : "mobile"
+  const safeSidebar = isHydrated ? sidebarState : "collapsed"
+
   // Calculate content margin based on navigation state
   const getContentMarginLeft = () => {
-    if (mode === "mobile") return "0px"
-    // Tablet/Desktop: sidebar takes space
-    return sidebar === "expanded" 
-      ? `${NAV_DIMENSIONS.SIDEBAR_EXPANDED}px` 
-      : `${NAV_DIMENSIONS.SIDEBAR_COLLAPSED}px`
+    if (safeMode === "mobile") return "0px"
+    if (safeMode === "tablet") return safeSidebar === "expanded" ? `${NAV_LAYOUT.WIDTH.EXPANDED}px` : `${NAV_LAYOUT.WIDTH.ICON}px`
+    if (safeMode === "desktop") return safeSidebar === "expanded" ? `${NAV_LAYOUT.WIDTH.EXPANDED}px` : `${NAV_LAYOUT.WIDTH.ICON}px`
+    return "0px"
   }
 
   // Calculate dynamic top padding for large title collapse
   const getContentPaddingTop = () => {
-    if (mode === "desktop" || mode === "tablet") return "0px"
-    
-    // Mobile only: topbar takes vertical space
+    if (safeMode === "desktop") return "0px"
+
     const titleProgress = Math.min(1, p)
-    const baseHeight = motion.largeTitleEnabled 
-      ? NAV_DIMENSIONS.TOPBAR_HEIGHT_LARGE 
-      : NAV_DIMENSIONS.TOPBAR_HEIGHT
-    const collapsedHeight = NAV_DIMENSIONS.TOPBAR_HEIGHT
-    const currentHeight = motion.largeTitleEnabled 
+    const baseHeight = motion.largeTitleEnabled ? topbarHeight : NAV_LAYOUT.TOPBAR.COLLAPSED_PX
+    const collapsedHeight = NAV_LAYOUT.TOPBAR.COLLAPSED_PX
+    const currentHeight = motion.largeTitleEnabled
       ? (baseHeight - (titleProgress * (baseHeight - collapsedHeight)))
       : collapsedHeight
-    
+
     return `${currentHeight}px`
   }
 
   // Check if drawer is open (mobile mode with expanded sidebar)
-  const isDrawerOpen = mode === 'mobile' && sidebar === 'expanded'
+  const isDrawerOpen = drawerOpen
+
+  // Enforce "body" never scrolls — AppShell makes #content-scroll the only scroll container
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prevOverflow }
+  }, [])
 
   return (
     <div className="h-[100dvh] overflow-hidden bg-[rgb(var(--bg))]">
-      {/* Layer 1: NavigationLayer (fixed, single entry point) */}
+      {/* NavigationLayer (fixed) */}
       <NavigationRoot />
+
+      {/* TopBarLayer (fixed) */}
+      <TopBar />
 
       {/* Layer 3: ContentScrollLayer (唯一滚动容器 + padding-left/padding-top) */}
       <main
@@ -73,7 +87,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         style={{
           marginLeft: getContentMarginLeft(),
           paddingTop: getContentPaddingTop(),
-          zIndex: Z_INDEX.CONTENT,
+          zIndex: 'var(--z-content)',
           pointerEvents: isDrawerOpen ? 'none' : 'auto'
         }}
       >

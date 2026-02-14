@@ -2,14 +2,7 @@
 
 import React from "react"
 import Link from "next/link"
-
-interface ActivityItem {
-  id: string
-  type: 'visit' | 'customer'
-  title: string
-  subtitle: string
-  date: string
-}
+import type { ActivityItem } from "../../lib/dashboard-optimized"
 
 export function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
   // Memoize grouped activities to avoid recalculation on every render

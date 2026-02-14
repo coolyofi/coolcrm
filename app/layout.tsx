@@ -1,4 +1,5 @@
 import "./globals.css"
+import { SWRProvider } from "@/components/SWRProvider"
 import { AuthProvider } from "@/components/AuthProvider"
 import { NavigationProvider } from "@/components/navigation/NavigationProvider"
 import { AppShell } from "@/components/navigation/AppShell"
@@ -15,13 +16,15 @@ export default function RootLayout({
       </head>
       <body>
         <div className="ambient-light" />
-        <AuthProvider>
-          <NavigationProvider>
-            <AppShell>
-              {children}
-            </AppShell>
-          </NavigationProvider>
-        </AuthProvider>
+        <SWRProvider>
+          <AuthProvider>
+            <NavigationProvider>
+              <AppShell>
+                {children}
+              </AppShell>
+            </NavigationProvider>
+          </AuthProvider>
+        </SWRProvider>
       </body>
     </html>
   )

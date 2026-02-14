@@ -117,6 +117,7 @@ export default function EditCustomer() {
         address: data.address || null,
       }
 
+      // 重要：只更新 customers 表，不触碰 visits 表以保持历史拜访记录的地理位置不变
       const { error } = await supabase
         .from("customers")
         .update(updateData)
@@ -339,23 +340,33 @@ export default function EditCustomer() {
                         control={control}
                         render={({ field }) => (
                             <div className="flex bg-[var(--surface-solid)] border border-[var(--border)] p-1 rounded-xl">
-                                {[1, 2, 3, 4, 5].map((level) => (
+                                {[
+                                    { level: 1, label: "初步接触" },
+                                    { level: 2, label: "有兴趣" },
+                                    { level: 3, label: "正在考虑" },
+                                    { level: 4, label: "高度意向" },
+                                    { level: 5, label: "即将成交" }
+                                ].map(({ level, label }) => (
                                     <button
                                         key={level}
                                         type="button"
                                         onClick={() => field.onChange(level)}
-                                        className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                                        className={`flex-1 py-2 px-1 text-xs font-medium rounded-lg transition-all duration-200 ${
                                             field.value === level
                                                 ? "bg-[var(--primary)] text-white shadow-md"
                                                 : "text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-[var(--glass-bg)]"
                                         }`}
+                                        title={`${level}级: ${label}`}
                                     >
-                                        {level}级
+                                        {level}级<br/>{label}
                                     </button>
                                 ))}
                             </div>
                         )}
                     />
+                    <p className="text-xs text-[var(--fg-muted)] mt-1.5 text-center">
+                        选择客户对产品的意向程度，1级最低，5级最高
+                    </p>
                 </div>
                 
                  {/* Contact */}

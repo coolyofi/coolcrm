@@ -15,3 +15,33 @@ export const MENU_ITEMS = [
     { name: "Settings", path: "/settings", iconPath: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" },
 ]
 
+// UI contract constants used across navigation and header
+export const UI_CONTRACT = {
+  TOPBAR_HEIGHT_PX: 72, // canonical topbar height; update here to keep layout in sync
+  PAGE_HEADER_SCROLL_DISTANCE: 56,
+  PAGE_HEADER_TITLE: {
+    INITIAL: 34,
+    MIN: 17,
+  }
+} as const
+
+export const calculateTitleSize = (progress: number) => {
+  const { INITIAL, MIN } = UI_CONTRACT.PAGE_HEADER_TITLE
+  return INITIAL - (INITIAL - MIN) * Math.min(Math.max(progress, 0), 1)
+}
+
+// Navigation layout constants
+export const NAV_LAYOUT = {
+  WIDTH: {
+    EXPANDED: 260,
+    ICON: 72,
+    CLOSED: 72,
+  },
+  PROXIMITY: {
+    LEFT_EDGE: 60,
+    RIGHT_EDGE: 300,
+  },
+  TOPBAR: {
+    COLLAPSED_PX: 60,
+  }
+} as const

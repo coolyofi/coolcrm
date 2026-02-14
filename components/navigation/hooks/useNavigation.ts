@@ -10,4 +10,4 @@
  *   // Access: nav.mode, nav.sidebar, nav.drawerOpen, nav.motion, etc.
  */
 
-export { useNav as useNavigation } from "../NavigationProvider"
+export { useNavigation } from "../NavigationProvider"

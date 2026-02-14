@@ -2,10 +2,9 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useNav } from "./NavigationProvider"
+import { useNavigation } from "./NavigationProvider"
 import { MENU_ITEMS } from "./constants"
 import { useScrollVelocity } from "../../hooks/useScrollVelocity"
-import { Z_INDEX, NAV_DIMENSIONS } from "./tokens"
 
 /**
  * SidebarDesktop - Full-height sidebar for tablet/desktop
@@ -17,34 +16,31 @@ import { Z_INDEX, NAV_DIMENSIONS } from "./tokens"
  * - Only renders on tablet/desktop (NavigationRoot handles this)
  */
 export function SidebarDesktop() {
-  const { mode, sidebar, toggle, motion } = useNav()
+  const { deviceMode, sidebarState, toggle, motion, isHydrated } = useNavigation()
   const pathname = usePathname()
   const v = useScrollVelocity("content-scroll")
 
-  // Only show on tablet/desktop
-  if (mode === "mobile") return null
+  // Only show on tablet/desktop, but hide during hydration to prevent mismatch
+  if (!isHydrated || deviceMode === "mobile") return null
 
   // Velocity boost: only for apple motion level
   const boost = Math.min(10, v * 6)
   const blur = 28 + boost
 
-  const isExpanded = sidebar === "expanded"
+  const isExpanded = sidebarState === "expanded"
   const collapsed = !isExpanded
-
-  const sidebarWidth = collapsed 
-    ? NAV_DIMENSIONS.SIDEBAR_COLLAPSED 
-    : NAV_DIMENSIONS.SIDEBAR_EXPANDED
 
   return (
     <aside
-      className="fixed left-0 top-0 h-[100dvh] flex flex-col select-none transition-[width] ease-[var(--ease)]"
-      style={{
-        width: `${sidebarWidth}px`,
-        zIndex: Z_INDEX.SIDEBAR,
-        transitionDuration: `${motion.durations.base}ms`
-      }}
+      className="fixed left-0 top-0 bottom-0 flex flex-col select-none transition-[width] ease-[var(--ease)]"
+            style={{
+        width: collapsed ? 'var(--nav-w-collapsed)' : 'var(--nav-w-expanded)',
+        zIndex: 'var(--z-nav)',
+        transitionDuration: `${motion.durations.base}ms`,
+        overflow: 'hidden'
+            }}
     >
-      <div className="h-full p-3">
+      <div className="h-full p-3" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div 
           className="h-full rounded-2xl border border-white/20 bg-white/55 backdrop-blur-[18px] shadow-[var(--shadow-elev-1)] flex flex-col overflow-hidden" 
           style={{ 

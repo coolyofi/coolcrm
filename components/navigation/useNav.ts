@@ -1,7 +1,7 @@
 "use client"
 
-import { useNav as useNavFromProvider } from "./NavigationProvider"
+import { useNavigation as useNavigationFromProvider } from "./NavigationProvider"
 
-// Thin wrapper to expose the context.
-// In the future, we can add selectors or computed properties here without breaking the API.
-export const useNav = () => useNavFromProvider()
+// Compatibility shim: re-export the canonical `useNavigation` under the
+// legacy `useNav` name so older imports keep working during migration.
+export const useNav = () => useNavigationFromProvider()
