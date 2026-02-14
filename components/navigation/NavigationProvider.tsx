@@ -136,9 +136,8 @@ function getMotionPolicy(
 export function NavigationProvider({ children }: { children: React.ReactNode }) {
   const mode = useNavMode()
 
-  // Core state
-  const [sidebar, setSidebar] = useState<SidebarState>("closed")
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  // Core state: Sidebar state for manual toggle (only affects desktop/tablet)
+  const [sidebarOverride, setSidebarOverride] = useState<SidebarState | null>(null)
 
   // Motion system
   const [motionLevel, setMotionLevel] = useState<MotionLevel>(() => {
@@ -158,19 +157,22 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   // Proximity (desktop only)
   const mouseNear = useMouseProximity(mode === "desktop" && getMotionPolicy(motionLevel).proximityEnabled)
 
-  // Auto-rules: Device → Mode → Sidebar
-  useEffect(() => {
-    if (mode === "mobile") setSidebar("closed")
-    if (mode === "tablet") setSidebar("icon")
-    if (mode === "desktop") setSidebar("expanded")
-  }, [mode])
+  // Derived sidebar state from mode + overrides
+  const sidebar = useMemo<SidebarState>(() => {
+    // Mobile: always closed
+    if (mode === "mobile") return "closed"
+    // Tablet: icon or expanded (if overridden)
+    if (mode === "tablet") return sidebarOverride ?? "icon"
+    // Desktop: icon/expanded based on mouse proximity or override
+    if (mode === "desktop") {
+      if (sidebarOverride) return sidebarOverride
+      return mouseNear ? "expanded" : "icon"
+    }
+    return "closed"
+  }, [mode, sidebarOverride, mouseNear])
 
-  // Mouse proximity expand (desktop only)
-  useEffect(() => {
-    if (mode !== "desktop") return
-    if (mouseNear && sidebar === "icon") setSidebar("expanded")
-    else if (!mouseNear && sidebar === "expanded") setSidebar("icon")
-  }, [mode, mouseNear, sidebar])
+  // Drawer state
+  const [drawerOpen] = useState(false)
 
   // Scroll physics (apple mode only)
   useEffect(() => {
@@ -218,10 +220,10 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   }, [sidebar])
 
   // Actions
-  const open = useCallback(() => setSidebar("expanded"), [])
-  const close = useCallback(() => setSidebar("closed"), [])
+  const open = useCallback(() => setSidebarOverride("expanded"), [])
+  const close = useCallback(() => setSidebarOverride("closed"), [])
   const toggle = useCallback(() =>
-    setSidebar(s => s === "closed" ? "expanded" : "closed"), []
+    setSidebarOverride(s => s === "closed" ? "expanded" : "closed"), []
   )
 
   const setMotionLevelCallback = useCallback((level: MotionLevel) => {
