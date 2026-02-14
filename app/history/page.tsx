@@ -12,6 +12,9 @@ interface Customer {
   visit_date: string
   contact: string
   notes: string
+  latitude: number | null
+  longitude: number | null
+  address: string | null
 }
 
 export default function History() {

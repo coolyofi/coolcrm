@@ -16,6 +16,8 @@
 - 编辑客户信息
 - 查看客户历史记录
 - 客户数据隔离（用户只能访问自己的数据）
+- **地理位置支持**：自动获取当前位置，支持手动调整地址
+- **拜访记录**：记录每次拜访的位置、时间和备注
 
 ### 👤 用户设置
 - 修改密码
@@ -63,6 +65,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 3. 创建数据库表：
 ```sql
+-- 客户表
 CREATE TABLE customers (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -72,8 +75,24 @@ CREATE TABLE customers (
   visit_date DATE,
   contact TEXT,
   notes TEXT,
+  latitude DOUBLE PRECISION,
+  longitude DOUBLE PRECISION,
+  address TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 拜访记录表
+CREATE TABLE visits (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  customer_id UUID REFERENCES customers(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  visit_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  latitude DOUBLE PRECISION,
+  longitude DOUBLE PRECISION,
+  address TEXT,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 ```
 
@@ -81,8 +100,9 @@ CREATE TABLE customers (
 ```sql
 -- 启用RLS
 ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE visits ENABLE ROW LEVEL SECURITY;
 
--- 用户只能访问自己的客户记录
+-- 客户表策略
 CREATE POLICY "Users can view own customers" ON customers
   FOR SELECT USING (auth.uid() = user_id);
 
@@ -93,6 +113,19 @@ CREATE POLICY "Users can update own customers" ON customers
   FOR UPDATE USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can delete own customers" ON customers
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- 拜访记录策略
+CREATE POLICY "Users can view own visits" ON visits
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own visits" ON visits
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own visits" ON visits
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own visits" ON visits
   FOR DELETE USING (auth.uid() = user_id);
 ```
 

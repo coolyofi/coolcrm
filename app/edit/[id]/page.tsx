@@ -20,6 +20,9 @@ const customerSchema = z.object({
   visit_date: z.string().optional(),
   contact: z.string().optional(),
   notes: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
+  address: z.string().optional(),
 })
 
 type CustomerForm = z.infer<typeof customerSchema>
@@ -65,6 +68,7 @@ export default function EditCustomer() {
   const router = useRouter()
   const { user } = useAuth()
   const [saving, setSaving] = useState(false)
+  const [recordingVisit, setRecordingVisit] = useState(false)
 
   const fetcher = async (id: string) => {
     if (!user) throw new Error("未登录")
@@ -105,6 +109,9 @@ export default function EditCustomer() {
         visit_date: customer.visit_date ? format(parseISO(customer.visit_date), "yyyy-MM-dd") : "",
         contact: customer.contact,
         notes: customer.notes,
+        latitude: customer.latitude?.toString() || "",
+        longitude: customer.longitude?.toString() || "",
+        address: customer.address || "",
       })
     }
   }, [customer, reset])
@@ -114,9 +121,16 @@ export default function EditCustomer() {
 
     setSaving(true)
     try {
+      const updateData = {
+        ...data,
+        latitude: data.latitude ? parseFloat(data.latitude) : null,
+        longitude: data.longitude ? parseFloat(data.longitude) : null,
+        address: data.address || null,
+      }
+
       const { error } = await supabase
         .from("customers")
-        .update(data)
+        .update(updateData)
         .eq("id", id)
         .eq("user_id", user?.id)
 
@@ -129,6 +143,57 @@ export default function EditCustomer() {
       console.error(error)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const recordVisit = async () => {
+    if (!user || !customer) return
+
+    setRecordingVisit(true)
+    try {
+      // 获取当前位置
+      if (!navigator.geolocation) {
+        toast.error("您的浏览器不支持地理定位")
+        return
+      }
+
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 })
+      })
+
+      const lat = position.coords.latitude
+      const lng = position.coords.longitude
+
+      // 获取地址
+      let address = ""
+      try {
+        const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh`)
+        const data = await response.json()
+        address = `${data.city || ''} ${data.locality || ''} ${data.principalSubdivision || ''}`.trim() || "未知地址"
+      } catch (error) {
+        console.error("获取地址失败:", error)
+        address = "获取地址失败"
+      }
+
+      // 插入拜访记录
+      const { error } = await supabase
+        .from("visits")
+        .insert([{
+          customer_id: customer.id,
+          user_id: user.id,
+          latitude: lat,
+          longitude: lng,
+          address,
+          notes: `拜访记录 - ${new Date().toLocaleString('zh-CN')}`
+        }])
+
+      if (error) throw error
+      toast.success("拜访记录成功")
+    } catch (error) {
+      toast.error("记录拜访失败: " + (error as Error).message)
+      console.error(error)
+    } finally {
+      setRecordingVisit(false)
     }
   }
 
@@ -266,6 +331,54 @@ export default function EditCustomer() {
             />
           </FormField>
 
+          <FormField label="纬度">
+            <Controller
+              name="latitude"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="text"
+                  placeholder="纬度"
+                  aria-label="输入纬度"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              )}
+            />
+          </FormField>
+
+          <FormField label="经度">
+            <Controller
+              name="longitude"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="text"
+                  placeholder="经度"
+                  aria-label="输入经度"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              )}
+            />
+          </FormField>
+
+          <FormField label="地址">
+            <Controller
+              name="address"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="text"
+                  placeholder="详细地址"
+                  aria-label="输入地址"
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              )}
+            />
+          </FormField>
+
           <div className="flex gap-4">
             <button
               type="submit"
@@ -274,6 +387,14 @@ export default function EditCustomer() {
               className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition"
             >
               {saving ? "保存中..." : "保存"}
+            </button>
+            <button
+              type="button"
+              onClick={recordVisit}
+              disabled={recordingVisit}
+              className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition"
+            >
+              {recordingVisit ? "记录中..." : "记录拜访"}
             </button>
             <button
               type="button"

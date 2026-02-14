@@ -59,6 +59,9 @@ export function Navigation() {
         <Link href="/history" className="hover:text-white text-gray-400 transition">
           历史记录
         </Link>
+        <Link href="/visits" className="hover:text-white text-gray-400 transition">
+          拜访记录
+        </Link>
         <Link href="/settings" className="hover:text-white text-gray-400 transition">
           设置
         </Link>
