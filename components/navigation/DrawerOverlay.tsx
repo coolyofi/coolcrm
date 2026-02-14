@@ -8,14 +8,23 @@ import { MENU_ITEMS } from "./constants"
 import { useScrollVelocity } from "../../hooks/useScrollVelocity"
 import React from "react"
 
+/**
+ * DrawerOverlay - Mobile drawer with proper interaction blocking
+ *
+ * Requirements:
+ * - Only renders on mobile (NavigationRoot handles this)
+ * - Backdrop blocks interaction when open (pointer-events: auto)
+ * - Backdrop allows interaction when closed (pointer-events: none)
+ * - Drawer panel prevents touch propagation
+ * - Uses z-index tokens via CSS variables
+ */
 export function DrawerOverlay() {
   const { deviceMode, navMode, drawerOpen, closeDrawer, motion, isHydrated } = useNavigation()
   const { signOut } = useAuth()
   const pathname = usePathname()
   const v = useScrollVelocity("content-scroll")
 
-  // Fixed: Move all hook calls to top level before any conditional returns
-  // Swipe state (always initialize hooks, even if not used)
+  // Swipe state (always initialize hooks)
   const [translateX, setTranslateX] = React.useState(0)
   const [isDragging, setIsDragging] = React.useState(false)
   const startXRef = React.useRef<{ x: number; startTime: number } | null>(null)
@@ -76,8 +85,11 @@ export function DrawerOverlay() {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-[var(--z-drawer)]">
-      {/* Backdrop */}
+    <div 
+      className="fixed inset-0"
+      style={{ zIndex: 'var(--z-drawer)' }}
+    >
+      {/* Backdrop - blocks interaction when open, allows when closed */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity pointer-events-auto opacity-100"
         onClick={closeDrawer}
@@ -85,11 +97,13 @@ export function DrawerOverlay() {
 
       {/* Drawer Content */}
       <div
-        className="absolute top-[60px] left-0 right-0 glass scrolled border-b border-[var(--glass-border)] rounded-b-[24px] shadow-2xl p-4 animate-slide-down flex flex-col gap-2 transition-transform duration-200 pointer-events-auto"
+        className="absolute top-[60px] left-0 right-0 glass scrolled border-b border-[var(--glass-border)] rounded-b-[24px] shadow-2xl p-4 animate-slide-down flex flex-col gap-2 transition-transform duration-200"
         style={{
           "--glass-blur-scrolled": `${blur}px`,
           transform: `translateX(${translateX}%)`,
-          transitionDuration: `${motion.durations.base}ms`
+          transitionDuration: `${motion.durations.base}ms`,
+          zIndex: 'var(--z-drawer)',
+          pointerEvents: 'auto' // Drawer panel always captures events to prevent propagation
         } as React.CSSProperties}
           onPointerDown={motion.drawerDragEnabled ? handlePointerDown : undefined}
           onPointerMove={motion.drawerDragEnabled ? handlePointerMove : undefined}
@@ -102,7 +116,7 @@ export function DrawerOverlay() {
             <Link
               key={item.path}
               href={item.path}
-              onClick={close}
+              onClick={closeDrawer}
               className={`
                 flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200
                 ${isActive
@@ -123,7 +137,7 @@ export function DrawerOverlay() {
 
         <button
           onClick={() => {
-            close()
+            closeDrawer()
             signOut()
           }}
           className="flex items-center gap-4 px-4 py-3 rounded-xl text-[var(--danger)] hover:bg-[var(--danger)]/5 transition-all w-full text-left"

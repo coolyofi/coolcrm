@@ -9,12 +9,25 @@ import { MotionLevelToggle } from "../MotionLevelToggle"
 import { useScrollProgress } from "../../hooks/useScrollProgress"
 import { UI_CONTRACT, NAV_LAYOUT } from "./constants"
 
+/**
+ * AppShell - OS Layer Three-Layer Structure
+ *
+ * Enforces the contract:
+ * 1. NavigationLayer (fixed, managed by NavigationRoot)
+ * 2. TopBarLayer (fixed, only on mobile)
+ * 3. ContentScroll (only scrollable container)
+ *
+ * Rules:
+ * - Body never scrolls (locked in globals.css)
+ * - Only #content-scroll scrolls
+ * - Content has proper offset for topbar/sidebar
+ * - z-index uses tokens (no magic numbers)
+ */
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { deviceMode, sidebarState, motion, isHydrated, topbarHeight, drawerOpen } = useNavigation()
   const pathname = usePathname()
   const { p } = useScrollProgress("content-scroll", UI_CONTRACT.PAGE_HEADER_SCROLL_DISTANCE)
 
-  // Don't wrap login page with shell
   // Don't wrap login page with shell. Also avoid rendering shell until
   // hydration completes to keep server and client markup identical on first load.
   if (pathname === '/login' || !isHydrated) {
@@ -60,13 +73,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="h-[100dvh] overflow-hidden bg-[rgb(var(--bg))]">
-      {/* NavigationLayer（fixed） */}
+      {/* NavigationLayer (fixed) */}
       <NavigationRoot />
 
-      {/* TopBarLayer（fixed，顶部，含 safe-area） */}
+      {/* TopBarLayer (fixed) */}
       <TopBar />
 
-      {/* ContentScrollLayer（唯一滚动容器 + padding-left/padding-top） */}
+      {/* Layer 3: ContentScrollLayer (唯一滚动容器 + padding-left/padding-top) */}
       <main
         id="content-scroll"
         className="h-[100dvh] overflow-y-auto overscroll-contain min-w-0"

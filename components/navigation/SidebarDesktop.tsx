@@ -6,6 +6,15 @@ import { useNavigation } from "./NavigationProvider"
 import { MENU_ITEMS } from "./constants"
 import { useScrollVelocity } from "../../hooks/useScrollVelocity"
 
+/**
+ * SidebarDesktop - Full-height sidebar for tablet/desktop
+ * 
+ * Requirements:
+ * - Fixed positioning from top to bottom (h-screen)
+ * - Menu area uses flex-1 for flexible height
+ * - Bottom actions use mt-auto to stick to bottom
+ * - Only renders on tablet/desktop (NavigationRoot handles this)
+ */
 export function SidebarDesktop() {
   const { deviceMode, sidebarState, toggle, motion, isHydrated } = useNavigation()
   const pathname = usePathname()
@@ -14,7 +23,7 @@ export function SidebarDesktop() {
   // Only show on tablet/desktop, but hide during hydration to prevent mismatch
   if (!isHydrated || deviceMode === "mobile") return null
 
-  // Velocity boost: only for apple motion level (we'll add this back later)
+  // Velocity boost: only for apple motion level
   const boost = Math.min(10, v * 6)
   const blur = 28 + boost
 
@@ -24,12 +33,12 @@ export function SidebarDesktop() {
   return (
     <aside
       className="fixed left-0 top-0 bottom-0 flex flex-col select-none transition-[width] ease-[var(--ease)]"
-      style={{
+            style={{
         width: collapsed ? 'var(--nav-w-collapsed)' : 'var(--nav-w-expanded)',
         zIndex: 'var(--z-nav)',
         transitionDuration: `${motion.durations.base}ms`,
         overflow: 'hidden'
-      }}
+            }}
     >
       <div className="h-full p-3" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div 

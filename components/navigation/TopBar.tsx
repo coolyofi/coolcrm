@@ -8,6 +8,16 @@ import { UI_CONTRACT, NAV_LAYOUT } from "./constants"
 
 function clamp(v: number, min: number, max: number) { return Math.max(min, Math.min(max, v)) }
 
+/**
+ * TopBar - Mobile topbar with menu, title, and primary action
+ * 
+ * Requirements:
+ * - Only renders on mobile (NavigationRoot handles this)
+ * - Menu button opens drawer
+ * - Title collaborates with LargeTitle (future feature)
+ * - Primary action (+ button) for quick add
+ * - Height from tokens
+ */
 export function TopBar() {
   const { deviceMode, openDrawer, motion, isHydrated, topbarHeight } = useNavigation()
   const pathname = usePathname()
