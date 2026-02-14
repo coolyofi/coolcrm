@@ -2,28 +2,75 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { middlewareCookiesAdapter, requestCookiesAdapter } from './cookie-adapter'
 
-// Placeholder values used when environment variables are not set
+// Placeholder values used when environment variables are not set (development only)
 const PLACEHOLDER_URL = 'https://placeholder.supabase.co'
 const PLACEHOLDER_KEY = 'placeholder-key'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || PLACEHOLDER_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || PLACEHOLDER_KEY
+// Check if we're in production environment
+const isProduction = process.env.NODE_ENV === 'production'
+
+// Get environment variables
+const supabaseUrlEnv = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKeyEnv = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+/**
+ * Validates Supabase configuration and throws an error in production if invalid.
+ * In development, logs a warning when using placeholders.
+ * @throws {Error} In production when environment variables are not properly configured
+ */
+export function validateSupabaseConfig() {
+  const isProduction = process.env.NODE_ENV === 'production'
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  
+  // Check if env vars are missing or using placeholder values
+  const isMissingOrPlaceholder = 
+    !url || 
+    !key || 
+    url === PLACEHOLDER_URL || 
+    key === PLACEHOLDER_KEY
+  
+  if (isProduction && isMissingOrPlaceholder) {
+    throw new Error(
+      'Supabase configuration error: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set in production environment. ' +
+      'Please configure these environment variables before deploying.'
+    )
+  }
+  
+  if (!isProduction && isMissingOrPlaceholder) {
+    console.warn(
+      '⚠️  Supabase configuration warning: Environment variables not set. Using placeholder values. ' +
+      'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local for full functionality.'
+    )
+  }
+}
+
+// Validate configuration at module initialization
+validateSupabaseConfig()
+
+// Use environment variables or placeholders (only in development)
+const supabaseUrl = supabaseUrlEnv || PLACEHOLDER_URL
+const supabaseAnonKey = supabaseAnonKeyEnv || PLACEHOLDER_KEY
 
 /**
  * Check if Supabase is properly configured with environment variables.
- * Returns true if both URL and anon key are set.
+ * Returns true if both URL and anon key are set and not using placeholders.
  */
 export function isSupabaseConfigured(): boolean {
-  return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && 
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+  return !!(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && 
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL !== PLACEHOLDER_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== PLACEHOLDER_KEY
+  )
 }
 
 /**
  * Public (browser) Supabase client using the anon key.
  * Only safe for public, unauthenticated or user-scoped operations.
  * 
- * Note: If environment variables are not set, the client will be created with placeholder values.
- * This allows the app to load, but Supabase operations will fail with meaningful errors.
+ * Note: In production, this will throw an error if environment variables are not properly set.
+ * In development, placeholder values are allowed but will log a warning.
  * Use isSupabaseConfigured() to check if the client is properly configured.
  */
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
