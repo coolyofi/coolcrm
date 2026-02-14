@@ -1,6 +1,6 @@
 "use client"
 
-import { useScrollProgress } from "@/hooks/useScrollProgress"
+import { useScrollProgress } from "../hooks/useScrollProgress"
 
 interface PageHeaderProps {
   title: string

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useScrollDirection } from "@/hooks/useScrollDirection"
+import { useScrollDirection } from "../hooks/useScrollDirection"
 import { useEffect } from "react"
 
 export function CommandBar() {
