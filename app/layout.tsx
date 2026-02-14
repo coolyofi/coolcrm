@@ -1,8 +1,6 @@
 import "./globals.css"
 import { AuthProvider } from "@/components/AuthProvider"
-import { NavigationProvider } from "@/components/navigation/NavigationProvider"
-import { AppShell } from "@/components/navigation/AppShell"
-import { Analytics } from "@vercel/analytics/next"
+import { Navigation } from "@/components/Navigation"
 
 export default function RootLayout({
   children,
@@ -23,34 +21,6 @@ export default function RootLayout({
             </AppShell>
           </NavigationProvider>
         </AuthProvider>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const savedTheme = localStorage.getItem('themeMode');
-                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  const currentHour = new Date().getHours();
-                  const isNight = currentHour >= 19 || currentHour < 7;
-                  
-                  let theme = 'dark';
-                  
-                  if (savedTheme === 'light') theme = 'light';
-                  else if (savedTheme === 'dark') theme = 'dark';
-                  else if (savedTheme === 'auto') {
-                    theme = isNight ? 'dark' : 'light';
-                  } else {
-                     // Default Auto
-                     theme = isNight ? 'dark' : 'light';
-                  }
-                  
-                  document.documentElement.setAttribute('data-theme', theme);
-                } catch (e) {}
-              })()
-            `,
-          }}
-        />
-        <Analytics />
       </body>
     </html>
   )
