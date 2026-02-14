@@ -1,6 +1,7 @@
 import "./globals.css"
 import { AuthProvider } from "@/components/AuthProvider"
-import { NavigationProvider } from "@/components/NavigationProvider"
+import { NavigationProvider } from "@/components/navigation/NavigationProvider"
+import { AppShell } from "@/components/navigation/AppShell"
 
 export default function RootLayout({
   children,
@@ -15,7 +16,11 @@ export default function RootLayout({
       <body>
         <div className="ambient-light" />
         <AuthProvider>
-            {children}
+          <NavigationProvider>
+            <AppShell>
+              {children}
+            </AppShell>
+          </NavigationProvider>
         </AuthProvider>
         <script
           dangerouslySetInnerHTML={{
