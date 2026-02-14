@@ -6,10 +6,11 @@ import { useNav } from "./useNav"
 import { MENU_ITEMS } from "./constants"
 
 export function Sidebar() {
-  const { state, toggleSidebar, navWidthPx, mode } = useNav()
+  const { state, toggleSidebar, navWidthPx } = useNav()
   const pathname = usePathname()
 
-  if (mode === "mobile") return null
+  // Removed internal 'if (mode === "mobile") return null' check.
+  // The AppShell now strictly controls lifecycle.
 
   const isExpanded = state === "expanded"
 

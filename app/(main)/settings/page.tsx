@@ -26,11 +26,6 @@ const passwordSchema = z.object({
 type ProfileForm = z.infer<typeof profileSchema>
 type PasswordForm = z.infer<typeof passwordSchema>
 
-interface Profile {
-  id: string
-  nickname: string
-}
-
 const FormField = ({
   label,
   children,

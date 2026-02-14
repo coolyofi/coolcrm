@@ -24,7 +24,7 @@ export default function History() {
   const [searchTerm, setSearchTerm] = useState("")
   const [industryFilter, setIndustryFilter] = useState("")
 
-  const fetchData = useCallback(async () => {
+  const refetchData = useCallback(async () => {
     const { data, error } = await supabase
       .from("customers")
       .select("*")
@@ -55,8 +55,19 @@ export default function History() {
   }, [customers, searchTerm, industryFilter])
 
   useEffect(() => {
+    const fetchData = async () => {
+      const { data, error } = await supabase
+        .from("customers")
+        .select("*")
+        .order("created_at", { ascending: false })
+
+      if (!error && data) {
+        setCustomers(data)
+      }
+      setLoading(false)
+    }
     fetchData()
-  }, [fetchData])
+  }, [])
 
   const handleDelete = async (id: string) => {
     if (!confirm("确定要删除这个客户吗？")) return
@@ -67,7 +78,7 @@ export default function History() {
       console.error(error)
     } else {
       toast.success("删除成功")
-      fetchData()
+      refetchData()
     }
   }
 

@@ -17,9 +17,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <Sidebar />
-      {mode === 'mobile' && <TopBar />}
-      <Drawer />
+      {/* 
+        Strict Rendering Logic:
+        - Mobile: TopBar + Drawer (Only if mode is explicitly mobile)
+        - Tablet/Desktop: Sidebar (Only if mode is NOT mobile)
+        
+        This prevents "Double Rendering" ghosts.
+      */}
+      {mode !== 'mobile' && <Sidebar />}
+      
+      {mode === 'mobile' && (
+        <>
+            <TopBar />
+            <Drawer />
+        </>
+      )}
       
       <main
         className="min-h-[100svh] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"

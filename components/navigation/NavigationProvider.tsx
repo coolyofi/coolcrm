@@ -86,11 +86,17 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
 
   // Critical: Reset rules when mode changes
   useEffect(() => {
+    // 1. Mobile Fix
     if (mode === "mobile") {
-      setDrawerOpen(false)
-      // mobile sidebar is effectively closed
       setState("closed") 
+      // Do not auto-close drawer here to avoid flickering if accidentally resized, 
+      // BUT for desktop switch we must close it.
       return
+    }
+
+    // 2. Desktop Fix: Force close drawer if we switched to desktop/tablet
+    if (drawerOpen) {
+        setDrawerOpen(false)
     }
 
     // tablet / desktop: restore persistence or default

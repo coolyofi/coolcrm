@@ -7,10 +7,13 @@ import { useNav } from "./useNav"
 import { MENU_ITEMS } from "./constants"
 
 export function Drawer() {
-  const { drawerOpen, closeDrawer } = useNav()
+  const { drawerOpen, closeDrawer, mode } = useNav()
   const { signOut } = useAuth()
   const pathname = usePathname()
 
+  // Extra Safety: Never render drawer if not mobile, even if state says open
+  if (mode !== 'mobile') return null
+  
   if (!drawerOpen) return null
 
   return (
