@@ -1,15 +1,28 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+// Placeholder values used when environment variables are not set
+const PLACEHOLDER_URL = 'https://placeholder.supabase.co'
+const PLACEHOLDER_KEY = 'placeholder-key'
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set')
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || PLACEHOLDER_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || PLACEHOLDER_KEY
+
+/**
+ * Check if Supabase is properly configured with environment variables.
+ * Returns true if both URL and anon key are set.
+ */
+export function isSupabaseConfigured(): boolean {
+  return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && 
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 }
 
 /**
  * Public (browser) Supabase client using the anon key.
  * Only safe for public, unauthenticated or user-scoped operations.
+ * 
+ * Note: If environment variables are not set, the client will be created with placeholder values.
+ * This allows the app to load, but Supabase operations will fail with meaningful errors.
+ * Use isSupabaseConfigured() to check if the client is properly configured.
  */
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
