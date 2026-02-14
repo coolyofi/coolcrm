@@ -32,6 +32,13 @@
 
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* Phase 1.1: Motion Tokens */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-slow: 240ms;
+  --ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
 }
 
 /* ---------------- Dark (Liquid Glass) ---------------- */
@@ -108,7 +115,7 @@
   --auth-blur: 8px;
 }
 
-/* base */
+/* Phase 1.2: Scroll Behavior - Lock Body */
 html, body {
   background: var(--bg);
   color: var(--fg);
@@ -116,9 +123,17 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background 0.3s ease, color 0.3s ease;
-  overflow-x: hidden; /* Fix iOS layout explosion */
+  overflow: hidden; /* Lock body scroll, delegate to ContentScroll */
+  height: 100%; /* Fallback */
+  height: 100svh; /* Modern mobile viewport fix */
 }
 * { min-width: 0; } /* Prevent flex children from overflowing */
+
+/* Motion Utilities */
+.motion-fast { transition-duration: var(--motion-fast); transition-timing-function: var(--ease-spring); }
+.motion-base { transition-duration: var(--motion-base); transition-timing-function: var(--ease-spring); }
+.motion-slow { transition-duration: var(--motion-slow); transition-timing-function: var(--ease-spring); }
+
 
 /* ---------------- Components ---------------- */
 

@@ -1,85 +1,82 @@
 "use client"
 
-import { NavItem } from "./NavItems"
-import { useAuth } from "@/components/AuthProvider"
-import { useState } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useNav } from "./useNav"
+import { MENU_ITEMS } from "./constants"
 
-interface SidebarProps {
-  state: 'icon' | 'expanded'
-  onToggle: (state: 'icon' | 'expanded') => void
-  menuItems: any[]
-}
+export function Sidebar() {
+  const { state, setExpanded, setIcon, toggleSidebar, navWidthPx, mode } = useNav()
+  const pathname = usePathname()
 
-export function Sidebar({ state, onToggle, menuItems }: SidebarProps) {
-  const { signOut } = useAuth()
-  const isCollapsed = state === 'icon'
+  if (mode === "mobile") return null
+
+  const isExpanded = state === "expanded"
 
   return (
-    <aside 
-      className={`
-        fixed top-4 bottom-4 left-4 z-40
-        glass-strong transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]
-        flex flex-col py-6
-        ${isCollapsed ? 'w-[72px] px-3' : 'w-[260px] px-5'}
-      `}
+    <aside
+      className="fixed left-0 top-0 bottom-0 z-40 bg-[var(--glass-bg)] border-r border-[var(--border)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col backdrop-blur-xl"
+      style={{ width: navWidthPx }}
     >
-      {/* Brand */}
-      <div className={`flex items-center h-10 mb-8 transition-all ${isCollapsed ? 'justify-center' : 'gap-3 px-2'}`}>
-        <div className="w-8 h-8 rounded-xl bg-[var(--primary)] flex items-center justify-center text-white font-bold shrink-0">
-          C
+      {/* Header / Brand */}
+      <div className="h-[60px] flex items-center px-4 border-b border-[var(--border)] shrink-0">
+        <div 
+            className={`font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[var(--fg)] to-[var(--fg-muted)] overflow-hidden whitespace-nowrap transition-all duration-300 ${isExpanded ? "opacity-100 w-auto" : "opacity-0 w-0"}`}
+        >
+          CoolCRM
         </div>
-        {!isCollapsed && (
-          <span className="font-bold text-lg tracking-tight whitespace-nowrap overflow-hidden">
-            CoolCRM
-          </span>
-        )}
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 space-y-2">
-        {menuItems.map((item: any) => (
-          <NavItem 
-            key={item.path} 
-            label={item.name} 
-            href={item.path} 
-            icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">{item.icon}</svg>} 
-            collapsed={isCollapsed}
-          />
-        ))}
+      {/* Navigation Items */}
+      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+        {MENU_ITEMS.map((item) => {
+          const isActive = pathname === item.path
+          return (
+            <Link
+              key={item.path}
+              href={item.path}
+              className={`
+                group flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                ${isActive 
+                  ? 'bg-[var(--primary)]/10 text-[var(--primary)]' 
+                  : 'text-[var(--fg-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)]'
+                }
+              `}
+              title={!isExpanded ? item.name : undefined}
+            >
+              <svg 
+                className={`w-6 h-6 shrink-0 transition-colors ${isActive ? "text-[var(--primary)]" : "text-current group-hover:text-[var(--fg)]"}`}
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.iconPath} />
+              </svg>
+              
+              <span className={`whitespace-nowrap font-medium transition-all duration-300 origin-left ${isExpanded ? "opacity-100 w-auto scale-100" : "opacity-0 w-0 scale-90"}`}>
+                {item.name}
+              </span>
+            </Link>
+          )
+        })}
       </nav>
 
-      {/* Footer Actions */}
-      <div className="pt-4 border-t border-[var(--border)] space-y-2">
-         {/* Toggle Button */}
-         <button 
-           onClick={() => onToggle(isCollapsed ? 'expanded' : 'icon')}
-           className={`
-             w-full flex items-center gap-3 px-3 py-2 rounded-xl 
-             text-[var(--fg-muted)] hover:bg-white/5 transition-colors
-             ${isCollapsed ? 'justify-center' : ''}
-           `}
-         >
-           <svg className={`w-5 h-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Footer / Toggle */}
+      <div className="p-3 border-t border-[var(--border)] shrink-0">
+        <button
+          onClick={toggleSidebar}
+          className="w-full flex items-center justify-center p-2 rounded-lg text-[var(--fg-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--fg)] transition-colors"
+          title={isExpanded ? "Collapse Sidebar" : "Expand Sidebar"}
+        >
+          <svg 
+            className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? "rotate-180" : "rotate-0"}`} 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-           </svg>
-           {!isCollapsed && <span className="text-sm font-medium">Collapse</span>}
-         </button>
-
-         <button
-            onClick={signOut}
-            className={`
-                group flex items-center gap-3 px-3 py-2 rounded-xl 
-                text-[var(--danger)] hover:bg-[var(--danger)]/5 transition-colors
-                ${isCollapsed ? 'justify-center' : ''}
-            `}
-            title="Sign Out"
-         >
-            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            {!isCollapsed && <span className="text-sm font-medium">Sign Out</span>}
-         </button>
+          </svg>
+        </button>
       </div>
     </aside>
   )
