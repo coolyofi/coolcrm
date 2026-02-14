@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 
@@ -19,7 +19,6 @@ interface Customer {
 
 export default function History() {
   const [customers, setCustomers] = useState<Customer[]>([])
-  const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [industryFilter, setIndustryFilter] = useState("")
@@ -36,7 +35,8 @@ export default function History() {
     setLoading(false)
   }
 
-  const filterCustomers = () => {
+  // 使用useMemo优化过滤性能
+  const filteredCustomers = useMemo(() => {
     let filtered = customers
 
     if (searchTerm) {
@@ -50,16 +50,12 @@ export default function History() {
       filtered = filtered.filter(c => c.industry === industryFilter)
     }
 
-    setFilteredCustomers(filtered)
-  }
+    return filtered
+  }, [customers, searchTerm, industryFilter])
 
   useEffect(() => {
     fetchData()
   }, [])
-
-  useEffect(() => {
-    filterCustomers()
-  }, [customers, searchTerm, industryFilter])
 
   const handleDelete = async (id: string) => {
     if (!confirm("确定要删除这个客户吗？")) return
@@ -122,75 +118,139 @@ export default function History() {
 
       <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
         {loading ? (
-          <div className="p-6 text-gray-400">加载中...</div>
+          <div className="p-6 text-center text-gray-400">
+            <div className="animate-spin inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mb-2"></div>
+            <p>加载中...</p>
+          </div>
         ) : filteredCustomers.length === 0 ? (
-          <div className="p-6 text-gray-400">
+          <div className="p-6 text-center text-gray-400">
             {customers.length === 0 ? "暂无数据" : "没有匹配的客户"}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-800 text-gray-400">
-                <tr>
-                  <th className="p-4 text-left">公司</th>
-                  <th className="p-4 text-left">行业</th>
-                  <th className="p-4 text-left">联系人</th>
-                  <th className="p-4 text-left">意向</th>
-                  <th className="p-4 text-left">日期</th>
-                  <th className="p-4 text-left">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCustomers.map((c) => (
-                  <tr
-                    key={c.id}
-                    className="border-t border-gray-800 hover:bg-gray-800/50 transition"
-                  >
-                    <td className="p-4">
-                      <div>
-                        <p className="font-medium">{c.company_name}</p>
-                        {c.notes && <p className="text-xs text-gray-500 mt-1">{c.notes.slice(0, 50)}...</p>}
-                      </div>
-                    </td>
-                    <td className="p-4 text-gray-400">
-                      {c.industry || "-"}
-                    </td>
-                    <td className="p-4 text-gray-400">
-                      {c.contact || "-"}
-                    </td>
-                    <td className="p-4">
-                      <span className={`px-2 py-1 rounded-md text-xs ${
-                        c.intent_level >= 4 ? 'bg-green-600/20 text-green-400' :
-                        c.intent_level >= 3 ? 'bg-yellow-600/20 text-yellow-400' :
-                        'bg-red-600/20 text-red-400'
-                      }`}>
-                        {c.intent_level}
-                      </span>
-                    </td>
-                    <td className="p-4 text-gray-400">
-                      {c.visit_date ? new Date(c.visit_date).toLocaleDateString() : "-"}
-                    </td>
-                    <td className="p-4">
-                      <div className="flex gap-2">
-                        <Link
-                          href={`/edit/${c.id}`}
-                          className="text-blue-400 hover:text-blue-300 transition"
-                        >
-                          编辑
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(c.id)}
-                          className="text-red-400 hover:text-red-300 transition"
-                        >
-                          删除
-                        </button>
-                      </div>
-                    </td>
+          <>
+            {/* 桌面端表格 */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-800 text-gray-400">
+                  <tr>
+                    <th className="p-4 text-left">公司</th>
+                    <th className="p-4 text-left">行业</th>
+                    <th className="p-4 text-left">联系人</th>
+                    <th className="p-4 text-left">意向</th>
+                    <th className="p-4 text-left">日期</th>
+                    <th className="p-4 text-left">操作</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredCustomers.map((c) => (
+                    <tr
+                      key={c.id}
+                      className="border-t border-gray-800 hover:bg-gray-800/50 transition"
+                    >
+                      <td className="p-4">
+                        <div>
+                          <p className="font-medium">{c.company_name}</p>
+                          {c.notes && <p className="text-xs text-gray-500 mt-1">{c.notes.slice(0, 50)}...</p>}
+                        </div>
+                      </td>
+                      <td className="p-4 text-gray-400">
+                        {c.industry || "-"}
+                      </td>
+                      <td className="p-4 text-gray-400">
+                        {c.contact || "-"}
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-md text-xs ${
+                          c.intent_level >= 4 ? 'bg-green-600/20 text-green-400' :
+                          c.intent_level >= 3 ? 'bg-yellow-600/20 text-yellow-400' :
+                          'bg-red-600/20 text-red-400'
+                        }`}>
+                          {c.intent_level}
+                        </span>
+                      </td>
+                      <td className="p-4 text-gray-400">
+                        {c.visit_date ? new Date(c.visit_date).toLocaleDateString() : "-"}
+                      </td>
+                      <td className="p-4">
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/edit/${c.id}`}
+                            className="text-blue-400 hover:text-blue-300 transition"
+                          >
+                            编辑
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(c.id)}
+                            className="text-red-400 hover:text-red-300 transition"
+                          >
+                            删除
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* 移动端卡片布局 */}
+            <div className="md:hidden space-y-4">
+              {filteredCustomers.map((c) => (
+                <div
+                  key={c.id}
+                  className="bg-gray-800 border border-gray-700 rounded-lg p-4 space-y-3"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-lg text-white">{c.company_name}</h3>
+                      {c.notes && (
+                        <p className="text-sm text-gray-400 mt-1">{c.notes.slice(0, 80)}...</p>
+                      )}
+                    </div>
+                    <span className={`px-2 py-1 rounded-md text-xs ml-2 ${
+                      c.intent_level >= 4 ? 'bg-green-600/20 text-green-400' :
+                      c.intent_level >= 3 ? 'bg-yellow-600/20 text-yellow-400' :
+                      'bg-red-600/20 text-red-400'
+                    }`}>
+                      意向 {c.intent_level}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-500">行业：</span>
+                      <span className="text-gray-300">{c.industry || "-"}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">联系人：</span>
+                      <span className="text-gray-300">{c.contact || "-"}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-gray-500">拜访日期：</span>
+                      <span className="text-gray-300">
+                        {c.visit_date ? new Date(c.visit_date).toLocaleDateString() : "-"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-2 border-t border-gray-700">
+                    <Link
+                      href={`/edit/${c.id}`}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition text-sm font-medium"
+                    >
+                      编辑
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(c.id)}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition text-sm font-medium"
+                    >
+                      删除
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
