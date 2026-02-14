@@ -13,29 +13,63 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ nickname, stats }: DashboardHeaderProps) {
-  const getGreeting = () => {
-    const hour = new Date().getHours()
-    if (hour < 5) return "Good evening" // Late night
-    if (hour < 12) return "Good morning"
-    if (hour < 18) return "Good afternoon"
-    return "Good evening"
+  const getDynamicGreeting = () => {
+    const now = new Date()
+    const hour = now.getHours()
+    const dayOfWeek = now.getDay()
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
+
+    // Time-based greeting
+    let timeGreeting = ""
+    if (hour < 5) timeGreeting = "Good evening"
+    else if (hour < 12) timeGreeting = "Good morning"
+    else if (hour < 18) timeGreeting = "Good afternoon"
+    else timeGreeting = "Good evening"
+
+    // Contextual enhancement
+    const enhancements = []
+    if (isWeekend && hour >= 9 && hour <= 17) {
+      enhancements.push("weekend")
+    }
+    if (stats.newCustomersThisWeek > 2) {
+      enhancements.push("productive")
+    }
+    if (!stats.hasCustomers) {
+      enhancements.push("fresh")
+    }
+
+    // Combine
+    if (enhancements.includes("fresh")) {
+      return `${timeGreeting}, let's get started`
+    }
+    if (enhancements.includes("productive")) {
+      return `${timeGreeting}, you're on fire`
+    }
+    if (enhancements.includes("weekend")) {
+      return `${timeGreeting}, enjoy your weekend`
+    }
+
+    return timeGreeting
   }
 
-  // Smart Contextual Insight
+  // Smart Contextual Insight with storytelling
   const getSubtitle = () => {
     if (!stats.hasCustomers) {
-      return "Let's start building your customer profile."
+      return "Ready to build something amazing? Let's add your first customer."
     }
 
     if (stats.newCustomersThisWeek > 0) {
-      return `You added ${stats.newCustomersThisWeek} new customer${stats.newCustomersThisWeek === 1 ? '' : 's'} this week.`
+      const count = stats.newCustomersThisWeek
+      if (count === 1) return "You added a new customer this week. Great start!"
+      if (count <= 3) return `You added ${count} new customers this week. Keep it up!`
+      return `You've been busy! ${count} new customers this week.`
     }
 
     if (!stats.hasVisitsRecent) {
-      return "No new visits yet — let's log one today."
+      return "No recent visits logged. How about scheduling one today?"
     }
 
-    return "Here's what's happening with your customers today."
+    return "Here's your customer activity overview."
   }
 
   const greetingName = nickname ? `, ${nickname}` : ""
@@ -59,7 +93,7 @@ export function DashboardHeader({ nickname, stats }: DashboardHeaderProps) {
 
   return (
     <PageHeader
-      title={`${getGreeting()}${greetingName}`}
+      title={`${getDynamicGreeting()}${greetingName}`}
       subtitle={getSubtitle()}
       actions={actions}
     />

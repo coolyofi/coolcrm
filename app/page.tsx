@@ -12,6 +12,7 @@ export default function Home() {
   const { user } = useAuth()
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [kpiCollapsed, setKpiCollapsed] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -56,46 +57,69 @@ export default function Home() {
       />
 
       {/* 2. KPI Row with State Machine */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <KpiCard 
-          title="Total Customers"
-          value={customers.current}
-          previousValue={customers.previous}
-          trendPercent={customers.trendPercent}
-          emptyLabel="Start by creating your first customer"
-          emptyAction="Add Customer"
-        />
-        
-        <KpiCard 
-          title="Visits This Month"
-          value={visits.current}
-          previousValue={visits.previous}
-          trendPercent={visits.trendPercent}
-          emptyLabel="Log a visit to track activity"
-          emptyAction="Log Visit"
-          // In real app, log visit might open a modal or go to visits page
-          emptyHref="/visits" 
-        />
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-[var(--fg)] tracking-tight">Key Metrics</h2>
+          <button
+            onClick={() => setKpiCollapsed(!kpiCollapsed)}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors rounded-lg hover:bg-[var(--surface-solid)]/50"
+          >
+            <span>{kpiCollapsed ? 'Show' : 'Hide'}</span>
+            <svg 
+              className={`w-4 h-4 transition-transform ${kpiCollapsed ? 'rotate-180' : ''}`} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
 
-        {/* Placeholder KPIs for completeness as per designs often have 3-4 cards (Conversion, etc) */}
-        {/* We can use dummy for now or logic similar to above */}
-        <KpiCard 
-             title="Conversion Rate"
-             value={0}
-             previousValue={null}
-             trendPercent={null}
-             formatValue={(v) => `${v}%`}
-             emptyLabel="Track deals to see conversion"
-        />
+        <div className={`
+          grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
+          ${kpiCollapsed ? 'opacity-0 max-h-0 overflow-hidden' : 'opacity-100 max-h-[200px]'}
+        `}>
+          <KpiCard 
+            title="Total Customers"
+            value={customers.current}
+            previousValue={customers.previous}
+            trendPercent={customers.trendPercent}
+            emptyLabel="Start by creating your first customer"
+            emptyAction="Add Customer"
+          />
+          
+          <KpiCard 
+            title="Visits This Month"
+            value={visits.current}
+            previousValue={visits.previous}
+            trendPercent={visits.trendPercent}
+            emptyLabel="Log a visit to track activity"
+            emptyAction="Log Visit"
+            // In real app, log visit might open a modal or go to visits page
+            emptyHref="/visits" 
+          />
 
-        {/* Quick Goal Glance (Mini) or just another metric */}
-         <KpiCard 
-             title="High Intent"
-             value={(data.customers.recent as { intent_level?: number }[]).filter((c) => (c.intent_level || 0) >= 4).length} // Rough proxy
-             previousValue={0} // No trend yet
-             trendPercent={null}
-             emptyLabel="No high intent leads yet"
-        />
+          {/* Placeholder KPIs for completeness as per designs often have 3-4 cards (Conversion, etc) */}
+          {/* We can use dummy for now or logic similar to above */}
+          <KpiCard 
+               title="Conversion Rate"
+               value={0}
+               previousValue={null}
+               trendPercent={null}
+               formatValue={(v) => `${v}%`}
+               emptyLabel="Track deals to see conversion"
+          />
+
+          {/* Quick Goal Glance (Mini) or just another metric */}
+           <KpiCard 
+               title="High Intent"
+               value={(data.customers.recent as { intent_level?: number }[]).filter((c) => (c.intent_level || 0) >= 4).length} // Rough proxy
+               previousValue={0} // No trend yet
+               trendPercent={null}
+               emptyLabel="No high intent leads yet"
+          />
+        </div>
       </div>
 
       {/* 3. Goals Progress */}

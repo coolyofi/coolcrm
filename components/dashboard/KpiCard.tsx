@@ -11,6 +11,7 @@ interface KpiCardProps {
   emptyAction?: string
   emptyHref?: string
   formatValue?: (v: number) => string
+  showStorytelling?: boolean
 }
 
 export function KpiCard({
@@ -21,8 +22,28 @@ export function KpiCard({
   emptyLabel = "Start adding data",
   emptyAction = "Add Now",
   emptyHref = "/add",
-  formatValue = (v) => v.toString()
+  formatValue = (v) => v.toString(),
+  showStorytelling = true
 }: KpiCardProps) {
+
+    const getStorytelling = () => {
+      if (trendPercent === null || previousValue === null) return null
+
+      const percent = Math.abs(trendPercent)
+      const isPositive = trendPercent > 0
+      const isSignificant = percent >= 10
+
+      if (isPositive && isSignificant) {
+        if (percent >= 50) return "🚀 Wow, massive growth!"
+        if (percent >= 25) return "📈 Strong upward trend"
+        return "📊 Steady improvement"
+      }
+      if (!isPositive && isSignificant) {
+        if (percent >= 25) return "📉 Let's turn this around"
+        return "📊 Slight dip, keep pushing"
+      }
+      return "📊 Holding steady"
+    }
 
     // Status: EMPTY
     // Logic: If value is 0 (or specifically "no data" but we simplify to 0 for now)
@@ -59,6 +80,8 @@ export function KpiCard({
         ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /> // Up
         : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" /> // Down (or handle neutral)
 
+    const storytelling = showStorytelling ? getStorytelling() : null
+
     return (
         <div className="glass-strong p-6 flex flex-col justify-between h-[160px]">
             <div className="text-sm font-semibold text-[var(--fg-muted)] tracking-wide uppercase">
@@ -89,6 +112,13 @@ export function KpiCard({
                 ) : (
                     <div className="text-sm text-[var(--fg-muted)] font-normal">
                         No previous month data yet
+                    </div>
+                )}
+
+                {/* Storytelling */}
+                {storytelling && (
+                    <div className="text-xs text-[var(--fg-muted)] font-medium mt-1">
+                        {storytelling}
                     </div>
                 )}
             </div>
