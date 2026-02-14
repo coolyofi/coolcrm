@@ -4,8 +4,11 @@ import type { NextRequest } from "next/server"
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
-  const supabase = createServerClient({
-    cookies: {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: (() => ({
       getAll() {
         return req.cookies.getAll()
       },
@@ -14,7 +17,7 @@ export async function middleware(req: NextRequest) {
           res.cookies.set(name, value, options)
         })
       },
-    },
+    })) as any,
   })
 
   // Enhanced error handling for session retrieval with timeout protection

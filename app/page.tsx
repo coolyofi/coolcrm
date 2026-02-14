@@ -115,13 +115,13 @@ export default function Home() {
           />
 
           {/* Quick Goal Glance (Mini) or just another metric */}
-           <KpiCard 
+             <KpiCard 
                title="High Intent"
                value={(data.customers.recent || []).filter((c) => (c.intent_level || 0) >= 4).length} // Safe access with default array
                previousValue={0} // No trend yet
-               trendPercent={null}
+               trendPercent={0}
                emptyLabel="No high intent leads yet"
-          />
+            />
         </div>
       </div>
 

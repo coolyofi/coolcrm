@@ -38,8 +38,9 @@ export async function createServerSupabase() {
   const { cookies } = await import('next/headers')
   const cookieStore = cookies()
 
-  return createServerClient({
-    cookies: () => cookieStore,
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
+    // cast to any to satisfy differing cookie method types across Next/Supabase versions
+    cookies: (() => cookieStore) as any,
   })
 }
 
@@ -50,8 +51,8 @@ export async function createServerSupabase() {
  */
 export function createRouteSupabase(request: Request, response: Response) {
   // Use createServerClient for route handlers; provide cookie accessors from the Request/Response
-  return createServerClient({
-    cookies: () => (request as any).cookies,
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: (() => (request as any).cookies) as any,
   })
 }
 
@@ -61,8 +62,8 @@ export function createRouteSupabase(request: Request, response: Response) {
  * Safe to use in Middleware.
  */
 export function createMiddlewareSupabase(request: Request) {
-  return createServerClient({
-    cookies: () => (request as any).cookies,
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: (() => (request as any).cookies) as any,
   })
 }
 

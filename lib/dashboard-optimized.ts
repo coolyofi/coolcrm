@@ -121,7 +121,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   // Helper function to safely extract data with defaults
   // DON'T throw on single query failures — return sensible defaults and log useful diagnostics.
   const safeExtract = <T>(
-    result: PromiseSettledResult<{ data?: T; count?: number; error?: SupabaseError | null }>,
+    result: PromiseSettledResult<{ data?: T | null; count?: number | null; error?: SupabaseError | null }>,
     defaultValue: T,
     label?: string
   ): T => {
@@ -133,7 +133,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
       }
 
       // For count queries, return count; for data queries, return data
-      return ('count' in result.value ? (result.value.count ?? defaultValue) : (result.value.data ?? defaultValue)) as T
+      return ('count' in result.value ? ((result.value.count ?? defaultValue) as unknown as T) : (result.value.data ?? defaultValue) as T) as T
     }
 
     // If the promise was rejected, log and return default instead of throwing
