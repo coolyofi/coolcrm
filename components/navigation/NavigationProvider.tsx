@@ -13,6 +13,7 @@ type NavContextValue = {
   mode: NavMode
   state: NavState
   drawerOpen: boolean
+  proximity: boolean
 
   // Derived
   navWidthPx: number // Used for content padding-left
@@ -53,6 +54,8 @@ function writePersisted(v: PersistedState) {
 
 function getNavWidth(mode: NavMode, state: NavState): number {
   if (mode === "mobile") return 0
+  if (mode === "tablet-expanded") return 0 // Portrait uses drawer
+  if (mode === "tablet-compact") return 72 // Landscape icon-only
   if (state === "icon") return 72
   if (state === "expanded") return 260
   return 0
@@ -67,6 +70,9 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     // Default initial state
     return DEFAULT_DESKTOP_STATE
   })
+  
+  // Proximity expand for desktop/tablet-compact
+  const [proximity, setProximity] = useState(false)
   
   // Hydrate persistence after mount to match hydration
   useEffect(() => {
@@ -94,15 +100,21 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
       return
     }
 
-    // 2. Desktop Fix: Force close drawer if we switched to desktop/tablet
+    // 2. Tablet-expanded (portrait) uses drawer
+    if (mode === "tablet-expanded") {
+      setState("closed")
+      return
+    }
+
+    // 3. Desktop Fix: Force close drawer if we switched to desktop/tablet-compact
     if (drawerOpen) {
         setDrawerOpen(false)
     }
 
-    // tablet / desktop: restore persistence or default
+    // tablet-compact / desktop: restore persistence or default
     const persisted = readPersisted()
-    if (mode === "tablet") {
-      setState(persisted ?? DEFAULT_TABLET_STATE)
+    if (mode === "tablet-compact") {
+      setState(persisted ?? "icon")
     } else {
       setState(persisted ?? DEFAULT_DESKTOP_STATE)
     }
@@ -124,6 +136,51 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
   }, [mode, drawerOpen, state])
+
+  // Mouse proximity expand (desktop/tablet-compact only)
+  useEffect(() => {
+    if (mode === "mobile" || mode === "tablet-expanded") return
+
+    let timeoutId: number
+    const handleMouseMove = (e: MouseEvent) => {
+      const isNearLeft = e.clientX < 24
+      if (isNearLeft && !proximity) {
+        clearTimeout(timeoutId)
+        timeoutId = window.setTimeout(() => setProximity(true), 80)
+      } else if (!isNearLeft && proximity) {
+        clearTimeout(timeoutId)
+        timeoutId = window.setTimeout(() => setProximity(false), 400)
+      }
+    }
+
+    window.addEventListener("mousemove", handleMouseMove, { passive: true })
+    return () => {
+      clearTimeout(timeoutId)
+      window.removeEventListener("mousemove", handleMouseMove)
+    }
+  }, [mode, proximity])
+
+  // Auto-collapse on scroll (tablet-compact/desktop only)
+  useEffect(() => {
+    if (mode === "mobile" || mode === "tablet-expanded") return
+
+    let timeoutId: number
+    const handleScroll = () => {
+      if (state === "expanded") {
+        clearTimeout(timeoutId)
+        timeoutId = window.setTimeout(() => {
+          setState("icon")
+          writePersisted("icon")
+        }, 300) // Delay to avoid flickering
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => {
+      clearTimeout(timeoutId)
+      window.removeEventListener("scroll", handleScroll)
+    }
+  }, [mode, state])
 
   const openDrawer = useCallback(() => setDrawerOpen(true), [])
   const closeDrawer = useCallback(() => setDrawerOpen(false), [])
@@ -150,7 +207,10 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     })
   }, [mode])
 
-  const navWidthPx = useMemo(() => getNavWidth(mode, state), [mode, state])
+  const navWidthPx = useMemo(() => {
+    const effectiveState = proximity && state === "icon" ? "expanded" : state
+    return getNavWidth(mode, effectiveState)
+  }, [mode, state, proximity])
 
   // Apple animation enhancement: Only elevate (scale down) content if on mobile + drawer open
   const elevated = mode === "mobile" && drawerOpen
@@ -159,6 +219,7 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     mode,
     state,
     drawerOpen,
+    proximity,
     navWidthPx,
     elevated,
     reducedMotion,

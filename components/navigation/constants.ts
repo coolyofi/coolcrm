@@ -5,7 +5,7 @@ export const BREAKPOINTS = {
   tabletMax: 1023,
 } as const
 
-export type NavMode = "mobile" | "tablet" | "desktop"
+export type NavMode = "mobile" | "tablet-compact" | "tablet-expanded" | "desktop"
 export type NavState = "closed" | "icon" | "expanded"
 
 // Mobile always closed

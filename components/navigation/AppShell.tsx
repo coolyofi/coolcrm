@@ -19,14 +19,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <>
       {/* 
         Strict Rendering Logic:
-        - Mobile: TopBar + Drawer (Only if mode is explicitly mobile)
-        - Tablet/Desktop: Sidebar (Only if mode is NOT mobile)
+        - Mobile: TopBar + Drawer
+        - Tablet-expanded (iPad portrait): TopBar + Drawer  
+        - Tablet-compact (iPad landscape) / Desktop: Sidebar
         
         This prevents "Double Rendering" ghosts.
       */}
-      {mode !== 'mobile' && <Sidebar />}
+      {(mode === 'tablet-compact' || mode === 'desktop') && <Sidebar />}
       
-      {mode === 'mobile' && (
+      {(mode === 'mobile' || mode === 'tablet-expanded') && (
         <>
             <TopBar />
             <Drawer />
@@ -37,7 +38,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         className="min-h-[100svh] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
         style={{
           paddingLeft: `${navWidthPx}px`,
-          paddingTop: mode === 'mobile' ? '60px' : '0px',
+          paddingTop: (mode === 'mobile' || mode === 'tablet-expanded') ? '60px' : '0px',
           transform: elevated ? 'scale(0.985) translateY(10px)' : 'none',
           transformOrigin: 'top center',
           borderRadius: elevated ? '24px' : '0px',

@@ -48,7 +48,6 @@ export default function Home() {
       {/* 1. Header with Intelligence */}
       <DashboardHeader 
         nickname={data.profile?.nickname} 
-        email={user?.email}
         stats={{
           hasCustomers: customers.current > 0,
           hasVisitsRecent: visits.current > 0,

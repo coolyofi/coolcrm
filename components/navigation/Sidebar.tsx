@@ -6,13 +6,13 @@ import { useNav } from "./useNav"
 import { MENU_ITEMS } from "./constants"
 
 export function Sidebar() {
-  const { state, toggleSidebar, navWidthPx } = useNav()
+  const { state, toggleSidebar, navWidthPx, proximity } = useNav()
   const pathname = usePathname()
 
   // Removed internal 'if (mode === "mobile") return null' check.
   // The AppShell now strictly controls lifecycle.
 
-  const isExpanded = state === "expanded"
+  const isExpanded = state === "expanded" || (state === "icon" && proximity)
 
   return (
     <aside
@@ -66,7 +66,7 @@ export function Sidebar() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.iconPath} />
               </svg>
               
-              <span className={`whitespace-nowrap font-medium transition-all duration-300 origin-left ${isExpanded ? "opacity-100 w-auto scale-100" : "opacity-0 w-0 scale-90"}`}>
+              <span className={`whitespace-nowrap font-medium transition-all duration-160 ease-out ${isExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-1"}`}>
                 {item.name}
               </span>
             </Link>
