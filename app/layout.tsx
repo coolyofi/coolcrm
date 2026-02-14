@@ -1,5 +1,6 @@
 import "./globals.css"
 import { AuthProvider } from "@/components/AuthProvider"
+import { NavigationProvider } from "@/components/NavigationProvider"
 import { Navigation } from "@/components/Navigation"
 
 export default function RootLayout({
@@ -15,12 +16,14 @@ export default function RootLayout({
       <body>
         <div className="ambient-light" />
         <AuthProvider>
-          <div className="flex min-h-screen">
-            <Navigation />
-            <main className="flex-1 p-8 overflow-y-auto h-screen">
-              {children}
-            </main>
-          </div>
+          <NavigationProvider>
+            <div className="flex min-h-screen">
+              <Navigation />
+              <main className="flex-1 p-8 overflow-y-auto h-screen">
+                {children}
+              </main>
+            </div>
+          </NavigationProvider>
         </AuthProvider>
         <script
           dangerouslySetInnerHTML={{
