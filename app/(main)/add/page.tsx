@@ -3,26 +3,62 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useForm, Controller } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
 import toast, { Toaster } from "react-hot-toast"
 import { supabase } from "@/lib/supabase"
 import { PageHeader } from "@/components/PageHeader"
 
+const customerSchema = z.object({
+  company_name: z.string().min(1, "公司名称不能为空"),
+  industry: z.string().min(1, "请选择行业"),
+  intent_level: z.number().min(1).max(5, "意向等级必须在1-5之间"),
+  visit_date: z.string().min(1, "请选择拜访日期"),
+  contact: z.string().optional(),
+  notes: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
+  address: z.string().optional(),
+})
+
+type CustomerForm = z.infer<typeof customerSchema>
+
+const industries = [
+  { value: "", label: "选择行业" },
+  { value: "科技", label: "科技" },
+  { value: "金融", label: "金融" },
+  { value: "医疗", label: "医疗" },
+  { value: "教育", label: "教育" },
+  { value: "制造业", label: "制造业" },
+  { value: "零售", label: "零售" },
+  { value: "其他", label: "其他" },
+]
+
 export default function AddCustomer() {
-  const [company, setCompany] = useState("")
-  const [industry, setIndustry] = useState("")
-  const [intentLevel, setIntentLevel] = useState(1)
-  const [visitDate, setVisitDate] = useState(new Date().toISOString().split('T')[0])
-  const [contact, setContact] = useState("")
-  const [notes, setNotes] = useState("")
-  const [latitude, setLatitude] = useState("")
-  const [longitude, setLongitude] = useState("")
-  const [address, setAddress] = useState("")
-  
   const [loading, setLoading] = useState(false)
   const [locationLoading, setLocationLoading] = useState(false)
   const [isLocationExpanded, setIsLocationExpanded] = useState(false)
   
   const router = useRouter()
+
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<CustomerForm>({
+    resolver: zodResolver(customerSchema),
+    defaultValues: {
+      intent_level: 1,
+      visit_date: new Date().toISOString().split('T')[0]
+    }
+  })
+
+  // Watch location fields to auto-expand section if data exists
+  const lat = watch("latitude")
+  const addr = watch("address")
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -38,8 +74,8 @@ export default function AddCustomer() {
       async (position) => {
         const lat = position.coords.latitude.toString()
         const lng = position.coords.longitude.toString()
-        setLatitude(lat)
-        setLongitude(lng)
+        setValue("latitude", lat)
+        setValue("longitude", lng)
 
         // 使用高德地图逆地理编码API - 获取详细地址信息
         try {
@@ -77,7 +113,7 @@ export default function AddCustomer() {
               address = parts.join('') || data.regeocode.formatted_address
             }
             
-            setAddress(address)
+            setValue("address", address)
             toast.success("位置获取成功")
           } else {
             throw new Error(data.info || '地址解析失败')
@@ -111,19 +147,7 @@ export default function AddCustomer() {
     )
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    // Manual Validation
-    if (!company.trim()) {
-        toast.error("请填写公司名称")
-        return
-    }
-    if (!industry) {
-        toast.error("请选择行业")
-        return
-    }
-
+  const onSubmit = async (data: CustomerForm) => {
     setLoading(true)
 
     // Enhanced: Better error handling with specific error messages
@@ -131,15 +155,15 @@ export default function AddCustomer() {
       const { error } = await supabase
         .from("customers")
         .insert([{
-          company_name: company,
-          industry,
-          intent_level: intentLevel,
-          visit_date: visitDate || null,
-          contact,
-          notes,
-          latitude: latitude ? parseFloat(latitude) : null,
-          longitude: longitude ? parseFloat(longitude) : null,
-          address: address || null
+          company_name: data.company_name,
+          industry: data.industry,
+          intent_level: data.intent_level,
+          visit_date: data.visit_date || null,
+          contact: data.contact || null,
+          notes: data.notes || null,
+          latitude: data.latitude ? parseFloat(data.latitude) : null,
+          longitude: data.longitude ? parseFloat(data.longitude) : null,
+          address: data.address || null
         }])
 
       if (error) {
@@ -173,7 +197,7 @@ export default function AddCustomer() {
         subtitle="录入新的拜访与意向信息"
       />
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Section A: Basic Info */}
         <section className="space-y-6">
             <h2 className="text-sm font-semibold text-[var(--fg)] uppercase tracking-wider flex items-center gap-2 after:content-[''] after:h-px after:flex-1 after:bg-[var(--border)]">
@@ -186,14 +210,19 @@ export default function AddCustomer() {
                     <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">
                         公司名称 <span className="text-red-500">*</span>
                     </label>
-                    <input
-                        type="text"
-                        placeholder="请输入公司名称"
-                        value={company}
-                        onChange={(e) => setCompany(e.target.value)}
-                        required
-                        className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all font-normal"
+                    <Controller
+                        name="company_name"
+                        control={control}
+                        render={({ field }) => (
+                            <input
+                                {...field}
+                                type="text"
+                                placeholder="请输入公司名称"
+                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all font-normal"
+                            />
+                        )}
                     />
+                    {errors.company_name && <p className="text-red-500 text-xs mt-1">{errors.company_name.message}</p>}
                 </div>
 
                 {/* Industry */}
@@ -202,27 +231,28 @@ export default function AddCustomer() {
                         行业 <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
-                        <select
-                            value={industry}
-                            onChange={(e) => setIndustry(e.target.value)}
-                            required
-                            className="appearance-none w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all cursor-pointer"
-                        >
-                            <option value="" disabled>选择行业</option>
-                            <option value="科技">科技</option>
-                            <option value="金融">金融</option>
-                            <option value="医疗">医疗</option>
-                            <option value="教育">教育</option>
-                            <option value="制造业">制造业</option>
-                            <option value="零售">零售</option>
-                            <option value="其他">其他</option>
-                        </select>
+                        <Controller
+                            name="industry"
+                            control={control}
+                            render={({ field }) => (
+                                <select
+                                    {...field}
+                                    required
+                                    className="appearance-none w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all cursor-pointer"
+                                >
+                                    {industries.map(opt => (
+                                        <option key={opt.value} value={opt.value} disabled={!opt.value}>{opt.label}</option>
+                                    ))}
+                                </select>
+                            )}
+                        />
                         <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-[var(--fg-muted)]">
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                         </div>
                     </div>
+                    {errors.industry && <p className="text-red-500 text-xs mt-1">{errors.industry.message}</p>}
                 </div>
 
                 {/* Visit Date */}
@@ -230,13 +260,19 @@ export default function AddCustomer() {
                     <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">
                         拜访日期 <span className="text-red-500">*</span>
                     </label>
-                    <input
-                        type="date"
-                        value={visitDate}
-                        onChange={(e) => setVisitDate(e.target.value)}
-                        required
-                        className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all"
+                    <Controller
+                        name="visit_date"
+                        control={control}
+                        render={({ field }) => (
+                            <input
+                                {...field}
+                                type="date"
+                                required
+                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all"
+                            />
+                        )}
                     />
+                    {errors.visit_date && <p className="text-red-500 text-xs mt-1">{errors.visit_date.message}</p>}
                 </div>
 
                 {/* Intent Level (Segmented Pills) */}
@@ -244,24 +280,38 @@ export default function AddCustomer() {
                     <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">
                         意向等级 <span className="text-red-500">*</span>
                     </label>
-                    <div className="flex bg-[var(--surface-solid)] border border-[var(--border)] p-1 rounded-xl">
-                        {[1, 2, 3, 4, 5].map((level) => (
-                            <button
-                                key={level}
-                                type="button"
-                                onClick={() => setIntentLevel(level)}
-                                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                                    intentLevel === level
-                                        ? "bg-[var(--primary)] text-white shadow-md"
-                                        : "text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-[var(--glass-bg)]"
-                                }`}
-                            >
-                                {level}级
-                            </button>
-                        ))}
-                    </div>
-                    <p className="text-xs text-[var(--fg-muted)] mt-1.5 text-right px-1">
-                        1级(无意向) - 5级(即将成交)
+                    <Controller
+                        name="intent_level"
+                        control={control}
+                        render={({ field }) => (
+                            <div className="flex bg-[var(--surface-solid)] border border-[var(--border)] p-1 rounded-xl">
+                                {[
+                                    { level: 1, label: "初步接触" },
+                                    { level: 2, label: "有兴趣" },
+                                    { level: 3, label: "正在考虑" },
+                                    { level: 4, label: "高度意向" },
+                                    { level: 5, label: "即将成交" }
+                                ].map(({ level, label }) => (
+                                    <button
+                                        key={level}
+                                        type="button"
+                                        onClick={() => field.onChange(level)}
+                                        className={`flex-1 py-2 px-1 text-xs font-medium rounded-lg transition-all duration-200 ${
+                                            field.value === level
+                                                ? "bg-[var(--primary)] text-white shadow-md"
+                                                : "text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-[var(--glass-bg)]"
+                                        }`}
+                                        title={`${level}级: ${label}`}
+                                    >
+                                        {level}级<br/>{label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    />
+                    {errors.intent_level && <p className="text-red-500 text-xs mt-1">{errors.intent_level.message}</p>}
+                    <p className="text-xs text-[var(--fg-muted)] mt-1.5 text-center">
+                        选择客户对产品的意向程度，1级最低，5级最高
                     </p>
                 </div>
                 
@@ -270,12 +320,17 @@ export default function AddCustomer() {
                     <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">
                         联系人
                     </label>
-                    <input
-                        type="text"
-                        placeholder="姓名"
-                        value={contact}
-                        onChange={(e) => setContact(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all"
+                    <Controller
+                        name="contact"
+                        control={control}
+                        render={({ field }) => (
+                            <input
+                                {...field}
+                                type="text"
+                                placeholder="姓名"
+                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all"
+                            />
+                        )}
                     />
                 </div>
                 
@@ -284,12 +339,17 @@ export default function AddCustomer() {
                     <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">
                         备注信息
                     </label>
-                    <textarea
-                        placeholder="输入客户需求、痛点或后续跟进计划..."
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        rows={3}
-                        className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all resize-none"
+                    <Controller
+                        name="notes"
+                        control={control}
+                        render={({ field }) => (
+                            <textarea
+                                {...field}
+                                placeholder="输入客户需求、痛点或后续跟进计划..."
+                                rows={3}
+                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all resize-none"
+                            />
+                        )}
                     />
                 </div>
             </div>
@@ -302,7 +362,7 @@ export default function AddCustomer() {
             </h2>
             
             <div className="bg-[var(--glass-bg)] border border-[var(--border)] rounded-2xl p-5 md:p-6 transition-all">
-                {!isLocationExpanded && !address && !latitude ? (
+                {!isLocationExpanded && !lat && !addr ? (
                      <div className="flex flex-col items-center justify-center text-center py-2">
                         <p className="text-sm text-[var(--fg-muted)] mb-4">记录当前位置有助于地图模式分析</p>
                         <button
@@ -344,22 +404,39 @@ export default function AddCustomer() {
                          
                          <div className="md:col-span-2">
                              <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">详细地址</label>
-                             <input
-                                type="text"
-                                value={address}
-                                onChange={(e) => setAddress(e.target.value)}
-                                placeholder="自动获取或手动输入"
-                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all font-normal"
+                             <Controller
+                                name="address"
+                                control={control}
+                                render={({ field }) => (
+                                    <input
+                                        {...field}
+                                        type="text"
+                                        placeholder="自动获取或手动输入"
+                                        className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all font-normal"
+                                    />
+                                )}
                              />
                          </div>
                          
                          <div>
                              <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">经度</label>
-                             <input type="text" value={longitude} readOnly className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--border)] rounded-xl text-[var(--fg-muted)] text-sm cursor-not-allowed" />
+                             <Controller
+                                name="longitude"
+                                control={control}
+                                render={({ field }) => (
+                                    <input {...field} readOnly className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--border)] rounded-xl text-[var(--fg-muted)] text-sm cursor-not-allowed" />
+                                )}
+                             />
                          </div>
                          <div>
                              <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">纬度</label>
-                             <input type="text" value={latitude} readOnly className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--border)] rounded-xl text-[var(--fg-muted)] text-sm cursor-not-allowed" />
+                             <Controller
+                                name="latitude"
+                                control={control}
+                                render={({ field }) => (
+                                    <input {...field} readOnly className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--border)] rounded-xl text-[var(--fg-muted)] text-sm cursor-not-allowed" />
+                                )}
+                             />
                          </div>
                      </div>
                 )}

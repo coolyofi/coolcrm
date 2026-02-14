@@ -1,6 +1,7 @@
 "use client"
 
 import { useScrollProgress } from "../hooks/useScrollProgress"
+import { UI_CONTRACT, calculateTitleSize } from "./navigation/constants"
 
 interface PageHeaderProps {
   title: string
@@ -9,9 +10,9 @@ interface PageHeaderProps {
 }
 
 export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
-  const { p } = useScrollProgress("content-scroll", 56)
+  const { p } = useScrollProgress("content-scroll", UI_CONTRACT.PAGE_HEADER_SCROLL_DISTANCE)
 
-  const titleSize = 34 - (34 - 17) * p
+  const titleSize = calculateTitleSize(p)
   const subtitleOpacity = 1 - p
 
   return (

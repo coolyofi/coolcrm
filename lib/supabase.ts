@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
+import { createServerComponentClient, createRouteHandlerClient, createMiddlewareClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 
 // Placeholder values used when environment variables are not set
 const PLACEHOLDER_URL = 'https://placeholder.supabase.co'
@@ -27,9 +29,47 @@ export function isSupabaseConfigured(): boolean {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 /**
+ * Create a server-side Supabase client for Server Components using user session context.
+ * This client automatically handles cookies and user authentication.
+ * Safe to use in Server Components, Server Actions, and other server-side contexts.
+ */
+export function createServerSupabase() {
+  const cookieStore = cookies()
+  
+  return createServerComponentClient({
+    cookies: () => cookieStore,
+  })
+}
+
+/**
+ * Create a server-side Supabase client for API Routes using user session context.
+ * This client automatically handles cookies and user authentication.
+ * Safe to use in API Routes.
+ */
+export function createRouteSupabase(request: Request, response: Response) {
+  return createRouteHandlerClient({
+    cookies: () => request.cookies,
+  }, {
+    cookies: () => response.cookies,
+  })
+}
+
+/**
+ * Create a server-side Supabase client for Middleware using user session context.
+ * This client automatically handles cookies and user authentication.
+ * Safe to use in Middleware.
+ */
+export function createMiddlewareSupabase(request: Request) {
+  return createMiddlewareClient({
+    cookies: () => request.cookies,
+  })
+}
+
+/**
  * Create a server-side Supabase client using the service role key.
  * WARNING: Do NOT expose the service role key to the browser. Only call
  * `createAdminSupabase()` from server-side code (API routes, server actions, middleware).
+ * This client has elevated privileges and bypasses RLS. Use only for admin operations.
  */
 export function createAdminSupabase() {
 	const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY

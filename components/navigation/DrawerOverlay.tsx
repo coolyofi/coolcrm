@@ -9,7 +9,7 @@ import { useScrollVelocity } from "../../hooks/useScrollVelocity"
 import React from "react"
 
 export function DrawerOverlay() {
-  const { mode, sidebar, close, motion } = useNav()
+  const { mode, sidebar, close, motion, isHydrated } = useNav()
   const { signOut } = useAuth()
   const pathname = usePathname()
   const v = useScrollVelocity("content-scroll")
@@ -21,8 +21,8 @@ export function DrawerOverlay() {
   const startXRef = React.useRef<{ x: number; startTime: number } | null>(null)
   const startTranslateRef = React.useRef(0)
 
-  // Only show on mobile
-  if (mode !== "mobile") return null
+  // Only show on mobile, but hide during hydration to prevent mismatch
+  if (!isHydrated || mode !== "mobile") return null
 
   const open = sidebar === "expanded"
 
