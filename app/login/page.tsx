@@ -57,30 +57,30 @@ export default function Login() {
   return (
     <>
       <Toaster position="top-right" />
-      <div className="min-h-screen flex items-center justify-center bg-gray-950">
-        <div className="max-w-md w-full p-8 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div className="max-w-md w-full p-8 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">CoolCRM</h1>
-            <p className="text-gray-400">客户关系管理系统</p>
+            <h1 className="text-3xl font-bold text-white drop-shadow-sm mb-2">CoolCRM</h1>
+            <p className="text-white/60">客户关系管理系统</p>
           </div>
 
           <div className="flex mb-6">
             <button
               onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2 px-4 rounded-l-lg font-medium transition ${
+              className={`flex-1 py-2 px-4 rounded-l-lg font-medium transition-all duration-300 ${
                 isLogin
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                  ? "bg-blue-500/30 backdrop-blur-sm text-blue-200 border border-blue-400/50"
+                  : "bg-white/5 backdrop-blur-sm text-white/60 hover:bg-white/10 border border-white/10 hover:border-white/20"
               }`}
             >
               登录
             </button>
             <button
               onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2 px-4 rounded-r-lg font-medium transition ${
+              className={`flex-1 py-2 px-4 rounded-r-lg font-medium transition-all duration-300 ${
                 !isLogin
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                  ? "bg-blue-500/30 backdrop-blur-sm text-blue-200 border border-blue-400/50"
+                  : "bg-white/5 backdrop-blur-sm text-white/60 hover:bg-white/10 border border-white/10 hover:border-white/20"
               }`}
             >
               注册
@@ -89,7 +89,7 @@ export default function Login() {
 
           <form onSubmit={isLogin ? handleLogin : handleRegister} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white/80 mb-2">
                 邮箱地址
               </label>
               <input
@@ -97,13 +97,13 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
                 placeholder="your@email.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white/80 mb-2">
                 密码
               </label>
               <input
@@ -112,14 +112,14 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
                 placeholder="••••••••"
               />
             </div>
 
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-white/80 mb-2">
                   确认密码
                 </label>
                 <input
@@ -128,7 +128,7 @@ export default function Login() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   minLength={6}
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  className="w-full px-4 py-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
                   placeholder="••••••••"
                 />
               </div>
@@ -137,7 +137,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105"
+              className="w-full bg-blue-500/20 backdrop-blur-xl hover:bg-blue-500/30 disabled:bg-gray-500/20 text-blue-200 hover:text-blue-100 disabled:text-gray-400 font-medium py-3 px-4 rounded-xl transition-all duration-300 border border-blue-400/30 hover:border-blue-400/50 disabled:border-gray-400/30 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -154,7 +154,7 @@ export default function Login() {
             <div className="mt-6 text-center">
               <button
                 onClick={() => toast("忘记密码功能即将上线")}
-                className="text-blue-400 hover:text-blue-300 text-sm transition"
+                className="text-blue-300 hover:text-blue-200 text-sm transition-colors"
               >
                 忘记密码？
               </button>

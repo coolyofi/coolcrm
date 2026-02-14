@@ -117,11 +117,11 @@ export default function AddCustomer() {
       <Toaster position="top-center" />
       <div className="max-w-2xl mx-auto space-y-4 md:space-y-6 px-4 md:px-0">
         <div className="pt-4 md:pt-0">
-          <h1 className="text-xl md:text-2xl font-bold">新增客户</h1>
-          <p className="text-gray-400 mt-1 text-sm md:text-base">添加新客户信息</p>
+          <h1 className="text-xl md:text-2xl font-bold text-white drop-shadow-sm">新增客户</h1>
+          <p className="text-white/60 mt-1 text-sm md:text-base">添加新客户信息</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-gray-900 border border-gray-800 rounded-xl p-4 md:p-6 space-y-4 md:space-y-4">
+        <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 md:p-6 space-y-4 md:space-y-4 shadow-lg">
           <div>
             <label className="block text-sm font-medium mb-2">公司名称 *</label>
             <input
@@ -130,7 +130,7 @@ export default function AddCustomer() {
               value={company}
               onChange={(e) => setCompany(e.target.value)}
               required
-              className="w-full px-4 py-3 text-base bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
             />
           </div>
 
@@ -140,7 +140,7 @@ export default function AddCustomer() {
               <select
                 value={industry}
                 onChange={(e) => setIndustry(e.target.value)}
-                className="w-full px-4 py-3 text-base bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white transition-all duration-300"
               >
                 <option value="">请选择行业</option>
                 <option value="科技">科技</option>
@@ -161,7 +161,7 @@ export default function AddCustomer() {
                 max="5"
                 value={intentLevel}
                 onChange={(e) => setIntentLevel(Number(e.target.value))}
-                className="w-full px-4 py-3 text-base bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white transition-all duration-300"
               />
             </div>
           </div>
@@ -173,7 +173,7 @@ export default function AddCustomer() {
                 type="date"
                 value={visitDate}
                 onChange={(e) => setVisitDate(e.target.value)}
-                className="w-full px-4 py-3 text-base bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white transition-all duration-300"
               />
             </div>
 
@@ -184,7 +184,7 @@ export default function AddCustomer() {
                 placeholder="请输入联系人姓名"
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
-                className="w-full px-4 py-3 text-base bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
               />
             </div>
           </div>
@@ -196,7 +196,7 @@ export default function AddCustomer() {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="w-full px-4 py-3 text-base bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
             />
           </div>
 
@@ -207,9 +207,9 @@ export default function AddCustomer() {
                 type="button"
                 onClick={getCurrentLocation}
                 disabled={locationLoading}
-                className="w-full md:w-auto px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white font-medium rounded-lg transition text-base"
+                className="w-full md:w-auto px-6 py-3 bg-green-500/20 backdrop-blur-xl hover:bg-green-500/30 disabled:bg-gray-500/20 text-green-200 hover:text-green-100 disabled:text-gray-400 font-medium rounded-xl transition-all duration-300 border border-green-400/30 hover:border-green-400/50 disabled:border-gray-400/30 shadow-lg hover:shadow-xl"
               >
-                {locationLoading ? "获取中..." : "📍 获取当前位置"}
+                {locationLoading ? "获取中..." : "获取当前位置"}
               </button>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input
@@ -217,14 +217,14 @@ export default function AddCustomer() {
                   placeholder="纬度"
                   value={latitude}
                   onChange={(e) => setLatitude(e.target.value)}
-                  className="px-4 py-3 text-base bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
                 />
                 <input
                   type="text"
                   placeholder="经度"
                   value={longitude}
                   onChange={(e) => setLongitude(e.target.value)}
-                  className="px-4 py-3 text-base bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
                 />
               </div>
               <input
@@ -232,7 +232,7 @@ export default function AddCustomer() {
                 placeholder="详细地址（可手动调整）"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="w-full px-4 py-3 text-base bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
               />
             </div>
           </div>
@@ -240,9 +240,9 @@ export default function AddCustomer() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white font-medium py-4 px-6 rounded-lg transition text-lg"
+            className="w-full bg-blue-500/20 backdrop-blur-xl hover:bg-blue-500/30 disabled:bg-gray-500/20 text-blue-200 hover:text-blue-100 disabled:text-gray-400 font-medium py-4 px-6 rounded-xl transition-all duration-300 border border-blue-400/30 hover:border-blue-400/50 disabled:border-gray-400/30 shadow-lg hover:shadow-xl text-lg"
           >
-            {loading ? "提交中..." : "✅ 提交"}
+            {loading ? "提交中..." : "提交"}
           </button>
         </form>
       </div>

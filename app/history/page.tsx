@@ -75,37 +75,37 @@ export default function History() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold">历史记录</h1>
-          <p className="text-gray-400 text-sm mt-1">
+          <h1 className="text-2xl font-semibold text-white drop-shadow-sm">历史记录</h1>
+          <p className="text-white/60 text-sm mt-1">
             所有已录入的客户信息 ({filteredCustomers.length} 个客户)
           </p>
         </div>
         <Link
           href="/add"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+          className="bg-blue-500/20 backdrop-blur-xl hover:bg-blue-500/30 text-blue-200 hover:text-blue-100 px-4 py-2 rounded-xl transition-all duration-300 border border-blue-400/30 hover:border-blue-400/50 shadow-lg hover:shadow-xl"
         >
           新增客户
         </Link>
       </div>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 shadow-lg">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">搜索</label>
+            <label className="block text-sm font-medium mb-2 text-white/90">搜索</label>
             <input
               type="text"
               placeholder="搜索公司名称或联系人..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">行业筛选</label>
+            <label className="block text-sm font-medium mb-2 text-white/90">行业筛选</label>
             <select
               value={industryFilter}
               onChange={(e) => setIndustryFilter(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white transition-all duration-300"
             >
               <option value="">全部行业</option>
               {uniqueIndustries.map(industry => (
@@ -116,7 +116,7 @@ export default function History() {
         </div>
       </div>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl overflow-hidden shadow-lg">
         {loading ? (
           <div className="p-6 text-center text-gray-400">
             <div className="animate-spin inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mb-2"></div>
@@ -131,7 +131,7 @@ export default function History() {
             {/* 桌面端表格 */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-800 text-gray-400">
+                <thead className="bg-white/5 text-white/70">
                   <tr>
                     <th className="p-4 text-left">公司</th>
                     <th className="p-4 text-left">行业</th>
@@ -145,7 +145,7 @@ export default function History() {
                   {filteredCustomers.map((c) => (
                     <tr
                       key={c.id}
-                      className="border-t border-gray-800 hover:bg-gray-800/50 transition"
+                      className="border-t border-white/10 hover:bg-white/5 transition-all duration-300"
                     >
                       <td className="p-4">
                         <div>
@@ -153,10 +153,10 @@ export default function History() {
                           {c.notes && <p className="text-xs text-gray-500 mt-1">{c.notes.slice(0, 50)}...</p>}
                         </div>
                       </td>
-                      <td className="p-4 text-gray-400">
+                      <td className="p-4 text-white/70">
                         {c.industry || "-"}
                       </td>
-                      <td className="p-4 text-gray-400">
+                      <td className="p-4 text-white/70">
                         {c.contact || "-"}
                       </td>
                       <td className="p-4">
@@ -168,20 +168,20 @@ export default function History() {
                           {c.intent_level}
                         </span>
                       </td>
-                      <td className="p-4 text-gray-400">
+                      <td className="p-4 text-white/70">
                         {c.visit_date ? new Date(c.visit_date).toLocaleDateString() : "-"}
                       </td>
                       <td className="p-4">
                         <div className="flex gap-2">
                           <Link
                             href={`/edit/${c.id}`}
-                            className="text-blue-400 hover:text-blue-300 transition"
+                            className="text-blue-300 hover:text-blue-200 transition-colors"
                           >
                             编辑
                           </Link>
                           <button
                             onClick={() => handleDelete(c.id)}
-                            className="text-red-400 hover:text-red-300 transition"
+                            className="text-red-300 hover:text-red-200 transition-colors"
                           >
                             删除
                           </button>
@@ -198,13 +198,13 @@ export default function History() {
               {filteredCustomers.map((c) => (
                 <div
                   key={c.id}
-                  className="bg-gray-800 border border-gray-700 rounded-lg p-4 space-y-3"
+                  className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 space-y-3 hover:bg-white/10 transition-all duration-300"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <h3 className="font-medium text-lg text-white">{c.company_name}</h3>
                       {c.notes && (
-                        <p className="text-sm text-gray-400 mt-1">{c.notes.slice(0, 80)}...</p>
+                        <p className="text-sm text-white/60 mt-1">{c.notes.slice(0, 80)}...</p>
                       )}
                     </div>
                     <span className={`px-2 py-1 rounded-md text-xs ml-2 ${
@@ -218,31 +218,31 @@ export default function History() {
 
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="text-gray-500">行业：</span>
-                      <span className="text-gray-300">{c.industry || "-"}</span>
+                      <span className="text-white/60">行业：</span>
+                      <span className="text-white/80">{c.industry || "-"}</span>
                     </div>
                     <div>
-                      <span className="text-gray-500">联系人：</span>
-                      <span className="text-gray-300">{c.contact || "-"}</span>
+                      <span className="text-white/60">联系人：</span>
+                      <span className="text-white/80">{c.contact || "-"}</span>
                     </div>
                     <div className="col-span-2">
-                      <span className="text-gray-500">拜访日期：</span>
-                      <span className="text-gray-300">
+                      <span className="text-white/60">拜访日期：</span>
+                      <span className="text-white/80">
                         {c.visit_date ? new Date(c.visit_date).toLocaleDateString() : "-"}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex gap-3 pt-2 border-t border-gray-700">
+                  <div className="flex gap-3 pt-2 border-t border-white/10">
                     <Link
                       href={`/edit/${c.id}`}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition text-sm font-medium"
+                      className="flex-1 bg-blue-500/20 backdrop-blur-xl hover:bg-blue-500/30 text-blue-200 hover:text-blue-100 text-center py-2 px-4 rounded-xl transition-all duration-300 border border-blue-400/30 hover:border-blue-400/50 shadow-lg hover:shadow-xl text-sm font-medium"
                     >
                       编辑
                     </Link>
                     <button
                       onClick={() => handleDelete(c.id)}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition text-sm font-medium"
+                      className="flex-1 bg-red-500/20 backdrop-blur-xl hover:bg-red-500/30 text-red-200 hover:text-red-100 py-2 px-4 rounded-xl transition-all duration-300 border border-red-400/30 hover:border-red-400/50 shadow-lg hover:shadow-xl text-sm font-medium"
                     >
                       删除
                     </button>

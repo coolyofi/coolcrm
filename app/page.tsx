@@ -34,28 +34,28 @@ export default function Home() {
   return (
     <div className="space-y-4 md:space-y-6 px-4 md:px-0">
       <div className="pt-4 md:pt-0">
-        <h1 className="text-2xl md:text-3xl font-bold">CoolCRM Dashboard</h1>
-        <p className="text-gray-400 mt-2 text-sm md:text-base">客户关系管理系统</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow-sm">CoolCRM Dashboard</h1>
+        <p className="text-white/60 mt-2 text-sm md:text-base">客户关系管理系统</p>
       </div>
 
       {/* 统计卡片 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 md:p-6">
-          <h3 className="text-base md:text-lg font-semibold mb-2">📊 总客户数</h3>
-          <p className="text-2xl md:text-3xl font-bold text-blue-400">{customers.length}</p>
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 md:p-6 shadow-lg hover:bg-white/15 transition-all duration-300">
+          <h3 className="text-base md:text-lg font-semibold mb-2 text-white/90">总客户数</h3>
+          <p className="text-2xl md:text-3xl font-bold text-blue-300">{customers.length}</p>
         </div>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 md:p-6">
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 md:p-6 shadow-lg hover:bg-white/15 transition-all duration-300">
           <Link href="/add" className="block h-full">
-            <h3 className="text-base md:text-lg font-semibold mb-2">➕ 新增客户</h3>
-            <p className="text-blue-400 hover:text-blue-300 text-sm md:text-base">点击添加新客户</p>
+            <h3 className="text-base md:text-lg font-semibold mb-2 text-white/90">新增客户</h3>
+            <p className="text-blue-300 hover:text-blue-200 text-sm md:text-base">点击添加新客户</p>
           </Link>
         </div>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 md:p-6">
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 md:p-6 shadow-lg hover:bg-white/15 transition-all duration-300">
           <Link href="/history" className="block h-full">
-            <h3 className="text-base md:text-lg font-semibold mb-2">📜 历史记录</h3>
-            <p className="text-blue-400 hover:text-blue-300 text-sm md:text-base">查看全部客户</p>
+            <h3 className="text-base md:text-lg font-semibold mb-2 text-white/90">历史记录</h3>
+            <p className="text-blue-300 hover:text-blue-200 text-sm md:text-base">查看全部客户</p>
           </Link>
         </div>
       </div>
@@ -64,51 +64,47 @@ export default function Home() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <Link
           href="/add"
-          className="bg-green-600 hover:bg-green-700 text-white p-4 rounded-xl text-center transition"
+          className="bg-green-500/20 backdrop-blur-xl hover:bg-green-500/30 text-green-200 hover:text-green-100 p-4 rounded-xl text-center transition-all duration-300 border border-green-400/30 hover:border-green-400/50 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
-          <div className="text-2xl mb-2">➕</div>
           <div className="text-sm font-medium">新增客户</div>
         </Link>
 
         <Link
           href="/history"
-          className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl text-center transition"
+          className="bg-blue-500/20 backdrop-blur-xl hover:bg-blue-500/30 text-blue-200 hover:text-blue-100 p-4 rounded-xl text-center transition-all duration-300 border border-blue-400/30 hover:border-blue-400/50 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
-          <div className="text-2xl mb-2">📋</div>
           <div className="text-sm font-medium">客户列表</div>
         </Link>
 
         <Link
           href="/visits"
-          className="bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-xl text-center transition"
+          className="bg-purple-500/20 backdrop-blur-xl hover:bg-purple-500/30 text-purple-200 hover:text-purple-100 p-4 rounded-xl text-center transition-all duration-300 border border-purple-400/30 hover:border-purple-400/50 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
-          <div className="text-2xl mb-2">📍</div>
           <div className="text-sm font-medium">拜访记录</div>
         </Link>
 
         <Link
           href="/settings"
-          className="bg-gray-600 hover:bg-gray-700 text-white p-4 rounded-xl text-center transition"
+          className="bg-gray-500/20 backdrop-blur-xl hover:bg-gray-500/30 text-gray-200 hover:text-gray-100 p-4 rounded-xl text-center transition-all duration-300 border border-gray-400/30 hover:border-gray-400/50 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
-          <div className="text-2xl mb-2">⚙️</div>
           <div className="text-sm font-medium">设置</div>
         </Link>
       </div>
 
       {/* 最近客户 */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 md:p-6">
-        <h3 className="text-lg font-semibold mb-4">🕒 最近客户</h3>
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 md:p-6 shadow-lg">
+        <h3 className="text-lg font-semibold mb-4 text-white/90">最近客户</h3>
         {loading ? (
           <div className="text-center py-8">
-            <div className="animate-spin inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mb-2"></div>
-            <p className="text-gray-400">加载中...</p>
+            <div className="animate-spin inline-block w-6 h-6 border-2 border-blue-300 border-t-transparent rounded-full mb-2"></div>
+            <p className="text-white/60">加载中...</p>
           </div>
         ) : customers.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-400 mb-4">暂无客户数据</p>
+            <p className="text-white/60 mb-4">暂无客户数据</p>
             <Link
               href="/add"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition inline-block"
+              className="bg-blue-500/20 backdrop-blur-xl hover:bg-blue-500/30 text-blue-200 hover:text-blue-100 px-6 py-2 rounded-xl transition-all duration-300 border border-blue-400/30 hover:border-blue-400/50 shadow-lg hover:shadow-xl inline-block"
             >
               添加第一个客户
             </Link>
@@ -116,23 +112,23 @@ export default function Home() {
         ) : (
           <div className="space-y-3">
             {customers.map((customer) => (
-              <div key={customer.id} className="flex justify-between items-center p-3 md:p-4 bg-gray-800 rounded-lg">
+              <div key={customer.id} className="flex justify-between items-center p-3 md:p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/10 transition-all duration-300">
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-white truncate">{customer.company_name}</p>
-                  <p className="text-sm text-gray-400">{customer.industry || "未分类"}</p>
+                  <p className="text-sm text-white/60">{customer.industry || "未分类"}</p>
                 </div>
                 <Link
                   href={`/edit/${customer.id}`}
-                  className="text-blue-400 hover:text-blue-300 ml-3 text-sm md:text-base whitespace-nowrap"
+                  className="text-blue-300 hover:text-blue-200 ml-3 text-sm md:text-base whitespace-nowrap transition-colors"
                 >
                   编辑 →
                 </Link>
               </div>
             ))}
-            <div className="text-center pt-4 border-t border-gray-700">
+            <div className="text-center pt-4 border-t border-white/20">
               <Link
                 href="/history"
-                className="text-blue-400 hover:text-blue-300 text-sm"
+                className="text-blue-300 hover:text-blue-200 text-sm transition-colors"
               >
                 查看全部客户 →
               </Link>

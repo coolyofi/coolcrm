@@ -21,13 +21,13 @@ export function Navigation() {
 
   if (loading) {
     return (
-      <aside className="w-64 bg-gray-900 border-r border-gray-800 p-6 hidden md:block">
+      <aside className="w-64 bg-white/10 backdrop-blur-xl border-r border-white/20 p-6 hidden md:block">
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-700 rounded mb-6"></div>
+          <div className="h-6 bg-white/20 rounded mb-6"></div>
           <div className="space-y-4">
-            <div className="h-4 bg-gray-700 rounded"></div>
-            <div className="h-4 bg-gray-700 rounded"></div>
-            <div className="h-4 bg-gray-700 rounded"></div>
+            <div className="h-4 bg-white/20 rounded"></div>
+            <div className="h-4 bg-white/20 rounded"></div>
+            <div className="h-4 bg-white/20 rounded"></div>
           </div>
         </div>
       </aside>
@@ -44,7 +44,7 @@ export function Navigation() {
       <div className="md:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="bg-gray-900 text-white p-2 rounded-lg shadow-lg border border-gray-700"
+          className="bg-white/10 backdrop-blur-xl text-white p-3 rounded-xl shadow-xl border border-white/20 transform transition-all duration-200 hover:scale-110 active:scale-95"
           aria-label="打开菜单"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,7 +60,7 @@ export function Navigation() {
       {/* 移动端遮罩 */}
       {isMobileMenuOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300 ease-in-out"
           onClick={closeMobileMenu}
         />
       )}
@@ -68,18 +68,20 @@ export function Navigation() {
       {/* 侧边栏 */}
       <aside className={`
         fixed md:static inset-y-0 left-0 z-50
-        w-64 bg-gray-900 border-r border-gray-800
-        transform transition-transform duration-300 ease-in-out
+        w-48 md:w-64 bg-white/10 backdrop-blur-xl border-r border-white/20
+        transform transition-all duration-300 ease-in-out shadow-2xl shadow-black/20
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0 md:block
       `}>
-        <div className="flex flex-col h-full p-6">
+        <div className="flex flex-col h-full p-4 md:p-6">
           {/* 头部 */}
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-xl font-bold">CoolCRM</h1>
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent drop-shadow-sm">
+              CoolCRM
+            </h1>
             <button
               onClick={signOut}
-              className="text-gray-400 hover:text-white text-sm transition p-1"
+              className="text-white/70 hover:text-white text-sm transition-all duration-200 p-2 rounded-xl hover:bg-white/10 backdrop-blur-sm border border-white/10"
               title="登出"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,47 +91,47 @@ export function Navigation() {
           </div>
 
           {/* 导航菜单 */}
-          <nav className="flex flex-col gap-2 flex-1">
+          <nav className="flex flex-col gap-1 md:gap-2 flex-1">
             <Link
               href="/"
               onClick={closeMobileMenu}
-              className="hover:text-white text-gray-400 transition px-3 py-2 rounded-lg hover:bg-gray-800"
+              className="flex items-center gap-3 hover:text-white text-white/70 transition-all duration-200 px-3 py-3 md:py-2 rounded-xl hover:bg-white/10 backdrop-blur-sm border border-transparent hover:border-white/20 hover:shadow-lg transform hover:scale-105"
             >
-              📊 Dashboard
+              <span className="hidden md:inline">Dashboard</span>
             </Link>
             <Link
               href="/add"
               onClick={closeMobileMenu}
-              className="hover:text-white text-gray-400 transition px-3 py-2 rounded-lg hover:bg-gray-800"
+              className="flex items-center gap-3 hover:text-white text-white/70 transition-all duration-200 px-3 py-3 md:py-2 rounded-xl hover:bg-white/10 backdrop-blur-sm border border-transparent hover:border-white/20 hover:shadow-lg transform hover:scale-105"
             >
-              ➕ 新增客户
+              <span className="hidden md:inline">新增客户</span>
             </Link>
             <Link
               href="/history"
               onClick={closeMobileMenu}
-              className="hover:text-white text-gray-400 transition px-3 py-2 rounded-lg hover:bg-gray-800"
+              className="flex items-center gap-3 hover:text-white text-white/70 transition-all duration-200 px-3 py-3 md:py-2 rounded-xl hover:bg-white/10 backdrop-blur-sm border border-transparent hover:border-white/20 hover:shadow-lg transform hover:scale-105"
             >
-              📋 历史记录
+              <span className="hidden md:inline">历史记录</span>
             </Link>
             <Link
               href="/visits"
               onClick={closeMobileMenu}
-              className="hover:text-white text-gray-400 transition px-3 py-2 rounded-lg hover:bg-gray-800"
+              className="flex items-center gap-3 hover:text-white text-white/70 transition-all duration-200 px-3 py-3 md:py-2 rounded-xl hover:bg-white/10 backdrop-blur-sm border border-transparent hover:border-white/20 hover:shadow-lg transform hover:scale-105"
             >
-              📍 拜访记录
+              <span className="hidden md:inline">拜访记录</span>
             </Link>
             <Link
               href="/settings"
               onClick={closeMobileMenu}
-              className="hover:text-white text-gray-400 transition px-3 py-2 rounded-lg hover:bg-gray-800"
+              className="flex items-center gap-3 hover:text-white text-white/70 transition-all duration-200 px-3 py-3 md:py-2 rounded-xl hover:bg-white/10 backdrop-blur-sm border border-transparent hover:border-white/20 hover:shadow-lg transform hover:scale-105"
             >
-              ⚙️ 设置
+              <span className="hidden md:inline">设置</span>
             </Link>
           </nav>
 
           {/* 用户信息 */}
-          <div className="mt-auto pt-6 border-t border-gray-800">
-            <div className="text-sm text-gray-500 truncate">
+          <div className="mt-auto pt-4 md:pt-6 border-t border-white/20">
+            <div className="text-xs md:text-sm text-white/60 truncate drop-shadow-sm">
               欢迎，{user.email}
             </div>
           </div>

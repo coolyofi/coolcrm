@@ -183,13 +183,13 @@ export default function Settings() {
       <Toaster position="top-right" />
       <div className="max-w-2xl mx-auto space-y-8 p-6">
         <div>
-          <h1 className="text-2xl font-bold">账户设置</h1>
-          <p className="text-gray-400 mt-1">管理你的账户信息和安全设置</p>
+          <h1 className="text-2xl font-bold text-white drop-shadow-sm">账户设置</h1>
+          <p className="text-white/60 mt-1">管理你的账户信息和安全设置</p>
         </div>
 
         {/* 昵称设置 */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h2 className="text-xl font-semibold mb-4">个人资料</h2>
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 shadow-lg">
+          <h2 className="text-xl font-semibold mb-4 text-white/90">个人资料</h2>
           <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
             <FormField label="昵称" error={profileForm.formState.errors.nickname?.message}>
               <Controller
@@ -200,7 +200,7 @@ export default function Settings() {
                     {...field}
                     type="text"
                     placeholder="输入你的昵称"
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full px-4 py-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
                   />
                 )}
               />
@@ -210,7 +210,7 @@ export default function Settings() {
               <button
                 type="submit"
                 disabled={savingProfile}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105"
+                className="flex-1 bg-blue-500/20 backdrop-blur-xl hover:bg-blue-500/30 disabled:bg-gray-500/20 text-blue-200 hover:text-blue-100 disabled:text-gray-400 font-medium py-3 px-4 rounded-xl transition-all duration-300 border border-blue-400/30 hover:border-blue-400/50 disabled:border-gray-400/30 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 {savingProfile ? (
                   <div className="flex items-center justify-center">
@@ -226,8 +226,8 @@ export default function Settings() {
         </div>
 
         {/* 密码修改 */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h2 className="text-xl font-semibold mb-4">修改密码</h2>
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 shadow-lg">
+          <h2 className="text-xl font-semibold mb-4 text-white/90">修改密码</h2>
           <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
             <FormField label="当前密码" error={passwordForm.formState.errors.currentPassword?.message}>
               <Controller
@@ -238,7 +238,7 @@ export default function Settings() {
                     {...field}
                     type="password"
                     placeholder="输入当前密码"
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full px-4 py-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
                   />
                 )}
               />
@@ -253,7 +253,7 @@ export default function Settings() {
                     {...field}
                     type="password"
                     placeholder="输入新密码（至少6位）"
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full px-4 py-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
                   />
                 )}
               />
@@ -268,7 +268,7 @@ export default function Settings() {
                     {...field}
                     type="password"
                     placeholder="再次输入新密码"
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    className="w-full px-4 py-3 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 transition-all duration-300"
                   />
                 )}
               />
@@ -278,7 +278,7 @@ export default function Settings() {
               <button
                 type="submit"
                 disabled={changingPassword}
-                className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105"
+                className="flex-1 bg-red-500/20 backdrop-blur-xl hover:bg-red-500/30 disabled:bg-gray-500/20 text-red-200 hover:text-red-100 disabled:text-gray-400 font-medium py-3 px-4 rounded-xl transition-all duration-300 border border-red-400/30 hover:border-red-400/50 disabled:border-gray-400/30 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 {changingPassword ? (
                   <div className="flex items-center justify-center">
@@ -294,22 +294,22 @@ export default function Settings() {
         </div>
 
         {/* 账户信息 */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h2 className="text-xl font-semibold mb-4">账户信息</h2>
+        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 shadow-lg">
+          <h2 className="text-xl font-semibold mb-4 text-white/90">账户信息</h2>
           <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-400">邮箱地址</label>
-              <p className="text-white">{user.email}</p>
+              <label className="block text-sm font-medium text-white/60">邮箱地址</label>
+              <p className="text-white/80">{user.email}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400">注册时间</label>
-              <p className="text-white">
+              <label className="block text-sm font-medium text-white/60">注册时间</label>
+              <p className="text-white/80">
                 {user.created_at ? new Date(user.created_at).toLocaleDateString('zh-CN') : '未知'}
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400">最后登录</label>
-              <p className="text-white">
+              <label className="block text-sm font-medium text-white/60">最后登录</label>
+              <p className="text-white/80">
                 {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString('zh-CN') : '未知'}
               </p>
             </div>

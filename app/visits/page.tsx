@@ -85,14 +85,14 @@ export default function Visits() {
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold">拜访记录</h1>
-            <p className="text-gray-400 mt-1">查看所有拜访历史</p>
+            <h1 className="text-2xl font-bold text-white drop-shadow-sm">拜访记录</h1>
+            <p className="text-white/60 mt-1">查看所有拜访历史</p>
           </div>
           <div className="flex gap-3">
             <button
               onClick={() => fetchVisits(true)}
               disabled={refreshing}
-              className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition flex items-center gap-2"
+              className="bg-green-500/20 backdrop-blur-xl hover:bg-green-500/30 disabled:bg-gray-500/20 text-green-200 hover:text-green-100 disabled:text-gray-400 font-medium py-2 px-4 rounded-xl transition-all duration-300 border border-green-400/30 hover:border-green-400/50 disabled:border-gray-400/30 shadow-lg hover:shadow-xl flex items-center gap-2"
             >
               {refreshing ? (
                 <>
@@ -113,46 +113,46 @@ export default function Visits() {
             </button>
             <Link
               href="/"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition"
+              className="bg-blue-500/20 backdrop-blur-xl hover:bg-blue-500/30 text-blue-200 hover:text-blue-100 font-medium py-2 px-4 rounded-xl transition-all duration-300 border border-blue-400/30 hover:border-blue-400/50 shadow-lg hover:shadow-xl"
             >
               返回首页
             </Link>
           </div>
         </div>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl overflow-hidden shadow-lg">
         {/* 桌面端表格 */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-800">
+            <thead className="bg-white/5">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
                   客户
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
                   拜访时间
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
                   位置
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
                   备注
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-700">
+            <tbody className="divide-y divide-white/10">
               {visits.map((visit) => (
-                <tr key={visit.id} className="hover:bg-gray-800">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                <tr key={visit.id} className="hover:bg-white/5 transition-all duration-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white/80">
                     {visit.customers?.[0]?.company_name || "未知客户"}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white/60">
                     {new Date(visit.visit_date).toLocaleString('zh-CN')}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white/60">
                     {visit.address || `${visit.latitude?.toFixed(6)}, ${visit.longitude?.toFixed(6)}` || "未知位置"}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-300">
+                  <td className="px-6 py-4 text-sm text-white/60">
                     {visit.notes || "-"}
                   </td>
                 </tr>
@@ -162,15 +162,15 @@ export default function Visits() {
         </div>
 
         {/* 移动端卡片布局 */}
-        <div className="md:hidden divide-y divide-gray-700">
+        <div className="md:hidden divide-y divide-white/10">
           {visits.map((visit) => (
-            <div key={visit.id} className="p-4 space-y-3">
+            <div key={visit.id} className="p-4 space-y-3 hover:bg-white/5 transition-all duration-300">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <h3 className="font-medium text-white text-lg">
                     {visit.customers?.[0]?.company_name || "未知客户"}
                   </h3>
-                  <p className="text-sm text-gray-400 mt-1">
+                  <p className="text-sm text-white/60 mt-1">
                     📅 {new Date(visit.visit_date).toLocaleString('zh-CN')}
                   </p>
                 </div>
@@ -178,16 +178,14 @@ export default function Visits() {
 
               <div className="space-y-2">
                 <div className="flex items-start gap-2">
-                  <span className="text-gray-500 text-sm mt-0.5">📍</span>
-                  <span className="text-gray-300 text-sm">
+                  <span className="text-white/80 text-sm">
                     {visit.address || `${visit.latitude?.toFixed(4)}, ${visit.longitude?.toFixed(4)}` || "未知位置"}
                   </span>
                 </div>
 
                 {visit.notes && (
                   <div className="flex items-start gap-2">
-                    <span className="text-gray-500 text-sm mt-0.5">📝</span>
-                    <span className="text-gray-300 text-sm">{visit.notes}</span>
+                    <span className="text-white/80 text-sm">{visit.notes}</span>
                   </div>
                 )}
               </div>
@@ -196,7 +194,7 @@ export default function Visits() {
         </div>
 
         {visits.length === 0 && (
-          <div className="text-center py-8 text-gray-400">
+          <div className="text-center py-8 text-white/60">
             暂无拜访记录
           </div>
         )}
