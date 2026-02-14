@@ -3,16 +3,21 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useAuth } from "@/components/AuthProvider"
-import { useNav } from "./useNav"
+import { useNav } from "./NavigationProvider"
 import { MENU_ITEMS } from "./constants"
 import { useScrollVelocity } from "../../hooks/useScrollVelocity"
 import React from "react"
 
-export function Drawer() {
-  const { drawerOpen, closeDrawer, mode } = useNav()
+export function DrawerOverlay() {
+  const { mode, sidebar, close } = useNav()
   const { signOut } = useAuth()
   const pathname = usePathname()
   const v = useScrollVelocity("content-scroll")
+
+  // Only show on mobile
+  if (mode !== "mobile") return null
+
+  const open = sidebar === "expanded"
 
   // Velocity boost: 0~2 -> 0~10px
   const boost = Math.min(10, v * 6)
@@ -41,7 +46,7 @@ export function Drawer() {
   const handlePointerUp = (e: React.PointerEvent) => {
     if (!isDragging || !startXRef.current) return
     setIsDragging(false)
-    
+
     const deltaX = e.clientX - startXRef.current.x
     const progress = Math.abs(translateX) / 100 // 0 to 1
     const velocity = Math.abs(deltaX) / (performance.now() - startXRef.current.startTime || 1) // rough velocity
@@ -49,30 +54,27 @@ export function Drawer() {
     if (progress > 0.3 || velocity > 0.6) {
       // Close
       setTranslateX(-110)
-      setTimeout(closeDrawer, 200)
+      setTimeout(close, 200)
     } else {
       // Snap back
       setTranslateX(0)
     }
   }
 
-  // Extra Safety: Never render drawer if not mobile, even if state says open
-  if (mode !== 'mobile') return null
-  
-  if (!drawerOpen) return null
+  if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-[60]">
+    <div className="fixed inset-0 z-[var(--z-drawer)]">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" 
-        onClick={closeDrawer} 
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity pointer-events-auto opacity-100"
+        onClick={close}
       />
-      
+
       {/* Drawer Content */}
-      <div 
-        className="absolute top-[60px] left-0 right-0 glass scrolled border-b border-[var(--glass-border)] rounded-b-[24px] shadow-2xl p-4 animate-slide-down flex flex-col gap-2 transition-transform duration-200"
-        style={{ 
+      <div
+        className="absolute top-[60px] left-0 right-0 glass scrolled border-b border-[var(--glass-border)] rounded-b-[24px] shadow-2xl p-4 animate-slide-down flex flex-col gap-2 transition-transform duration-200 pointer-events-auto"
+        style={{
           "--glass-blur-scrolled": `${blur}px`,
           transform: `translateX(${translateX}%)`
         } as React.CSSProperties}
@@ -86,11 +88,11 @@ export function Drawer() {
             <Link
               key={item.path}
               href={item.path}
-              onClick={closeDrawer}
+              onClick={close}
               className={`
                 flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200
-                ${isActive 
-                  ? 'bg-[var(--primary)]/10 text-[var(--primary)] font-medium' 
+                ${isActive
+                  ? 'bg-[var(--primary)]/10 text-[var(--primary)] font-medium'
                   : 'text-[var(--fg)] hover:bg-[var(--surface-solid)]'
                 }
               `}
@@ -102,12 +104,12 @@ export function Drawer() {
             </Link>
           )
         })}
-        
+
         <div className="h-px bg-[var(--border)] my-2" />
-        
+
         <button
           onClick={() => {
-            closeDrawer()
+            close()
             signOut()
           }}
           className="flex items-center gap-4 px-4 py-3 rounded-xl text-[var(--danger)] hover:bg-[var(--danger)]/5 transition-all w-full text-left"

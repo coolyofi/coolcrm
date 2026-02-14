@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useNav } from "./useNav"
+import { useNav } from "./NavigationProvider"
 import { usePathname } from "next/navigation"
 import { useScrollProgress } from "../../hooks/useScrollProgress"
 import { useScrollVelocity } from "../../hooks/useScrollVelocity"
@@ -9,7 +9,7 @@ import { useScrollVelocity } from "../../hooks/useScrollVelocity"
 function clamp(v: number, min: number, max: number) { return Math.max(min, Math.min(max, v)) }
 
 export function TopBar() {
-  const { openDrawer } = useNav()
+  const { mode, open } = useNav()
   const pathname = usePathname()
   const { p } = useScrollProgress("content-scroll", 56)
   const v = useScrollVelocity("content-scroll")
@@ -26,18 +26,20 @@ export function TopBar() {
 
   const compactOpacity = clamp((p - 0.2) / 0.8, 0, 1)
 
-  // Velocity boost: 0~2 -> 0~10px
-  const boost = Math.min(10, v * 6)
-  const blur = 28 + boost
+  // Only show on mobile/tablet
+  if (mode === "desktop") return null
 
   return (
     <div 
-      className="fixed top-0 left-0 right-0 z-50 h-[60px] glass scrolled border-b border-[var(--glass-border)] flex items-center justify-between px-4 safe-area-top backdrop-blur-md bg-[var(--glass-bg)]"
-      style={{ "--glass-blur-scrolled": `${blur}px` } as React.CSSProperties}
+      className="fixed top-0 left-0 right-0 h-[60px] glass scrolled border-b border-[var(--glass-border)] flex items-center justify-between px-4 safe-area-top backdrop-blur-md bg-[var(--glass-bg)]"
+      style={{ 
+        zIndex: 'var(--z-topbar)',
+        "--glass-blur-scrolled": `${blur}px` 
+      } as React.CSSProperties}
     >
       {/* Menu Trigger */}
       <button 
-        onClick={openDrawer}
+        onClick={open}
         className="p-2 -ml-2 text-[var(--fg)] active:scale-95 transition-transform"
         aria-label="Open Navigation"
       >

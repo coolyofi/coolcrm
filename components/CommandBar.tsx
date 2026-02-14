@@ -44,11 +44,12 @@ export function CommandBar() {
   return (
     <div
       className={`
-        fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom)+16px)] z-50
+        fixed left-1/2 -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom)+16px)]
         glass px-3 py-2 flex items-center gap-2
         transition-all duration-[var(--motion-base)] ease-[var(--ease)]
         ${hidden ? "opacity-0 translate-y-2 pointer-events-none" : "opacity-100 translate-y-0"}
       `}
+      style={{ zIndex: 'var(--z-overlay)' }}
     >
       {/* Search */}
       <button className="p-2 text-[var(--fg)] active:scale-95 transition-transform">

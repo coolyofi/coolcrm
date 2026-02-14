@@ -47,6 +47,13 @@
   --lt-title-min: 17px;
   --lt-subtitle-max: 13px;
   --lt-subtitle-min: 0px;
+
+  /* Layer System — Navigation Architecture */
+  --z-content: 1;
+  --z-topbar: 40;
+  --z-overlay: 50;
+  --z-drawer: 60;
+  --z-modal: 80;
 }
 
 /* ---------------- Dark (Liquid Glass) ---------------- */
@@ -344,4 +351,22 @@ main {
   [data-theme="light"] {
     --glass-blur-scrolled: 28px;
   }
+}
+
+/* ---------------- SVG Safety Rules ---------------- */
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---------------- Scroll Isolation (iOS Safari) ---------------- */
+html, body {
+  overflow: hidden;
+  height: 100%;
+}
+
+#content-scroll {
+  overflow-y: auto;
+  height: 100dvh;
+  -webkit-overflow-scrolling: touch;
 }
