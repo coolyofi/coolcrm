@@ -1,38 +1,77 @@
 name: CI
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  quality:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [20.x]
-
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: npm
 
-      - name: Install dependencies
+      - name: Install
         run: npm ci
 
-      - name: Run ESLint
+      # ✅ 只 lint 改动文件（超快）
+      - name: Lint changed files
+        if: github.event_name == 'pull_request'
+        run: |
+          npx eslint $(git diff --name-only origin/main...HEAD -- '*.ts' '*.tsx' || true) --max-warnings=0
+
+      # ✅ push main 仍跑全量 lint
+      - name: Lint (full)
+        if: github.event_name == 'push'
         run: npm run lint
 
       - name: Type check
         run: npm run type-check
 
-      - name: Run tests
+      - name: Tests
         run: npm run test
+
+  build:
+    if: github.event_name == 'push'
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # ✅ Next.js build cache（关键）
+      - name: Restore Next.js cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .next/cache
+          key: ${{ runner.os }}-nextcache-${{ hashFiles('package-lock.json') }}-${{ hashFiles('**/*.[jt]s', '**/*.[jt]sx', '**/*.[jt]s?') }}
+          restore-keys: |
+            ${{ runner.os }}-nextcache-${{ hashFiles('package-lock.json') }}-
 
       - name: Build
         run: npm run build
