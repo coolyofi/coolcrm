@@ -2,7 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 import type { NavMode, NavState } from "./constants"
-import { DEFAULT_DESKTOP_STATE, DEFAULT_TABLET_STATE, NAV_STORAGE_KEY } from "./constants"
+import { DEFAULT_DESKTOP_STATE, NAV_STORAGE_KEY } from "./constants"
 import { useNavMode } from "./useNavMode"
 import { useLockBodyScroll } from "./useLockBodyScroll"
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion"
@@ -78,7 +78,6 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     const persisted = readPersisted()
     if (persisted) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         setState(persisted)
     }
   }, [])
@@ -118,7 +117,6 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     } else {
       setState(persisted ?? DEFAULT_DESKTOP_STATE)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode])
 
   // Esc key handler

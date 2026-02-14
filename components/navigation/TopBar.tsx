@@ -33,7 +33,7 @@ export function TopBar() {
   return (
     <div 
       className="fixed top-0 left-0 right-0 z-50 h-[60px] glass scrolled border-b border-[var(--glass-border)] flex items-center justify-between px-4 safe-area-top backdrop-blur-md bg-[var(--glass-bg)]"
-      style={{ ["--glass-blur-scrolled" as any]: `${blur}px` }}
+      style={{ "--glass-blur-scrolled": `${blur}px` } as React.CSSProperties}
     >
       {/* Menu Trigger */}
       <button 

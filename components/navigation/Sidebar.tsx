@@ -23,7 +23,7 @@ export function Sidebar() {
   return (
     <aside
       className="fixed left-0 top-0 bottom-0 z-40 glass scrolled border-r border-[var(--border)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col backdrop-blur-xl"
-      style={{ width: navWidthPx, ["--glass-blur-scrolled" as any]: `${blur}px` }}
+      style={{ width: navWidthPx, "--glass-blur-scrolled": `${blur}px` } as React.CSSProperties}
     >
       {/* Header / Brand */}
       <div className="h-[60px] flex items-center justify-center px-4 border-b border-[var(--border)] shrink-0">

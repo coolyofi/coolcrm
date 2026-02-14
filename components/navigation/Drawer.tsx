@@ -21,30 +21,30 @@ export function Drawer() {
   // Swipe state
   const [translateX, setTranslateX] = React.useState(0)
   const [isDragging, setIsDragging] = React.useState(false)
-  const startXRef = React.useRef(0)
+  const startXRef = React.useRef<{ x: number; startTime: number } | null>(null)
   const startTranslateRef = React.useRef(0)
 
   const handlePointerDown = (e: React.PointerEvent) => {
     setIsDragging(true)
-    startXRef.current = e.clientX
+    startXRef.current = { x: e.clientX, startTime: performance.now() }
     startTranslateRef.current = translateX
     ;(e.target as Element).setPointerCapture(e.pointerId)
   }
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging) return
-    const deltaX = e.clientX - startXRef.current
+    if (!isDragging || !startXRef.current) return
+    const deltaX = e.clientX - startXRef.current.x
     const newTranslateX = Math.max(-100, Math.min(0, startTranslateRef.current + deltaX))
     setTranslateX(newTranslateX)
   }
 
   const handlePointerUp = (e: React.PointerEvent) => {
-    if (!isDragging) return
+    if (!isDragging || !startXRef.current) return
     setIsDragging(false)
     
-    const deltaX = e.clientX - startXRef.current
+    const deltaX = e.clientX - startXRef.current.x
     const progress = Math.abs(translateX) / 100 // 0 to 1
-    const velocity = Math.abs(deltaX) / (performance.now() - (startXRef.current as any).startTime || 1) // rough velocity
+    const velocity = Math.abs(deltaX) / (performance.now() - startXRef.current.startTime || 1) // rough velocity
 
     if (progress > 0.3 || velocity > 0.6) {
       // Close
@@ -73,9 +73,9 @@ export function Drawer() {
       <div 
         className="absolute top-[60px] left-0 right-0 glass scrolled border-b border-[var(--glass-border)] rounded-b-[24px] shadow-2xl p-4 animate-slide-down flex flex-col gap-2 transition-transform duration-200"
         style={{ 
-          ["--glass-blur-scrolled" as any]: `${blur}px`,
+          "--glass-blur-scrolled": `${blur}px`,
           transform: `translateX(${translateX}%)`
-        }}
+        } as React.CSSProperties}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}

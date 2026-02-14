@@ -25,7 +25,7 @@ export function useScrollDirection(scrollElId = "content-scroll", threshold = 6)
     el.addEventListener("scroll", onScroll, { passive: true })
     return () => {
       cancelAnimationFrame(raf)
-      el.removeEventListener("scroll", onScroll as any)
+      el.removeEventListener("scroll", onScroll)
     }
   }, [scrollElId, threshold])
 

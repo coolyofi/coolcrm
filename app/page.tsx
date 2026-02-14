@@ -91,8 +91,7 @@ export default function Home() {
         {/* Quick Goal Glance (Mini) or just another metric */}
          <KpiCard 
              title="High Intent"
-             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-             value={data.customers.recent.filter((c: any) => (c.intent_level || 0) >= 4).length} // Rough proxy
+             value={data.customers.recent.filter((c: { intent_level?: number }) => (c.intent_level || 0) >= 4).length} // Rough proxy
              previousValue={0} // No trend yet
              trendPercent={null}
              emptyLabel="No high intent leads yet"

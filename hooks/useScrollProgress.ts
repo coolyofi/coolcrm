@@ -21,7 +21,7 @@ export function useScrollProgress(scrollElId = "content-scroll", distance = 56) 
     onScroll()
     return () => {
       cancelAnimationFrame(raf)
-      el.removeEventListener("scroll", onScroll as any)
+      el.removeEventListener("scroll", onScroll)
     }
   }, [scrollElId])
 

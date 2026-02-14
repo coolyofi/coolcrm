@@ -10,16 +10,13 @@ export type DashboardData = {
   profile: { nickname: string | null } | null
   customers: {
     total: KpiTrend
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    recent: any[]
+    recent: unknown[]
   }
   visits: {
     thisMonth: KpiTrend
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    recent: any[]
+    recent: unknown[]
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  activity: any[] // Mixed timeline
+  activity: unknown[] // Mixed timeline
 }
 
 // Helper: Get start/end of current and last month
@@ -120,8 +117,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     .order("visit_date", { ascending: false })
     .limit(5)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const customersMapped = (recentCustomers || []).map((c: any) => ({
+  const customersMapped = (recentCustomers || []).map((c: { id: string; company_name: string; created_at: string }) => ({
     type: 'customer',
     id: c.id,
     title: `Added new customer`,
@@ -129,8 +125,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     date: c.created_at
   }))
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const visitsMapped = (recentVisits || []).map((v: any) => ({
+  const visitsMapped = (recentVisits || []).map((v: { id: string; customers: { company_name: string } | { company_name: string }[]; notes?: string; visit_date: string }) => ({
     type: 'visit',
     id: v.id,
     title: `Visited ${Array.isArray(v.customers) ? v.customers[0]?.company_name : v.customers?.company_name || 'Unknown'}`,
