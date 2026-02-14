@@ -1,15 +1,15 @@
-import { createMiddlewareClient } from "@supabase/ssr"
+import { createServerClient } from "@supabase/ssr"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
-  const supabase = createMiddlewareClient({
+  const supabase = createServerClient({
     cookies: {
       getAll() {
         return req.cookies.getAll()
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
         cookiesToSet.forEach(({ name, value, options }) => {
           res.cookies.set(name, value, options)
         })

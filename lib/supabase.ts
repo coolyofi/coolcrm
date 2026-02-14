@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { createServerComponentClient, createRouteHandlerClient, createMiddlewareClient } from '@supabase/ssr'
+import { createServerComponentClient, createRouteHandlerClient, createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 // Placeholder values used when environment variables are not set
@@ -60,7 +60,8 @@ export function createRouteSupabase(request: Request, response: Response) {
  * Safe to use in Middleware.
  */
 export function createMiddlewareSupabase(request: Request) {
-  return createMiddlewareClient({
+  // Use createServerClient as replacement for middleware client.
+  return createServerClient({
     cookies: () => request.cookies,
   })
 }
