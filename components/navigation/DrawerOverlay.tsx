@@ -14,6 +14,12 @@ export function DrawerOverlay() {
   const pathname = usePathname()
   const v = useScrollVelocity("content-scroll")
 
+  // Swipe state (only enabled for apple motion)
+  const [translateX, setTranslateX] = React.useState(0)
+  const [isDragging, setIsDragging] = React.useState(false)
+  const startXRef = React.useRef<{ x: number; startTime: number } | null>(null)
+  const startTranslateRef = React.useRef(0)
+
   // Only show on mobile
   if (mode !== "mobile") return null
 
@@ -22,12 +28,6 @@ export function DrawerOverlay() {
   // Velocity boost: 0~2 -> 0~10px
   const boost = Math.min(10, v * 6)
   const blur = 28 + boost
-
-// Swipe state (only enabled for apple motion)
-  const [translateX, setTranslateX] = React.useState(0)
-  const [isDragging, setIsDragging] = React.useState(false)
-  const startXRef = React.useRef<{ x: number; startTime: number } | null>(null)
-  const startTranslateRef = React.useRef(0)
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!motion.drawerDragEnabled) return
