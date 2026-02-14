@@ -1,7 +1,7 @@
 # Navigation Layering System v2 Specification
 
-**Status**: Phase 3 Implemented ✓  
-**Last Updated**: 2024  
+**Status**: Phase 3 Implemented ✓ | OS Layer Stabilization In Progress
+**Last Updated**: 2024
 **Owner**: CoolCRM Engineering Team
 
 ---
@@ -14,41 +14,88 @@ The Navigation Layering System v2 is a formal architectural specification for ma
 
 ---
 
-## Problem Statement
+## Standardized Bug Categories
 
-The initial navigation architecture exhibited visual instability across multiple dimensions:
+Based on systematic analysis of navigation issues, we've identified 6 standardized bug categories that cover all known navigation problems:
 
-### 1. **Layering Instability** 
-- **Problem**: Navigation and Content layers sharing stacking contexts due to `transform` properties at content level
-- **Symptom**: Elements appearing behind/in front unexpectedly despite correct z-index values
-- **Root Cause**: CSS `transform`, `filter`, or `backdrop-filter` creates new stacking context, breaking explicit z-index hierarchy
+### A. Navigation Double Mount（导航重复渲染 / 双实例）
+**现象**: 左上角出现两套 Sidebar（桌面截图里的"两个卡片叠着"）
+**常见根因**: 同一断点下 Drawer 和 Sidebar 同时渲染，或者 AppShell 被嵌套渲染一次
+**当前状态**: 仓库中存在两套路由侧栏实现（DrawerOverlay 以及旧的 Drawer/useNav）
 
-### 2. **Glass Rendering Conflict**
-- **Problem**: `backdrop-filter` blur reads incorrect pixels, glow/blur effects overlap unpredictably
-- **Symptom**: Glass topbar/sidebar shows distorted blur, glow extends beyond intended bounds
-- **Root Cause**: Missing `isolation: isolate` property allows backdrop-filter to read/render through adjacent stacking contexts
+### B. Layer Stack Inversion（层级栈反了 / z-index 与 hit-testing 错）
+**现象**: iPhone 竖屏时抽屉字能点，但内容文字/标题被叠住；或反过来抽屉看得见但点不到下面项
+**根因**: position: fixed + backdrop-filter + transform 形成新的 stacking context，z-index 没统一标准；再叠加 pointer-events 没隔离
 
-### 3. **Drawer Doesn't Freeze Content**
-- **Problem**: Content remains interactive and visually active when mobile drawer opens
-- **Symptom**: User can interact with background content; visual focus unclear on drawer
-- **Root Cause**: CSS pointer-events blocking only; missing visual depth cues (scale/saturation reduction)
+### C. Glass Bloom Bleed（玻璃光晕/blur"漏光"到不该出现的位置）
+**现象**: 绿色/蓝色亮光其实是按钮，但按钮没正常显示出来；页面背景出现奇怪的彩色 blob
+**根因**: 光晕层（通常是 pseudo-element 或绝对定位渐变）没被 clip 到卡片容器内，或者被错误放进了 navigation layer，导致越界叠加
 
-### 4. **Mobile Topbar Separation**
-- **Problem**: Content visually collides with top navigation bar
-- **Symptom**: Text/elements overlap with topbar; scroll doesn't provide adequate top spacing
-- **Root Cause**: Content doesn't account for topbar height; topbar z-index doesn't establish clear visual boundary
+### D. Sidebar Geometry Drift（侧栏几何不一致：不贴底、不连贯、图标尺寸不统一）
+**现象**: iPad/桌面侧栏像"吊在那"，不从上到下连贯；折叠/展开时底部 Collapse 区域居中、与上面 icon 风格不一致
+**根因**: Sidebar 容器不是 h-screen 的固定 OS 区域，而是一个内容卡片；内部布局没用 flex-col h-full 把底部操作 push 到底
 
-### 5. **Glow Containment Failure**
-- **Problem**: Button glow/shadows extend outside card boundaries
-- **Symptom**: Visual elements "bleed" outside their containers; inconsistent visual boundaries
-- **Root Cause**: Cards lack `overflow: hidden` to clip inner shadows/glows
+### E. Breakpoint Mode Conflict（断点模式冲突：横屏/桌面出现"大图标占屏、页面像没渲染"）
+**现象**: 横屏/桌面只剩一个巨大图形（看起来像某个空态 icon 被无限放大），正文没出现
+**根因**: 主内容区高度/滚动容器计算错（100dvh + body lock + 某些容器又 min-h），导致内容被挤出视口，只剩背景层或空态层露出来
 
-### 6. **Stacking Context + Blur Clipping**
-- **Problem**: Edge artifacts from missing isolation property combining with backdrop-filter
-- **Symptom**: Blurred edges show pixel artifacts; visual blur appears "cut off"
-- **Root Cause**: `backdrop-filter` without `isolation: isolate` reads from outside its intended bounds
+### F. TopBar / Content Offset Misalignment（顶部栏与内容没有建立系统级"安全边距契约"）
+**现象**: 标题/大字和抽屉菜单互相压住（iPhone Dashboard 的"Good evening..."和菜单重叠）
+**根因**: TopBar 是 fixed，但内容区没有统一的 padding-top: var(--topbar-h)；或 Drawer 打开时没有把内容层 lock/降级
 
 ---
+
+## Actionable Fix Plan: OS Layer Stabilization
+
+### 双轨架构策略
+- **motionLevel: "stable"**: 没有 velocity blur / inertia / proximity，所有动画只用 motion tokens，目标是 0 layout shift、0 点击穿透
+- **motionLevel: "apple"**: 在 stable 的基础上叠加 Large Title collapse、scroll velocity blur、proximity expand 等
+
+### Phase 1（必须先做，1 天内能把 90% 炸点灭掉）
+**目标**: 消灭 A/B/F/E（双实例、层级、offset、断点冲突）
+
+#### 1. 统一"单实例导航渲染"
+只保留一套路由导航实现：保留 NavigationProvider + Sidebar + TopBar + DrawerOverlay。把旧 Drawer/useNav 彻底下线。
+
+#### 2. 建立 OS Layer 的结构契约（AppShell 固定三层）
+- NavigationLayer（fixed，左侧，h-screen）
+- TopBarLayer（fixed，顶部，含 safe-area）
+- ContentScrollLayer（唯一滚动容器）
+
+#### 3. 统一 z-index tokens
+```css
+--z-content: 0
+--z-topbar: 40
+--z-nav: 50
+--z-drawer-backdrop: 60
+--z-drawer: 70
+--z-modal: 90
+```
+
+#### 4. 内容区强制 offset
+TopBar 存在时，ContentScroll 必须 padding-top: var(--topbar-h)
+
+#### 5. iPad auto behavior（先做稳定版）
+- <768：mobile（Drawer）
+- 768–1024：tablet（Sidebar 固定 + TopBar）
+- >=1024：desktop（Sidebar 固定 + 可开启 proximity）
+
+### Phase 2（半天到 1 天）：Sidebar "从上到下做到底"
+**目标**: iPad/桌面侧栏变成真正"系统侧栏"，解决 D（丑、吊着、不和谐）
+
+- Sidebar 外层：fixed left-0 top-0 h-[100dvh]
+- Sidebar 内层：flex flex-col h-full
+- 菜单区：flex-1 overflow-y-auto
+- 底部区（Collapse、Settings、Profile）：mt-auto 固定到底
+- Icon 统一：折叠态用 24px 或 20px
+- 折叠态不要"居中那块单独卡片"，要么做成底部一条 action，要么做成最后一个 menu item
+
+### Phase 3（再上 Apple Motion 轨）
+**目标**: proximity / large title / velocity blur，只在 motionLevel="apple" 下启用
+
+- Mouse proximity expand：只在 pointer:fine 且 desktop 启用
+- Large Title collapse：TopBar 读取 content-scroll 的 scroll progress
+- Scroll velocity blur：只加在 nav/topbar 的玻璃层，不要加在内容卡片层
 
 ## Solution Architecture
 
