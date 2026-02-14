@@ -116,22 +116,22 @@ export default function History() {
         </div>
       </div>
 
-      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl overflow-hidden shadow-lg">
+      <div className="glass overflow-hidden shadow-lg">
         {loading ? (
-          <div className="p-6 text-center text-gray-400">
-            <div className="animate-spin inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mb-2"></div>
+          <div className="p-6 text-center text-[var(--fg-muted)]">
+            <div className="animate-spin inline-block w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full mb-2"></div>
             <p>加载中...</p>
           </div>
         ) : filteredCustomers.length === 0 ? (
-          <div className="p-6 text-center text-gray-400">
+          <div className="p-6 text-center text-[var(--fg-muted)]">
             {customers.length === 0 ? "暂无数据" : "没有匹配的客户"}
           </div>
         ) : (
           <>
             {/* 桌面端表格 */}
             <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-white/5 text-white/70">
+              <table className="w-full text-sm text-[var(--fg)]">
+                <thead className="bg-[var(--surface-solid)] text-[var(--fg-muted)]">
                   <tr>
                     <th className="p-4 text-left">公司</th>
                     <th className="p-4 text-left">行业</th>
@@ -145,45 +145,43 @@ export default function History() {
                   {filteredCustomers.map((c) => (
                     <tr
                       key={c.id}
-                      className="border-t border-white/10 hover:bg-white/5 transition-all duration-300"
+                      className="border-t border-[var(--border)] hover:bg-[var(--glass-bg)] transition-all duration-300"
                     >
                       <td className="p-4">
                         <div>
-                          <p className="font-medium">{c.company_name}</p>
-                          {c.notes && <p className="text-xs text-gray-500 mt-1">{c.notes.slice(0, 50)}...</p>}
+                          <p className="font-medium text-[var(--fg)]">{c.company_name}</p>
+                          {c.notes && <p className="text-xs text-[var(--fg-muted)] mt-1">{c.notes.slice(0, 50)}...</p>}
                         </div>
                       </td>
-                      <td className="p-4 text-white/70">
+                      <td className="p-4 text-[var(--fg-muted)]">
                         {c.industry || "-"}
                       </td>
-                      <td className="p-4 text-white/70">
+                      <td className="p-4 text-[var(--fg-muted)]">
                         {c.contact || "-"}
                       </td>
                       <td className="p-4">
                         <span className={`px-2 py-1 rounded-md text-xs ${
                           c.intent_level >= 4 ? 'bg-green-600/20 text-green-400' :
-                          c.intent_level >= 3 ? 'bg-yellow-600/20 text-yellow-400' :
-                          'bg-red-600/20 text-red-400'
+                          c.intent_level >= 3 ? 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400' :
+                          'bg-red-500/20 text-red-600 dark:text-red-400'
                         }`}>
                           {c.intent_level}
                         </span>
                       </td>
-                      <td className="p-4 text-white/70">
+                      <td className="p-4 text-[var(--fg-muted)]">
                         {c.visit_date ? new Date(c.visit_date).toLocaleDateString() : "-"}
                       </td>
                       <td className="p-4">
                         <div className="flex gap-2">
                           <Link
                             href={`/edit/${c.id}`}
-                            className="text-blue-300 hover:text-blue-200 transition-colors"
+                            className="text-[var(--primary)] hover:text-blue-400 transition-colors"
                           >
                             编辑
                           </Link>
                           <button
                             onClick={() => handleDelete(c.id)}
-                            className="text-red-300 hover:text-red-200 transition-colors"
-                          >
-                            删除
+                            className="text-[var(--danger)]
                           </button>
                         </div>
                       </td>
@@ -194,23 +192,23 @@ export default function History() {
             </div>
 
             {/* 移动端卡片布局 */}
-            <div className="md:hidden space-y-4">
+            <div className="md:hidden space-y-4 p-4">
               {filteredCustomers.map((c) => (
                 <div
                   key={c.id}
-                  className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 space-y-3 hover:bg-white/10 transition-all duration-300"
+                  className="glass p-4 space-y-3 hover:bg-[var(--surface-solid)] transition-all duration-300"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h3 className="font-medium text-lg text-white">{c.company_name}</h3>
+                      <h3 className="font-medium text-lg text-[var(--fg)]">{c.company_name}</h3>
                       {c.notes && (
-                        <p className="text-sm text-white/60 mt-1">{c.notes.slice(0, 80)}...</p>
+                        <p className="text-sm text-[var(--fg-muted)] mt-1">{c.notes.slice(0, 80)}...</p>
                       )}
                     </div>
                     <span className={`px-2 py-1 rounded-md text-xs ml-2 ${
-                      c.intent_level >= 4 ? 'bg-green-600/20 text-green-400' :
-                      c.intent_level >= 3 ? 'bg-yellow-600/20 text-yellow-400' :
-                      'bg-red-600/20 text-red-400'
+                      c.intent_level >= 4 ? 'bg-green-500/20 text-green-600 dark:text-green-400' :
+                      c.intent_level >= 3 ? 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400' :
+                      'bg-red-500/20 text-red-600 dark:text-red-400'
                     }`}>
                       意向 {c.intent_level}
                     </span>
@@ -218,31 +216,31 @@ export default function History() {
 
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="text-white/60">行业：</span>
-                      <span className="text-white/80">{c.industry || "-"}</span>
+                      <span className="text-[var(--fg-muted)]">行业：</span>
+                      <span className="text-[var(--fg)]">{c.industry || "-"}</span>
                     </div>
                     <div>
-                      <span className="text-white/60">联系人：</span>
-                      <span className="text-white/80">{c.contact || "-"}</span>
+                      <span className="text-[var(--fg-muted)]">联系人：</span>
+                      <span className="text-[var(--fg)]">{c.contact || "-"}</span>
                     </div>
                     <div className="col-span-2">
-                      <span className="text-white/60">拜访日期：</span>
-                      <span className="text-white/80">
+                      <span className="text-[var(--fg-muted)]">拜访日期：</span>
+                      <span className="text-[var(--fg)]">
                         {c.visit_date ? new Date(c.visit_date).toLocaleDateString() : "-"}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex gap-3 pt-2 border-t border-white/10">
+                  <div className="flex gap-3 pt-2 border-t border-[var(--border)]">
                     <Link
                       href={`/edit/${c.id}`}
-                      className="flex-1 bg-blue-500/20 backdrop-blur-xl hover:bg-blue-500/30 text-blue-200 hover:text-blue-100 text-center py-2 px-4 rounded-xl transition-all duration-300 border border-blue-400/30 hover:border-blue-400/50 shadow-lg hover:shadow-xl text-sm font-medium"
+                      className="flex-1 bg-[var(--primary)] text-white text-center py-2 px-4 rounded-xl transition-all duration-300 hover:brightness-110 shadow-lg text-sm font-medium"
                     >
                       编辑
                     </Link>
                     <button
                       onClick={() => handleDelete(c.id)}
-                      className="flex-1 bg-red-500/20 backdrop-blur-xl hover:bg-red-500/30 text-red-200 hover:text-red-100 py-2 px-4 rounded-xl transition-all duration-300 border border-red-400/30 hover:border-red-400/50 shadow-lg hover:shadow-xl text-sm font-medium"
+                      className="flex-1 bg-[var(--danger)] text-white py-2 px-4 rounded-xl transition-all duration-300 hover:brightness-110 shadow-lg text-sm font-medium"
                     >
                       删除
                     </button>

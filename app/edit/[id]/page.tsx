@@ -222,10 +222,10 @@ export default function EditCustomer() {
     return (
       <div className="max-w-2xl mx-auto space-y-6 p-6" aria-live="polite">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-700 rounded mb-4"></div>
+          <div className="h-8 bg-[var(--surface-solid)] rounded mb-4"></div>
           <div className="space-y-4">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-10 bg-gray-700 rounded"></div>
+              <div key={i} className="h-10 bg-[var(--surface-solid)] rounded"></div>
             ))}
           </div>
         </div>
@@ -234,11 +234,11 @@ export default function EditCustomer() {
   }
 
   if (error) {
-    return <div className="p-6 text-red-400" role="alert">加载失败: {error.message}</div>
+    return <div className="p-6 text-[var(--danger)]" role="alert">加载失败: {error.message}</div>
   }
 
   if (!customer) {
-    return <div className="p-6 text-red-400" role="alert">客户不存在</div>
+    return <div className="p-6 text-[var(--danger)]" role="alert">客户不存在</div>
   }
 
   return (
@@ -246,11 +246,11 @@ export default function EditCustomer() {
       <Toaster position="top-center" />
       <div className="max-w-2xl mx-auto space-y-4 md:space-y-6 px-4 md:px-0">
         <div className="pt-4 md:pt-0">
-          <h1 className="text-xl md:text-2xl font-bold text-white drop-shadow-sm">编辑客户</h1>
-          <p className="text-white/60 mt-1 text-sm md:text-base">修改客户信息</p>
+          <h1 className="text-xl md:text-2xl font-bold text-[var(--fg)] drop-shadow-sm">编辑客户</h1>
+          <p className="text-[var(--fg-muted)] mt-1 text-sm md:text-base">修改客户信息</p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 md:p-6 space-y-4 md:space-y-4 shadow-lg" noValidate>
+        <form onSubmit={handleSubmit(onSubmit)} className="glass p-4 md:p-6 space-y-4 md:space-y-4 shadow-lg" noValidate>
           <FormField label="公司名称 *" error={errors.company_name?.message}>
             <Controller
               name="company_name"
@@ -261,7 +261,7 @@ export default function EditCustomer() {
                   type="text"
                   required
                   aria-describedby={errors.company_name ? "company_name_error" : undefined}
-                  className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
+                  className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] placeholder-[var(--fg-muted)] transition-all duration-300"
                 />
               )}
             />
@@ -275,7 +275,7 @@ export default function EditCustomer() {
                 <select
                   {...field}
                   aria-label="选择行业"
-                  className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white transition-all duration-300"
+                  className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] transition-all duration-300"
                 >
                   {memoizedIndustries.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -299,7 +299,7 @@ export default function EditCustomer() {
                   max="5"
                   onChange={(e) => field.onChange(Number(e.target.value))}
                   aria-describedby={errors.intent_level ? "intent_level_error" : undefined}
-                  className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white transition-all duration-300"
+                  className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] transition-all duration-300"
                 />
               )}
             />
@@ -314,7 +314,7 @@ export default function EditCustomer() {
                   {...field}
                   type="date"
                   aria-label="选择拜访日期"
-                  className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white transition-all duration-300"
+                  className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] transition-all duration-300"
                 />
               )}
             />
@@ -329,7 +329,7 @@ export default function EditCustomer() {
                   {...field}
                   type="text"
                   aria-label="输入联系人"
-                  className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
+                  className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] placeholder-[var(--fg-muted)] transition-all duration-300"
                 />
               )}
             />
@@ -344,7 +344,7 @@ export default function EditCustomer() {
                   {...field}
                   rows={3}
                   aria-label="输入备注"
-                  className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
+                  className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] placeholder-[var(--fg-muted)] transition-all duration-300"
                 />
               )}
             />
@@ -360,7 +360,7 @@ export default function EditCustomer() {
                   type="text"
                   placeholder="纬度"
                   aria-label="输入纬度"
-                  className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
+                  className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] placeholder-[var(--fg-muted)] transition-all duration-300"
                 />
               )}
             />
@@ -376,7 +376,7 @@ export default function EditCustomer() {
                   type="text"
                   placeholder="经度"
                   aria-label="输入经度"
-                  className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
+                  className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] placeholder-[var(--fg-muted)] transition-all duration-300"
                 />
               )}
             />
@@ -392,7 +392,7 @@ export default function EditCustomer() {
                   type="text"
                   placeholder="详细地址"
                   aria-label="输入地址"
-                  className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
+                  className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] placeholder-[var(--fg-muted)] transition-all duration-300"
                 />
               )}
             />
@@ -403,7 +403,7 @@ export default function EditCustomer() {
               type="submit"
               disabled={saving}
               aria-disabled={saving}
-              className="flex-1 bg-blue-500/20 backdrop-blur-xl hover:bg-blue-500/30 disabled:bg-gray-500/20 text-blue-200 hover:text-blue-100 disabled:text-gray-400 font-medium py-3 px-6 rounded-xl transition-all duration-300 border border-blue-400/30 hover:border-blue-400/50 disabled:border-gray-400/30 shadow-lg hover:shadow-xl text-base"
+              className="flex-1 bg-[var(--primary)] text-white disabled:bg-[var(--fg-muted)]/20 disabled:text-[var(--fg-muted)] font-medium py-3 px-6 rounded-xl transition-all duration-300 hover:brightness-110 shadow-lg text-base"
             >
               {saving ? "保存中..." : "💾 保存"}
             </button>
@@ -411,14 +411,14 @@ export default function EditCustomer() {
               type="button"
               onClick={recordVisit}
               disabled={recordingVisit}
-              className="flex-1 bg-green-500/20 backdrop-blur-xl hover:bg-green-500/30 disabled:bg-gray-500/20 text-green-200 hover:text-green-100 disabled:text-gray-400 font-medium py-3 px-6 rounded-xl transition-all duration-300 border border-green-400/30 hover:border-green-400/50 disabled:border-gray-400/30 shadow-lg hover:shadow-xl text-base"
+              className="flex-1 bg-green-500/20 backdrop-blur-xl hover:bg-green-500/30 disabled:bg-gray-500/20 text-green-600 dark:text-green-200 hover:text-green-700 dark:hover:text-green-100 disabled:text-gray-400 font-medium py-3 px-6 rounded-xl transition-all duration-300 border border-green-400/30 hover:border-green-400/50 disabled:border-gray-400/30 shadow-lg hover:shadow-xl text-base"
             >
               {recordingVisit ? "记录中..." : "记录拜访"}
             </button>
             <button
               type="button"
               onClick={() => router.push("/")}
-              className="flex-1 md:flex-none bg-gray-500/20 backdrop-blur-xl hover:bg-gray-500/30 text-gray-200 hover:text-gray-100 font-medium py-3 px-6 rounded-xl transition-all duration-300 border border-gray-400/30 hover:border-gray-400/50 shadow-lg hover:shadow-xl text-base"
+              className="flex-1 md:flex-none bg-[var(--surface-solid)] text-[var(--fg)] hover:bg-[var(--glass-border)] font-medium py-3 px-6 rounded-xl transition-all duration-300 border border-[var(--border)] hover:border-[var(--glass-border)] shadow-lg hover:shadow-xl text-base"
             >
               取消
             </button>

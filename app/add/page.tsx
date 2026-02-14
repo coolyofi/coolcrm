@@ -123,24 +123,24 @@ export default function AddCustomer() {
 
         <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-4 md:p-6 space-y-4 md:space-y-4 shadow-lg">
           <div>
-            <label className="block text-sm font-medium mb-2">公司名称 *</label>
+            <label className="block text-sm font-medium mb-2 text-[var(--fg-muted)]">公司名称 *</label>
             <input
               type="text"
               placeholder="请输入公司名称"
               value={company}
               onChange={(e) => setCompany(e.target.value)}
               required
-              className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
+              className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] placeholder-[var(--fg-muted)] transition-all duration-300"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">行业</label>
+              <label className="block text-sm font-medium mb-2 text-[var(--fg-muted)]">行业</label>
               <select
                 value={industry}
                 onChange={(e) => setIndustry(e.target.value)}
-                className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white transition-all duration-300"
+                className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] transition-all duration-300"
               >
                 <option value="">请选择行业</option>
                 <option value="科技">科技</option>
@@ -154,60 +154,60 @@ export default function AddCustomer() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">意向等级 (1-5)</label>
+              <label className="block text-sm font-medium mb-2 text-[var(--fg-muted)]">意向等级 (1-5)</label>
               <input
                 type="number"
                 min="1"
                 max="5"
                 value={intentLevel}
                 onChange={(e) => setIntentLevel(Number(e.target.value))}
-                className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white transition-all duration-300"
+                className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] transition-all duration-300"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">拜访日期</label>
+              <label className="block text-sm font-medium mb-2 text-[var(--fg-muted)]">拜访日期</label>
               <input
                 type="date"
                 value={visitDate}
                 onChange={(e) => setVisitDate(e.target.value)}
-                className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white transition-all duration-300"
+                className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] transition-all duration-300"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">联系人</label>
+              <label className="block text-sm font-medium mb-2 text-[var(--fg-muted)]">联系人</label>
               <input
                 type="text"
                 placeholder="请输入联系人姓名"
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
-                className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
+                className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] placeholder-[var(--fg-muted)] transition-all duration-300"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">备注</label>
+            <label className="block text-sm font-medium mb-2 text-[var(--fg-muted)]">备注</label>
             <textarea
               placeholder="请输入备注信息"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
+              className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] placeholder-[var(--fg-muted)] transition-all duration-300"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">地理位置</label>
+            <label className="block text-sm font-medium mb-2 text-[var(--fg-muted)]">地理位置</label>
             <div className="space-y-3">
               <button
                 type="button"
                 onClick={getCurrentLocation}
                 disabled={locationLoading}
-                className="w-full md:w-auto px-6 py-3 bg-green-500/20 backdrop-blur-xl hover:bg-green-500/30 disabled:bg-gray-500/20 text-green-200 hover:text-green-100 disabled:text-gray-400 font-medium rounded-xl transition-all duration-300 border border-green-400/30 hover:border-green-400/50 disabled:border-gray-400/30 shadow-lg hover:shadow-xl"
+                className="w-full md:w-auto px-6 py-3 bg-green-500/20 backdrop-blur-xl hover:bg-green-500/30 disabled:bg-gray-500/20 text-green-600 dark:text-green-200 hover:text-green-700 dark:hover:text-green-100 disabled:text-gray-400 font-medium rounded-xl transition-all duration-300 border border-green-400/30 hover:border-green-400/50 disabled:border-gray-400/30 shadow-lg hover:shadow-xl"
               >
                 {locationLoading ? "获取中..." : "获取当前位置"}
               </button>
@@ -217,22 +217,21 @@ export default function AddCustomer() {
                   placeholder="纬度"
                   value={latitude}
                   onChange={(e) => setLatitude(e.target.value)}
-                  className="px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
+                  className="px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] placeholder-[var(--fg-muted)] transition-all duration-300"
                 />
                 <input
                   type="text"
                   placeholder="经度"
                   value={longitude}
                   onChange={(e) => setLongitude(e.target.value)}
-                  className="px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
-                />
+                  className="px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]
               </div>
               <input
                 type="text"
                 placeholder="详细地址（可手动调整）"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="w-full px-4 py-3 text-base bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 text-white placeholder-white/50 transition-all duration-300"
+                className="w-full px-4 py-3 text-base bg-[var(--surface-solid)] border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)]/50 text-[var(--fg)] placeholder-[var(--fg-muted)] transition-all duration-300"
               />
             </div>
           </div>
@@ -240,7 +239,7 @@ export default function AddCustomer() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500/20 backdrop-blur-xl hover:bg-blue-500/30 disabled:bg-gray-500/20 text-blue-200 hover:text-blue-100 disabled:text-gray-400 font-medium py-4 px-6 rounded-xl transition-all duration-300 border border-blue-400/30 hover:border-blue-400/50 disabled:border-gray-400/30 shadow-lg hover:shadow-xl text-lg"
+            className="w-full bg-[var(--primary)] text-white disabled:bg-[var(--fg-muted)]/20 disabled:text-[var(--fg-muted)] font-medium py-4 px-6 rounded-xl transition-all duration-300 hover:brightness-110 shadow-lg text-lg"
           >
             {loading ? "提交中..." : "提交"}
           </button>
