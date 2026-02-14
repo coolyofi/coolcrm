@@ -14,7 +14,7 @@ interface Visit {
   notes: string | null
   customers: {
     company_name: string
-  }
+  }[]
 }
 
 export default function Visits() {
@@ -101,7 +101,7 @@ export default function Visits() {
               {visits.map((visit) => (
                 <tr key={visit.id} className="hover:bg-gray-800">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                    {visit.customers?.company_name || "未知客户"}
+                    {visit.customers?.[0]?.company_name || "未知客户"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                     {new Date(visit.visit_date).toLocaleString('zh-CN')}
