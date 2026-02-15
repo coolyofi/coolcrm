@@ -124,12 +124,12 @@ export default function History() {
   const uniqueIndustries = Array.from(new Set(customers.map(c => c.industry).filter(Boolean)))
 
   return (
-    <main className="max-w-[1200px] mx-auto min-h-screen p-6 sm:p-8 space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6">
       <Toaster position="top-center" />
       
       {/* 1. Page Header */}
       <PageHeader
-        title="客户 / 历史记录"
+        title="历史记录"
         subtitle="管理所有客户拜访与意向数据"
         actions={
           <Button asChild>
@@ -159,7 +159,7 @@ export default function History() {
             placeholder="搜索公司名称或联系人..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl leading-5 text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:ring-[4px] focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all sm:text-sm"
+            className="block w-full pl-[36px] pr-3 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-lg leading-5 text-[var(--fg)] placeholder:pl-5 placeholder-[var(--fg-muted)] focus:outline-none focus:ring-[4px] focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all sm:text-sm"
           />
         </div>
         
@@ -168,7 +168,7 @@ export default function History() {
              <select
               value={industryFilter}
               onChange={(e) => setIndustryFilter(e.target.value)}
-              className="appearance-none block w-full pl-4 pr-10 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] focus:outline-none focus:ring-[4px] focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all sm:text-sm cursor-pointer"
+              className="appearance-none block w-full pl-4 pr-10 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-lg text-[var(--fg)] focus:outline-none focus:ring-[4px] focus:ring-[var(--primary)]/20 focus:border-[var(--primary)] transition-all sm:text-sm cursor-pointer"
             >
               <option value="">所有行业</option>
               {uniqueIndustries.map(industry => (
@@ -184,7 +184,7 @@ export default function History() {
       </div>
 
       {/* 3. List Container (Solid Surface) */}
-      <div className="surface-solid rounded-[24px] border border-[var(--border)] flex flex-col overflow-hidden text-[var(--fg)] min-h-[400px]">
+      <div className="surface-solid border border-[var(--border)] flex flex-col overflow-hidden text-[var(--fg)] min-h-[400px]">
         {/* List Header */}
         <div className="px-6 py-4 border-b border-[var(--border)] bg-[var(--surface-solid)] flex justify-between items-center bg-opacity-50">
            <div className="flex items-center gap-2">
@@ -202,7 +202,7 @@ export default function History() {
           </div>
         ) : filteredCustomers.length === 0 ? (
           /* 4. Empty State */
-          <div className="flex-1">
+          <div className="flex-1 flex items-center justify-center">
             <EmptyState
               icon={defaultIcons.customers}
               title={searchTerm || industryFilter ? "没有匹配的客户" : "暂无客户记录"}
@@ -302,6 +302,6 @@ export default function History() {
           </>
         )}
       </div>
-    </main>
+    </div>
   )
 }

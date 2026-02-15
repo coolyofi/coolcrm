@@ -39,7 +39,7 @@ export function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
           <Link href="/history" className="text-sm font-medium text-[var(--primary)] hover:opacity-80">查看全部</Link>
       </div>
 
-      <div className="glass-strong rounded-2xl overflow-hidden">
+      <div className="glass-strong overflow-hidden">
         {Object.entries(groupedActivities).map(([dateStr, dayActivities], groupIndex) => (
           <div key={dateStr}>
             {/* Date Header */}

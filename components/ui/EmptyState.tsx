@@ -64,16 +64,16 @@ export function EmptyState({
 
   const content = (
     <div className={`flex flex-col items-center justify-center text-center px-4 ${sizeClasses[size]}`}>
-      <div className={`bg-[var(--glass-bg)] rounded-full flex items-center justify-center mb-6 ring-1 ring-[var(--border)] ${iconSizes[size]}`}>
+      <div className={`bg-[var(--glass-bg)] rounded-full flex items-center justify-center mb-12 ring-1 ring-[var(--border)] ${iconSizes[size]}`}>
         {icon || defaultIcons.data}
       </div>
 
-      <Typography variant="h3" className="mb-2">
+      <Typography variant="h3" className="mb-4">
         {title}
       </Typography>
 
       {description && (
-        <Typography variant="muted" className="max-w-sm mb-8">
+        <Typography variant="muted" className="max-w-sm mb-16">
           {description}
         </Typography>
       )}

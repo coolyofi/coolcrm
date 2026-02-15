@@ -114,7 +114,7 @@ export default function Visits() {
   return (
     <>
       <Toaster position="top-right" />
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         <PageHeader
           title="拜访记录"
           subtitle="查看所有拜访历史"
@@ -142,11 +142,6 @@ export default function Visits() {
                   </>
                 )}
               </Button>
-              <Button asChild>
-                <Link href="/">
-                  返回首页
-                </Link>
-              </Button>
             </div>
           }
         />
@@ -154,7 +149,7 @@ export default function Visits() {
         <div className="mt-12"></div>
 
       <div className="glass overflow-hidden shadow-lg">
-        {visits.length > 0 ? (
+        {visits.length > 0 && (
           <>
             {/* 桌面端表格 */}
             <div className="hidden md:block">
@@ -201,16 +196,7 @@ export default function Visits() {
               </div>
             </div>
               ))}
-            </div>
-          </>
-        ) : (
-          <EmptyState
-            variant="inline"
-            size="sm"
-            icon={defaultIcons.visits}
-            title="暂无拜访记录"
-            description="还没有任何拜访记录，开始记录您的客户拜访吧"
-          />
+            </div>          </>
         )}
       </div>
     </div>

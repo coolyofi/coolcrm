@@ -9,13 +9,13 @@ import { KpiCard } from "@/components/dashboard/KpiCard"
 import { GoalsSection } from "@/components/dashboard/GoalsSection"
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed"
 import { PerformanceMonitor } from "@/components/PerformanceMonitor"
-import { Button } from "@/components/ui/Button"
+import { useTranslation } from '@/hooks/useTranslation'
 
 export default function Home() {
   const { user } = useAuth()
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [kpiCollapsed, setKpiCollapsed] = useState(false)
+  const { t } = useTranslation()
 
   useEffect(() => {
     async function load() {
@@ -38,7 +38,7 @@ export default function Home() {
               ] as any
             },
             activity: [
-              { id: 'a1', type: 'customer', title: '新增客户', subtitle: '示例科技', date: new Date().toISOString() }
+              { id: 'a1', type: 'customer', title: '添加客户', subtitle: '示例科技', date: new Date().toISOString() }
             ]
           }
           setData(demoData)
@@ -91,40 +91,22 @@ export default function Home() {
 
       {/* 2. KPI Row with State Machine */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-[var(--fg)] tracking-tight">关键指标</h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setKpiCollapsed(!kpiCollapsed)}
-          >
-            <span>{kpiCollapsed ? '显示' : '隐藏'}</span>
-            <svg
-              className={`w-4 h-4 transition-transform ${kpiCollapsed ? 'rotate-180' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </Button>
-        </div>
+        <h2 className="text-2xl font-bold text-[var(--fg)] tracking-tight">{t("customer.totalCustomers")}</h2>
 
-        <div className={`
-          grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
-          ${kpiCollapsed ? 'opacity-0 max-h-0 overflow-hidden' : 'opacity-100 max-h-[200px]'}
-        `}>
+        <div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
+        >
           <KpiCard 
-            title="总客户数"
+            title={t("customer.totalCustomers")}
             value={customers.current || 0}
             previousValue={customers.previous || 0}
             trendPercent={customers.trendPercent}
-            emptyLabel="从创建您的第一个客户开始"
-            emptyAction="添加客户"
+            emptyLabel={t("empty.noCustomersDesc")}
+            emptyAction={t("customer.addCustomer")}
           />
           
           <KpiCard 
-            title="本月访问"
+            title={t("visit.visitHistory")}
             value={visits.current || 0}
             previousValue={visits.previous || 0}
             trendPercent={visits.trendPercent}
@@ -147,7 +129,7 @@ export default function Home() {
 
           {/* Quick Goal Glance (Mini) or just another metric */}
              <KpiCard 
-               title="高意向"
+               title={t("intentLevels.4")}
                value={(data.customers.recent || []).filter((c) => (c.intent_level || 0) >= 4).length} // Safe access with default array
                previousValue={0} // No trend yet
                trendPercent={0}

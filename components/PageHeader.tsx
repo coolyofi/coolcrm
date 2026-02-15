@@ -17,10 +17,10 @@ export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
   const subtitleOpacity = 1 - p
 
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 animate-fade-in" style={{ minHeight: `${UI_CONTRACT.TOPBAR_HEIGHT_PX}px`, paddingTop: '16px' }}>
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 animate-fade-in" style={{ minHeight: `${UI_CONTRACT.TOPBAR_HEIGHT_PX}px` }}>
       <div>
         <h1
-          className="font-bold tracking-tight text-[var(--fg)] transition-all duration-200"
+          className="font-bold tracking-tight text-[var(--fg)] transition-all duration-200 mt-12 md:mt-24"
           style={{ fontSize: `${titleSize}px` }}
         >
           {title}
@@ -37,7 +37,7 @@ export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
       </div>
 
       {actions && (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mt-12 md:mt-24">
           {actions}
         </div>
       )}

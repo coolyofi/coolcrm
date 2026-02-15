@@ -1,3 +1,5 @@
+@import 'remixicon/fonts/remixicon.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -289,7 +291,7 @@ html, body {
   background: var(--auth-primary);
   color: white;
   font-weight: 500;
-  border-radius: 9999px; /* Capsule */
+  border-radius: 0.75rem; /* Rounded rectangle */
   transition: transform 0.1s ease, filter 0.2s ease;
 }
 
@@ -310,7 +312,8 @@ html, body {
 .btn-primary {
   background: var(--primary);
   color: #fff;
-  border-radius: 9999px; /* Capsule */
+  border-radius: 0.75rem; /* Rounded rectangle */
+  padding: 0.625rem 1.25rem;
   font-weight: 500;
   transition: transform 0.1s ease, filter 0.2s ease;
   position: relative;
@@ -347,7 +350,7 @@ html, body {
   background: transparent;
   color: var(--primary);
   border: 1px solid rgba(37,99,235,0.12);
-  border-radius: 9999px;
+  border-radius: 0.75rem;
   padding: 0.625rem 1.25rem;
   font-weight: 500;
   transition: background 0.15s ease, color 0.15s ease, transform 0.08s ease;
@@ -362,7 +365,9 @@ html, body {
   color: var(--fg);
   border: 1px solid var(--surface-solid-border);
   border-radius: 12px;
-  padding: 0.5rem 0.9rem;
+  padding: 0.625rem 1.25rem;
+  font-weight: 500;
+  transition: filter 0.15s ease;
 }
 .btn-alternative:hover {
   filter: brightness(0.98);
@@ -371,12 +376,36 @@ html, body {
 .btn-dangerous {
   background: var(--danger);
   color: white;
-  border-radius: 9999px;
+  border-radius: 0.75rem; /* Rounded rectangle */
   padding: 0.625rem 1.25rem;
   font-weight: 600;
+  position: relative;
+  transition: transform 0.1s ease, filter 0.2s ease;
 }
+
 .btn-dangerous:hover {
-  filter: brightness(0.95);
+  filter: brightness(1.1);
+}
+
+.btn-dangerous:active {
+  transform: scale(0.98);
+}
+
+/* Danger button glow */
+.btn-dangerous::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: var(--danger);
+  opacity: 0.3;
+  filter: blur(4px);
+  z-index: -1;
+  transition: opacity 0.2s ease;
+}
+
+.btn-dangerous:hover::before {
+  opacity: 0.5;
 }
 
 .btn-tertiary {
@@ -384,7 +413,9 @@ html, body {
   color: var(--fg);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 0.5rem 0.85rem;
+  padding: 0.625rem 1.25rem;
+  font-weight: 500;
+  transition: background 0.15s ease;
 }
 .btn-tertiary:hover {
   background: var(--glass-bg);
@@ -638,4 +669,307 @@ html, body {
   overflow-y: auto;
   height: 100dvh;
   -webkit-overflow-scrolling: touch;
+}
+
+/* ---------------- Sidebar Expansion Styles ---------------- */
+aside.fixed.left-0.top-0.bottom-0.is-expanded {
+  width: var(--nav-w-expanded) !important;
+}
+
+/* Text visibility for expanded sidebar */
+aside.fixed.left-0.top-0.bottom-0 .nav-link-text,
+aside.fixed.left-0.top-0.bottom-0 .h-14 .min-w-0,
+aside.fixed.left-0.top-0.bottom-0 .mt-auto button span {
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 200ms var(--ease), transform 200ms var(--ease);
+  color: var(--fg-muted);
+}
+
+aside.fixed.left-0.top-0.bottom-0.is-expanded .nav-link-text,
+aside.fixed.left-0.top-0.bottom-0.is-expanded .h-14 .min-w-0,
+aside.fixed.left-0.top-0.bottom-0.is-expanded .mt-auto button span {
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+  color: var(--fg-muted) !important;
+}
+
+/* Light theme specific nav-link-text color for better visibility */
+[data-theme="light"] aside.fixed.left-0.top-0.bottom-0 .nav-link-text {
+  color: rgba(17,24,39,0.95);
+}
+
+[data-theme="light"] aside.fixed.left-0.top-0.bottom-0.is-expanded .nav-link-text {
+  color: rgba(17,24,39,0.95) !important;
+}
+
+/* ---------------- Pro Sidebar Styles (inspired by CodePen) ---------------- */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--nav-w-expanded);
+  background: var(--bg);
+  z-index: var(--z-nav);
+  transition: width 200ms var(--ease);
+  overflow: hidden;
+  height: 100dvh;
+}
+
+.sidebar.collapsed {
+  width: var(--nav-w-collapsed);
+}
+
+.sidebar-collapser {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 200ms var(--ease);
+}
+
+.sidebar-collapser:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-collapser i {
+  font-size: 18px;
+  color: var(--fg);
+  transition: transform 200ms var(--ease);
+}
+
+.sidebar-layout {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-solid);
+  backdrop-filter: blur(18px);
+  border-right: 1px solid var(--border);
+  padding-top: 32px; /* Add 32px top padding */
+}
+
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pro-sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pro-sidebar-logo div {
+  width: 40px;
+  height: 40px;
+  background: var(--primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+  font-size: 20px;
+}
+
+.pro-sidebar-logo h5 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 0;
+}
+
+.menu {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.menu ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.menu-item {
+  position: relative;
+}
+
+.menu-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 32px; /* Increased right padding from 20px to 32px */
+  text-decoration: none;
+  color: var(--fg-muted);
+  transition: all 200ms var(--ease);
+  border-radius: 8px;
+  margin: 4px 12px;
+}
+
+.menu-link:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--fg);
+}
+
+.menu-link.active {
+  background: var(--primary);
+  color: white;
+}
+
+.menu-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.menu-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.menu-suffix {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.menu-suffix i {
+  font-size: 14px;
+  transition: transform 200ms var(--ease);
+}
+
+.sub-menu-list {
+  display: none;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  margin: 8px 12px;
+  overflow: hidden;
+}
+
+.sub-menu-list ul {
+  padding: 8px 0;
+}
+
+.sub-menu-list .menu-link {
+  padding: 8px 20px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.sub-menu-list .menu-link:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.menu-item.sub-menu.open .sub-menu-list {
+  display: block;
+}
+
+.sidebar-footer {
+  padding: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.footer-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-box .react-logo {
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-box span {
+  font-size: 12px;
+  color: var(--fg-muted);
+  line-height: 1.4;
+}
+
+.footer-box .mb-3 {
+  margin-bottom: 12px;
+}
+
+.footer-box .mb-3 span {
+  background: var(--primary);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+/* Collapsed state adjustments */
+.sidebar.collapsed .sidebar-collapser {
+  right: 8px;
+}
+
+.sidebar.collapsed .sidebar-header {
+  padding: 20px 12px;
+}
+
+.sidebar.collapsed .pro-sidebar-logo h5 {
+  display: none;
+}
+
+.sidebar.collapsed .menu-link {
+  padding: 12px;
+  justify-content: center;
+}
+
+.sidebar.collapsed .menu-icon {
+  margin-right: 0;
+}
+
+/* Removed: .sidebar.collapsed .menu-title { display: none; } */
+
+.sidebar.collapsed .menu-title {
+  display: none;
+}
+
+.sidebar.collapsed .menu-suffix {
+  display: none;
+}
+
+.sidebar.collapsed .sub-menu-list {
+  display: none !important;
+}
+
+.sidebar.collapsed .sidebar-footer {
+  padding: 20px 12px;
+}
+
+.sidebar-footer {
+  border-top: none !important;
+}
+
+.sidebar.collapsed .footer-box div:last-child {
+  display: none;
 }

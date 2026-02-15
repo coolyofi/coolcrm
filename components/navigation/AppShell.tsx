@@ -104,15 +104,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Calculate dynamic top padding for large title collapse
   const getContentPaddingTop = () => {
     if (safeMode === "desktop") return "0px"
-
-    const titleProgress = Math.min(1, p)
-    const baseHeight = motion.largeTitleEnabled ? topbarHeight : NAV_LAYOUT.TOPBAR.COLLAPSED_PX
-    const collapsedHeight = NAV_LAYOUT.TOPBAR.COLLAPSED_PX
-    const currentHeight = motion.largeTitleEnabled
-      ? (baseHeight - (titleProgress * (baseHeight - collapsedHeight)))
-      : collapsedHeight
-
-    return `${currentHeight}px`
+    return `${topbarHeight}px`
   }
 
   // Check if drawer is open (mobile mode with expanded sidebar)
@@ -147,7 +139,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           pointerEvents: isDrawerOpen ? 'none' : 'auto'
         }}
       >
-        <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
+        <div className="p-12 md:p-16 space-y-8 animate-fade-in">
           {children}
         </div>
       </main>

@@ -15,6 +15,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const [showText, setShowText] = useState(true)
 
     useEffect(() => {
+      if (asChild) return
       if (!ref || typeof ref === 'function') return
 
       const element = ref.current
@@ -28,9 +29,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       observer.observe(element)
 
       return () => observer.disconnect()
-    }, [ref, compactThreshold])
+    }, [ref, compactThreshold, asChild])
 
-    const baseClasses = "inline-flex items-center justify-center whitespace-nowrap rounded-full text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 overflow-hidden text-ellipsis"
+    const baseClasses = "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 overflow-hidden text-ellipsis"
 
     const variantClasses = {
       primary: "bg-[var(--primary)] text-white shadow-lg shadow-blue-500/25 hover:brightness-110 active:scale-95",

@@ -10,6 +10,7 @@ import toast, { Toaster } from "react-hot-toast"
 import { supabase } from "@/lib/supabase"
 import { PageHeader } from "@/components/PageHeader"
 import { showDemoBlockedToast } from '@/components/DemoBlockedToast'
+import { useTranslation } from '@/hooks/useTranslation'
 
 const customerSchema = z.object({
   company_name: z.string().min(1, "公司名称不能为空"),
@@ -42,6 +43,7 @@ export default function AddCustomer() {
   const [isLocationExpanded, setIsLocationExpanded] = useState(false)
   
   const router = useRouter()
+  const { t } = useTranslation()
 
   const {
     control,
@@ -63,7 +65,7 @@ export default function AddCustomer() {
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      toast.error("您的浏览器不支持地理定位")
+      toast.error(t("messages.locationNotSupported"))
       return
     }
 
@@ -115,7 +117,7 @@ export default function AddCustomer() {
             }
             
             setValue("address", address)
-            toast.success("位置获取成功")
+            toast.success(t("messages.locationUpdated"))
           } else {
             throw new Error(data.info || '地址解析失败')
           }
@@ -123,7 +125,7 @@ export default function AddCustomer() {
           console.error("获取地址失败:", error)
           // More specific error message
           const errorMessage = error instanceof Error ? error.message : '未知错误'
-          toast.error(`自动获取地址失败 (${errorMessage})，请手动输入`)
+          toast.error(t("messages.addressParseFailed"))
         }
         setLocationLoading(false)
       },
@@ -168,7 +170,7 @@ export default function AddCustomer() {
         address: data.address || null
       })
       
-      toast.success("客户添加成功")
+      toast.success(t("messages.customerAdded"))
       router.push("/")
     } catch (error) {
       console.error("提交失败:", error)
@@ -183,7 +185,7 @@ export default function AddCustomer() {
       if (errorMessage.includes('duplicate')) {
         toast.error("客户已存在，请检查后重试")
       } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
-        toast.error("网络错误，请检查连接后重试")
+        toast.error(t("messages.networkError"))
       } else {
         toast.error(`提交失败: ${errorMessage}`)
       }
@@ -193,11 +195,11 @@ export default function AddCustomer() {
   }
 
   return (
-    <main className="max-w-[720px] mx-auto min-h-screen p-6 sm:p-8">
+    <div className="max-w-7xl mx-auto">
       <Toaster position="top-center" />
       
       <PageHeader
-        title="新增客户"
+        title={t("pages.addCustomer")}
         subtitle="录入新的拜访与意向信息"
       />
 
@@ -214,7 +216,7 @@ export default function AddCustomer() {
                 {/* Company Name */}
                 <div className="md:col-span-2">
                     <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">
-                        公司名称 <span className="text-red-500">*</span>
+                        {t("customer.companyName")} <span className="text-red-500">*</span>
                     </label>
                     <Controller
                         name="company_name"
@@ -223,8 +225,8 @@ export default function AddCustomer() {
                             <input
                                 {...field}
                                 type="text"
-                                placeholder="请输入公司名称"
-                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all font-normal"
+                                placeholder={t("form.companyNamePlaceholder")}
+                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-lg text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all font-normal"
                             />
                         )}
                     />
@@ -234,7 +236,7 @@ export default function AddCustomer() {
                 {/* Industry */}
                 <div>
                     <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">
-                        行业 <span className="text-red-500">*</span>
+                        {t("customer.industry")} <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                         <Controller
@@ -244,7 +246,7 @@ export default function AddCustomer() {
                                 <select
                                     {...field}
                                     required
-                                    className="appearance-none w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all cursor-pointer"
+                                    className="appearance-none w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-lg text-[var(--fg)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all cursor-pointer"
                                 >
                                     {industries.map(opt => (
                                         <option key={opt.value} value={opt.value} disabled={!opt.value}>{opt.label}</option>
@@ -264,7 +266,7 @@ export default function AddCustomer() {
                 {/* Visit Date */}
                 <div>
                     <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">
-                        拜访日期 <span className="text-red-500">*</span>
+                        {t("customer.visitDate")} <span className="text-red-500">*</span>
                     </label>
                     <Controller
                         name="visit_date"
@@ -274,7 +276,7 @@ export default function AddCustomer() {
                                 {...field}
                                 type="date"
                                 required
-                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all"
+                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-lg text-[var(--fg)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all"
                             />
                         )}
                     />
@@ -284,19 +286,19 @@ export default function AddCustomer() {
                 {/* Intent Level (Segmented Pills) */}
                 <div className="md:col-span-2">
                     <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">
-                        意向等级 <span className="text-red-500">*</span>
+                        {t("customer.intentLevel")} <span className="text-red-500">*</span>
                     </label>
                     <Controller
                         name="intent_level"
                         control={control}
                         render={({ field }) => (
-                            <div className="flex bg-[var(--surface-solid)] border border-[var(--border)] p-1 rounded-xl">
+                            <div className="flex bg-[var(--surface-solid)] border border-[var(--border)] p-1 rounded-lg">
                                 {[
-                                    { level: 1, label: "初步接触" },
-                                    { level: 2, label: "有兴趣" },
-                                    { level: 3, label: "正在考虑" },
-                                    { level: 4, label: "高度意向" },
-                                    { level: 5, label: "即将成交" }
+                                    { level: 1, label: t("intentLevels.1") },
+                                    { level: 2, label: t("intentLevels.2") },
+                                    { level: 3, label: t("intentLevels.3") },
+                                    { level: 4, label: t("intentLevels.4") },
+                                    { level: 5, label: t("intentLevels.5") }
                                 ].map(({ level, label }) => (
                                     <button
                                         key={level}
@@ -324,7 +326,7 @@ export default function AddCustomer() {
                  {/* Contact */}
                 <div>
                     <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">
-                        联系人
+                        {t("customer.contact")}
                     </label>
                     <Controller
                         name="contact"
@@ -333,8 +335,8 @@ export default function AddCustomer() {
                             <input
                                 {...field}
                                 type="text"
-                                placeholder="姓名"
-                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all"
+                                placeholder={t("form.contactPlaceholder")}
+                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-lg text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all"
                             />
                         )}
                     />
@@ -343,7 +345,7 @@ export default function AddCustomer() {
                 {/* Notes */}
                 <div className="md:col-span-2">
                     <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">
-                        备注信息
+                        {t("customer.notes")}
                     </label>
                     <Controller
                         name="notes"
@@ -351,9 +353,9 @@ export default function AddCustomer() {
                         render={({ field }) => (
                             <textarea
                                 {...field}
-                                placeholder="输入客户需求、痛点或后续跟进计划..."
+                                placeholder={t("form.notesPlaceholder")}
                                 rows={3}
-                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all resize-none"
+                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-lg text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all resize-none"
                             />
                         )}
                     />
@@ -409,7 +411,7 @@ export default function AddCustomer() {
                          </div>
                          
                          <div className="md:col-span-2">
-                             <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">详细地址</label>
+                             <label className="block text-xs font-medium text-[var(--fg-muted)] mb-2">{t("customer.address")}</label>
                              <Controller
                                 name="address"
                                 control={control}
@@ -417,8 +419,8 @@ export default function AddCustomer() {
                                     <input
                                         {...field}
                                         type="text"
-                                        placeholder="自动获取或手动输入"
-                                        className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all font-normal"
+                                        placeholder={t("form.addressPlaceholder")}
+                                        className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-lg text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all font-normal"
                                     />
                                 )}
                              />
@@ -430,7 +432,7 @@ export default function AddCustomer() {
                                 name="longitude"
                                 control={control}
                                 render={({ field }) => (
-                                    <input {...field} readOnly className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--border)] rounded-xl text-[var(--fg-muted)] text-sm cursor-not-allowed" />
+                                    <input {...field} readOnly className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--border)] rounded-lg text-[var(--fg-muted)] text-sm cursor-not-allowed" />
                                 )}
                              />
                          </div>
@@ -440,7 +442,7 @@ export default function AddCustomer() {
                                 name="latitude"
                                 control={control}
                                 render={({ field }) => (
-                                    <input {...field} readOnly className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--border)] rounded-xl text-[var(--fg-muted)] text-sm cursor-not-allowed" />
+                                    <input {...field} readOnly className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--border)] rounded-lg text-[var(--fg-muted)] text-sm cursor-not-allowed" />
                                 )}
                              />
                          </div>
@@ -453,14 +455,14 @@ export default function AddCustomer() {
         <div className="flex items-center justify-end gap-4 pt-4 border-t border-[var(--border)] mt-8">
             <Link 
                 href="/" 
-                className="px-6 py-2.5 rounded-full border border-[var(--border)] text-[var(--fg-muted)] font-medium text-sm hover:bg-[var(--glass-bg)] hover:text-[var(--fg)] transition-all"
+                className="px-6 py-2.5 rounded-xl border border-[var(--border)] text-[var(--fg-muted)] font-medium text-sm hover:bg-[var(--glass-bg)] hover:text-[var(--fg)] transition-all"
             >
-                取消
+                {t("actions.cancel")}
             </Link>
             <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2.5 rounded-full bg-[var(--primary)] text-white font-medium text-sm hover:brightness-110 shadow-lg shadow-blue-500/25 disabled:opacity-70 disabled:cursor-not-allowed min-w-[120px] flex items-center justify-center"
+                className="px-6 py-2.5 rounded-xl bg-[var(--primary)] text-white font-medium text-sm hover:brightness-110 shadow-lg shadow-blue-500/25 disabled:opacity-70 disabled:cursor-not-allowed min-w-[120px] flex items-center justify-center"
             >
                 {loading ? (
                     <>
@@ -468,15 +470,15 @@ export default function AddCustomer() {
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        提交中
+                        {t("messages.saving")}
                     </>
                 ) : (
-                    "确认添加"
+                    t("actions.add")
                 )}
             </button>
         </div>
 
       </form>
-    </main>
+    </div>
   )
 }

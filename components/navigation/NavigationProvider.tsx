@@ -55,6 +55,9 @@ type NavContextValue = {
   toggleDrawer: () => void
   setMotionLevel: (level: MotionLevel) => void
 
+  // Hover actions
+  onSidebarHover: (hovering: boolean) => void
+
   // Computed values for components
   navWidthPx: number
   proximity: boolean
@@ -133,7 +136,10 @@ function useMouseProximity(enabled: boolean) {
   const [nearLeft, setNearLeft] = useState(false)
 
   useEffect(() => {
-    if (!enabled) return
+    if (!enabled) {
+      setNearLeft(false)
+      return
+    }
 
     const move = (e: MouseEvent) => {
       if (e.clientX < NAV_LAYOUT.PROXIMITY.LEFT_EDGE) setNearLeft(true)  // Expand when mouse within left edge
@@ -216,6 +222,7 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
 
   // Core state: Sidebar state for manual toggle (only affects desktop/tablet)
   const [sidebarOverride, setSidebarOverride] = useState<SidebarState | null>(null)
+  const [sidebarHover, setSidebarHover] = useState(false)
 
   // Motion system
   const [motionLevel, setMotionLevel] = useState<MotionLevel>(() => {
@@ -248,15 +255,18 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   const sidebarState = useMemo<SidebarState>(() => {
     // Mobile: always collapsed
     if (deviceMode === "mobile") return "collapsed"
-    // Tablet: expanded by default (better for iPad UX)
-    if (deviceMode === "tablet") return sidebarOverride ?? "expanded"
-    // Desktop: expanded when mouse near or override
+    // Tablet: expanded by default, but can be collapsed via hover
+    if (deviceMode === "tablet") {
+      if (sidebarOverride) return sidebarOverride
+      return sidebarHover ? "expanded" : "collapsed"
+    }
+    // Desktop: expanded when mouse near or override or hovering
     if (deviceMode === "desktop") {
       if (sidebarOverride) return sidebarOverride
-      return mouseNear ? "expanded" : "collapsed"
+      return (mouseNear || sidebarHover) ? "expanded" : "collapsed"
     }
     return "collapsed"
-  }, [deviceMode, sidebarOverride, mouseNear])
+  }, [deviceMode, sidebarOverride, mouseNear, sidebarHover])
 
   // Drawer state
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -320,6 +330,9 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   const toggle = useCallback(() =>
     setSidebarOverride(s => s === "collapsed" ? "expanded" : "collapsed"), []
   )
+  const onSidebarHover = useCallback((hovering: boolean) => {
+    setSidebarHover(hovering)
+  }, [])
 
   const openDrawer = useCallback(() => setDrawerOpen(true), [])
   const closeDrawer = useCallback(() => setDrawerOpen(false), [])
@@ -352,6 +365,7 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     closeDrawer,
     toggleDrawer,
     setMotionLevel: setMotionLevelCallback,
+    onSidebarHover,
     navWidthPx,
     proximity: mouseNear
   }), [deviceMode, navMode, sidebarState, drawerOpen, topbarHeight, motion, motionLevel, isHydrated, open, close, toggle, openDrawer, closeDrawer, toggleDrawer, setMotionLevelCallback, navWidthPx, mouseNear])

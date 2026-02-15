@@ -269,7 +269,7 @@ export default function EditCustomer() {
   }
 
   return (
-    <main className="max-w-[720px] mx-auto min-h-screen p-6 sm:p-8">
+    <div className="max-w-7xl mx-auto">
       <Toaster position="top-center" />
       
       <PageHeader
@@ -299,7 +299,7 @@ export default function EditCustomer() {
                             <input
                                 {...field}
                                 type="text"
-                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all font-normal"
+                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-lg text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all font-normal"
                             />
                         )}
                     />
@@ -318,7 +318,7 @@ export default function EditCustomer() {
                             render={({ field }) => (
                                 <select
                                     {...field}
-                                    className="appearance-none w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all cursor-pointer"
+                                    className="appearance-none w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-lg text-[var(--fg)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all cursor-pointer"
                                 >
                                     {industries.map(opt => (
                                         <option key={opt.value} value={opt.value} disabled={!opt.value}>{opt.label}</option>
@@ -346,7 +346,7 @@ export default function EditCustomer() {
                             <input
                                 {...field}
                                 type="date"
-                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all"
+                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-lg text-[var(--fg)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all"
                             />
                         )}
                     />
@@ -361,7 +361,7 @@ export default function EditCustomer() {
                         name="intent_level"
                         control={control}
                         render={({ field }) => (
-                            <div className="flex bg-[var(--surface-solid)] border border-[var(--border)] p-1 rounded-xl">
+                            <div className="flex bg-[var(--surface-solid)] border border-[var(--border)] p-1 rounded-lg">
                                 {[
                                     { level: 1, label: "初步接触" },
                                     { level: 2, label: "有兴趣" },
@@ -403,7 +403,7 @@ export default function EditCustomer() {
                             <input
                                 {...field}
                                 type="text"
-                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all"
+                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-lg text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all"
                             />
                         )}
                     />
@@ -421,7 +421,7 @@ export default function EditCustomer() {
                             <textarea
                                 {...field}
                                 rows={3}
-                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all resize-none"
+                                className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-lg text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all resize-none"
                             />
                         )}
                     />
@@ -479,7 +479,7 @@ export default function EditCustomer() {
                                     <input
                                         {...field}
                                         type="text"
-                                        className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-xl text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all font-normal"
+                                        className="w-full px-4 py-2.5 bg-[var(--surface-solid)] border border-[var(--border)] rounded-lg text-[var(--fg)] placeholder-[var(--fg-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-[4px] focus:ring-[var(--primary)]/20 transition-all font-normal"
                                     />
                                 )}
                              />
@@ -491,7 +491,7 @@ export default function EditCustomer() {
                                 name="longitude"
                                 control={control}
                                 render={({ field }) => (
-                                    <input {...field} readOnly className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--border)] rounded-xl text-[var(--fg-muted)] text-sm cursor-not-allowed" />
+                                    <input {...field} readOnly className="w-full px-4 py-2.5 bg-[var(--glass-bg)] border border-[var(--border)] rounded-lg text-[var(--fg-muted)] text-sm cursor-not-allowed" />
                                 )}
                              />
                          </div>
@@ -514,14 +514,14 @@ export default function EditCustomer() {
         <div className="flex items-center justify-end gap-4 pt-4 border-t border-[var(--border)] mt-8">
             <Link 
                 href="/history" 
-                className="px-6 py-2.5 rounded-full border border-[var(--border)] text-[var(--fg-muted)] font-medium text-sm hover:bg-[var(--glass-bg)] hover:text-[var(--fg)] transition-all"
+                className="px-6 py-2.5 rounded-lg border border-[var(--border)] text-[var(--fg-muted)] font-medium text-sm hover:bg-[var(--glass-bg)] hover:text-[var(--fg)] transition-all"
             >
                 取消
             </Link>
             <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2.5 rounded-full bg-[var(--primary)] text-white font-medium text-sm hover:brightness-110 shadow-lg shadow-blue-500/25 disabled:opacity-70 disabled:cursor-not-allowed min-w-[120px] flex items-center justify-center"
+                className="px-6 py-2.5 rounded-lg bg-[var(--primary)] text-white font-medium text-sm hover:brightness-110 shadow-lg shadow-blue-500/25 disabled:opacity-70 disabled:cursor-not-allowed min-w-[120px] flex items-center justify-center"
             >
                 {saving ? (
                     <>
@@ -538,6 +538,6 @@ export default function EditCustomer() {
         </div>
 
       </form>
-    </main>
+    </div>
   )
 }

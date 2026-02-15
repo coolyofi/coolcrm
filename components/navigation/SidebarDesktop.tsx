@@ -16,7 +16,7 @@ import { useScrollVelocity } from "../../hooks/useScrollVelocity"
  * - Only renders on tablet/desktop (NavigationRoot handles this)
  */
 export function SidebarDesktop() {
-  const { deviceMode, sidebarState, toggle, motion, isHydrated } = useNavigation()
+  const { deviceMode, sidebarState, toggle, motion, isHydrated, onSidebarHover } = useNavigation()
   const pathname = usePathname()
   const v = useScrollVelocity("content-scroll")
 
@@ -31,89 +31,124 @@ export function SidebarDesktop() {
   const collapsed = !isExpanded
 
   return (
-    <aside
-      className="fixed left-0 top-0 bottom-0 h-[100dvh] flex flex-col select-none transition-[width] ease-[var(--ease)]"
-            style={{
-        width: collapsed ? 'var(--nav-w-collapsed)' : 'var(--nav-w-expanded)',
-        zIndex: 'var(--z-nav)',
-        transitionDuration: `${motion.durations.base}ms`,
-        overflow: 'hidden'
-            }}
-    >
-      <div className="absolute inset-0 p-3" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div 
-          className="h-full rounded-2xl border border-white/20 bg-white/55 backdrop-blur-[18px] shadow-[var(--shadow-elev-1)] flex flex-col overflow-hidden" 
-          style={{ 
-            "--glass-blur-scrolled": `${blur}px`
-          } as React.CSSProperties}
-        >
-          {/* Top */}
-          <div className="px-3 pt-3">
-            <div className="h-14 flex items-center gap-2">
-              <svg className="h-8 w-8 rounded-xl bg-black/10 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              <div className={`min-w-0 font-semibold truncate text-[var(--fg)] transition-all duration-200 ${collapsed ? 'opacity-0 -translate-x-1' : 'opacity-100 translate-x-0'}`}>
-                CoolCRM
-              </div>
-            </div>
+    <>
+      {/* Hover zone for collapsed sidebar */}
+      {collapsed && (
+        <div
+          className="fixed left-0 top-0 bottom-0 z-10"
+          style={{
+            width: 'var(--nav-w-expanded)',
+            zIndex: 'var(--z-nav)',
+          }}
+          onMouseEnter={() => onSidebarHover(true)}
+          onMouseLeave={() => onSidebarHover(false)}
+        />
+      )}
+
+      <aside
+        id="sidebar"
+        className={`sidebar fixed left-0 top-0 bottom-0 h-[100dvh] flex flex-col select-none transition-[width] ease-[var(--ease)] break-point-sm has-bg-image ${
+          collapsed ? 'collapsed' : 'is-expanded'
+        }`}
+        style={{
+          width: collapsed ? 'var(--nav-w-collapsed)' : 'var(--nav-w-expanded)',
+          zIndex: 'var(--z-nav)',
+          transitionDuration: `${motion.durations.base}ms`,
+          overflow: 'hidden',
+          height: '100dvh'
+        }}
+        onMouseEnter={() => onSidebarHover(true)}
+        onMouseLeave={() => onSidebarHover(false)}
+      >
+      {/* Collapse button - Hidden as we use mouse hover */}
+      {/* <a
+        id="btn-collapse"
+        className="sidebar-collapser"
+        onClick={toggle}
+        title={isExpanded ? "Collapse Sidebar" : "Expand Sidebar"}
+      >
+        <i className={`ri-arrow-left-s-line ${collapsed ? 'rotate-180' : ''}`}></i>
+      </a> */}
+
+      {/* Background image wrapper */}
+      <div className="image-wrapper">
+        {/* Optional background image */}
+      </div>
+
+      <div className="sidebar-layout mt-6">
+        {/* Header - Hidden */}
+        {/* <div className="sidebar-header">
+          <div className="pro-sidebar-logo">
+            <div>C</div>
+            <h5 className={`transition-all duration-200 ${collapsed ? 'opacity-0' : 'opacity-100'}`}>
+              CoolCRM
+            </h5>
           </div>
+        </div> */}
 
-          {/* Nav items - flex-1 for menu area */}
-          <nav className="mt-3 flex-1 px-2 space-y-1 overflow-y-auto">
-            {MENU_ITEMS.map((item) => {
-              const isActive = pathname === item.path
-              return (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  className={`
-                    group relative h-11 rounded-xl flex items-center gap-3 px-3 transition-all duration-200
-                    ${isActive
-                      ? 'bg-[var(--primary)]/10 text-[var(--primary)]'
-                      : 'text-[var(--fg-muted)] hover:bg-black/5 hover:text-[var(--fg)]'
-                    }
-                  `}
-                  title={collapsed ? item.name : undefined}
-                >
-                  {isActive && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-[var(--primary)] rounded-full"></span>
-                  )}
-                  <svg
-                    className={`w-6 h-6 shrink-0 transition-colors ${isActive ? "text-[var(--primary)]" : "text-current group-hover:text-[var(--fg)]"}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.iconPath} />
-                  </svg>
+        {/* Content */}
+        <div className="sidebar-content">
+          <nav className="menu open-current-submenu">
+            <ul>
+              {MENU_ITEMS.map((item) => {
+                const isActive = pathname === item.path
 
-                  <span className={`min-w-0 truncate font-medium transition-all duration-200 ${collapsed ? 'opacity-0 -translate-x-1' : 'opacity-100 translate-x-0'}`}>{item.name}</span>
-                </Link>
-              )
-            })}
+                return (
+                  <li key={item.path} className="menu-item">
+                    <Link
+                      href={item.path}
+                      className={`
+                        menu-link group relative flex items-center gap-4 px-3 transition-all duration-200
+                        ${isActive
+                          ? 'bg-transparent text-blue-600'
+                          : 'text-[var(--fg-muted)] hover:bg-black/5 hover:text-[var(--fg)]'
+                        }
+                      `}
+                      title={collapsed ? item.name : undefined}
+                    >
+                      <span className={`menu-icon flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
+                        isActive ? 'bg-transparent text-blue-600' : 'bg-transparent text-[var(--fg)] group-hover:text-[var(--fg)]'
+                      }`}>
+                        <svg
+                          className="w-6 h-6 shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.iconPath} />
+                        </svg>
+                      </span>
+
+                      <span className={`menu-title min-w-0 truncate font-medium transition-all duration-200 nav-link-text ${isActive ? '!text-blue-600' : ''} ${
+                        collapsed ? 'opacity-0 -translate-x-1' : 'opacity-100 translate-x-0'
+                      }`}>
+                        {item.name}
+                      </span>
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
           </nav>
+        </div>
 
-          {/* Bottom actions - mt-auto 固定到底 */}
-          <div className="mt-auto p-2 border-t border-[var(--border)]">
-            <button
-              className="h-11 w-full rounded-xl flex items-center justify-center gap-2 hover:bg-black/5 text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors"
-              onClick={toggle}
-              title={isExpanded ? "Collapse Sidebar" : "Expand Sidebar"}
-            >
-              <svg
-                className={`w-6 h-6 transition-all duration-200 ${isExpanded ? "rotate-180" : "rotate-0"}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-              </svg>
-              <span className={`text-sm transition-all duration-200 ${collapsed ? 'opacity-0 -translate-x-1' : 'opacity-100 translate-x-0'}`}>{isExpanded ? 'Collapse' : 'Collapse'}</span>
-            </button>
+        {/* Footer */}
+        <div className="sidebar-footer">
+          <div className="footer-box">
+            <div className={`menu-link group relative flex items-center ${collapsed ? 'justify-center px-3 py-2' : 'gap-4 px-3 py-2'} transition-all duration-200 text-[var(--fg-muted)] hover:bg-black/5 hover:text-[var(--fg)]`}>
+              <span className="menu-icon flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 bg-transparent text-[var(--fg)] group-hover:text-[var(--fg)]">
+                <i className="ri-information-line text-lg"></i>
+              </span>
+              {!collapsed && (
+                <span className="menu-title min-w-0 truncate font-medium transition-all duration-200 nav-link-text text-[var(--fg)]">
+                  v1.0.0
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
     </aside>
+    </>
   )
 }

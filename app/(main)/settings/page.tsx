@@ -197,7 +197,7 @@ export default function Settings() {
   return (
     <ErrorBoundary>
       <Toaster position="top-right" />
-      <div className="max-w-2xl mx-auto space-y-8 p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
         <PageHeader
           title="设置"
           subtitle={(!user && isDemo()) ? '演示账户 — 写入功能已禁用' : '管理您的账户和偏好设置'}
@@ -205,33 +205,26 @@ export default function Settings() {
 
         <div className="mt-12"></div>
 
-        {!user && isDemo() && (
-          <div className="glass p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        {!user && isDemo() && <div className="glass p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold">演示账户</h3>
               <p className="text-sm text-[var(--fg-muted)]">您当前以演示账户浏览。演示中可以查看功能，但写入/修改操作已被禁用。若要保存更改，请注册或登录。</p>
             </div>
-            <div className="flex gap-3">
+            <div className="w-full md:w-auto min-h-12">
               <button
                 onClick={() => router.push('/login')}
-                className="btn-primary px-4 py-2"
-              >
-                注册/登录
-              </button>
-              <button
-                onClick={() => { disableDemo(); router.push('/login') }}
-                className="px-4 py-2 rounded bg-white/5"
+                className="py-2 px-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors border border-[var(--border)]"
+                data-demo-allow
               >
                 退出演示
               </button>
             </div>
-          </div>
-        )}
+          </div>}
 
         {/* Theme Settings */}
         <div className="glass p-6">
           <h2 className="text-xl font-semibold mb-4 text-[var(--fg)]">外观</h2>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-4 min-h-12">
             {[
               { key: 'auto', label: '自动' },
               { key: 'light', label: '浅色' },
@@ -240,8 +233,9 @@ export default function Settings() {
               <button
                 key={key}
                 onClick={() => handleThemeChange(key)}
+                data-demo-allow={key === 'dark'}
                 className={`
-                  flex flex-col items-center justify-center p-4 rounded-xl border transition-all capitalized
+                  flex flex-col items-center justify-center p-2 rounded-lg border transition-all capitalized
                   ${currentTheme === key 
                     ? 'bg-[var(--primary)] text-white border-transparent shadow-lg' 
                     : 'bg-white/5 border-[var(--border)] text-[var(--fg-muted)] hover:bg-white/10'
@@ -342,8 +336,7 @@ export default function Settings() {
               <button
                 type="submit"
                 disabled={!user || changingPassword}
-                className="btn-primary py-3 px-6 bg-red-500 hover:brightness-110 shadow-red-500/30 w-full"
-                style={{ background: 'var(--danger)' }}
+                className="btn-dangerous py-3 px-6 w-full rounded-lg"
                 data-demo-block
               >
                 {changingPassword ? "更新中..." : (user ? "更新密码" : "修改（演示禁用）")}
