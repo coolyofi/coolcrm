@@ -28,6 +28,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const { p } = useScrollProgress("content-scroll", UI_CONTRACT.PAGE_HEADER_SCROLL_DISTANCE)
 
+  // Enforce "body" never scrolls — AppShell makes #content-scroll the only scroll container
+  // The effect must be declared unconditionally to keep Hooks order stable across renders.
+  useEffect(() => {
+    if (pathname === '/login' || !isHydrated) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prevOverflow }
+  }, [pathname, isHydrated])
+
   // Don't wrap login page with shell. Also avoid rendering shell until
   // hydration completes to keep server and client markup identical on first load.
   if (pathname === '/login' || !isHydrated) {
@@ -64,12 +73,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Check if drawer is open (mobile mode with expanded sidebar)
   const isDrawerOpen = drawerOpen
 
-  // Enforce "body" never scrolls — AppShell makes #content-scroll the only scroll container
-  useEffect(() => {
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prevOverflow }
-  }, [])
+  
 
   return (
     <div className="h-[100dvh] overflow-hidden bg-[rgb(var(--bg))]">
