@@ -11,10 +11,8 @@ export type Visit = {
   notes: string | null
   created_at?: string
   updated_at?: string
-  // Nested customer data from join
+  // Nested customer data from join (always an array for consistency)
   customers?: {
-    company_name: string
-  } | {
     company_name: string
   }[]
 }
@@ -39,5 +37,16 @@ export async function fetchVisits(client = supabase) {
     .order('visit_date', { ascending: false })
   
   if (error) throw error
-  return data as Visit[]
+  
+  // Normalize customers field to always be an array for type consistency
+  // Supabase may return either a single object or array depending on the relationship configuration
+  // This normalization ensures consistent behavior regardless of Supabase's runtime return type
+  const normalized = (data || []).map(visit => ({
+    ...visit,
+    customers: visit.customers 
+      ? (Array.isArray(visit.customers) ? visit.customers : [visit.customers])
+      : []
+  }))
+  
+  return normalized as Visit[]
 }
