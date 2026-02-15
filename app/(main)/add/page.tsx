@@ -54,6 +54,8 @@ export default function AddCustomer() {
   } = useForm<CustomerForm>({
     resolver: zodResolver(customerSchema),
     defaultValues: {
+      company_name: "",
+      industry: "",
       intent_level: 1,
       visit_date: new Date().toISOString().split('T')[0]
     }
