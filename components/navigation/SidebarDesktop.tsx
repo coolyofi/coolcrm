@@ -32,7 +32,7 @@ export function SidebarDesktop() {
 
   return (
     <aside
-      className="fixed left-0 top-0 bottom-0 flex flex-col select-none transition-[width] ease-[var(--ease)]"
+      className="fixed left-0 top-0 bottom-0 h-[100dvh] flex flex-col select-none transition-[width] ease-[var(--ease)]"
             style={{
         width: collapsed ? 'var(--nav-w-collapsed)' : 'var(--nav-w-expanded)',
         zIndex: 'var(--z-nav)',
@@ -40,7 +40,7 @@ export function SidebarDesktop() {
         overflow: 'hidden'
             }}
     >
-      <div className="h-full p-3" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div className="absolute inset-0 p-3" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div 
           className="h-full rounded-2xl border border-white/20 bg-white/55 backdrop-blur-[18px] shadow-[var(--shadow-elev-1)] flex flex-col overflow-hidden" 
           style={{ 
@@ -53,7 +53,9 @@ export function SidebarDesktop() {
               <svg className="h-8 w-8 rounded-xl bg-black/10 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              {!collapsed && <div className="min-w-0 font-semibold truncate text-[var(--fg)]">CoolCRM</div>}
+              <div className={`min-w-0 font-semibold truncate text-[var(--fg)] transition-all duration-200 ${collapsed ? 'opacity-0 -translate-x-1' : 'opacity-100 translate-x-0'}`}>
+                CoolCRM
+              </div>
             </div>
           </div>
 
@@ -86,7 +88,7 @@ export function SidebarDesktop() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.iconPath} />
                   </svg>
 
-                  {!collapsed && <span className="min-w-0 truncate font-medium">{item.name}</span>}
+                  <span className={`min-w-0 truncate font-medium transition-all duration-200 ${collapsed ? 'opacity-0 -translate-x-1' : 'opacity-100 translate-x-0'}`}>{item.name}</span>
                 </Link>
               )
             })}
@@ -107,7 +109,7 @@ export function SidebarDesktop() {
               >
                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
               </svg>
-              {!collapsed && <span className="text-sm">Collapse</span>}
+              <span className={`text-sm transition-all duration-200 ${collapsed ? 'opacity-0 -translate-x-1' : 'opacity-100 translate-x-0'}`}>{isExpanded ? 'Collapse' : 'Collapse'}</span>
             </button>
           </div>
         </div>

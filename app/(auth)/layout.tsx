@@ -25,7 +25,7 @@ export default function AuthLayout({
       {/* Footer Branding */}
       <div className="absolute bottom-6 w-full text-center">
         <p className="text-xs font-medium text-[var(--auth-muted)] opacity-60">
-          © {new Date().getFullYear()} CoolCRM. Secure Login.
+          © {new Date().getFullYear()} CoolCRM. 安全登录。
         </p>
       </div>
     </div>

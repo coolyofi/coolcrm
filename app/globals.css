@@ -92,6 +92,10 @@
   --auth-primary: #2563eb;
   --auth-focus: rgba(37, 99, 235, 0.18);
   --auth-blur: 8px;
+
+  /* Default primary color for buttons and UI elements */
+  --primary: #2563eb;
+  --danger: #dc2626;
 }
 
 /* ---------------- Dark (Liquid Glass) ---------------- */
@@ -136,10 +140,10 @@
 
 /* ---------------- Light (Solid Glass) ---------------- */
 [data-theme="light"] {
-  --bg: #f4f7fb;
+  --bg: linear-gradient(135deg, #f4f7fb 0%, #ffffff 50%, #f4f7fb 100%);
   --fg: rgba(17,24,39,0.92);
   --fg-muted: rgba(17,24,39,0.62);
-  --border: rgba(17,24,39,0.08);
+  --border: rgba(17,24,39,0.12);
 
   --primary: #2563eb;
   --danger: #dc2626;
@@ -152,7 +156,7 @@
   --glass-noise: 0.03;
 
   --surface-solid: rgba(255,255,255,0.95);
-  --surface-solid-border: rgba(17,24,39,0.08);
+  --surface-solid-border: rgba(17,24,39,0.12);
 
   /* Auth Tokens - Light */
   --auth-bg: #f4f7fb;
@@ -181,6 +185,14 @@ html, body {
   height: 100svh; /* Modern mobile viewport fix */
 }
 * { min-width: 0; } /* Prevent flex children from overflowing */
+
+/* Light mode background texture for premium feel */
+[data-theme="light"] body {
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(37,99,235,0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(37,99,235,0.03) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(37,99,235,0.02) 0%, transparent 50%);
+}
 
 /* Motion Utilities */
 .motion-fast { transition-duration: var(--motion-fast); transition-timing-function: var(--ease-spring); }
@@ -330,6 +342,72 @@ html, body {
   opacity: 0.5;
 }
 
+/* Standardized button variants (map to Bricks visualStyle) */
+.btn-secondary {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid rgba(37,99,235,0.12);
+  border-radius: 9999px;
+  padding: 0.625rem 1.25rem;
+  font-weight: 500;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.08s ease;
+}
+.btn-secondary:hover {
+  background: rgba(37,99,235,0.06);
+  box-shadow: 0 6px 20px rgba(37,99,235,0.03);
+}
+
+.btn-alternative {
+  background: rgba(var(--glass-tint), calc(var(--glass-alpha) - 0.08));
+  color: var(--fg);
+  border: 1px solid var(--surface-solid-border);
+  border-radius: 12px;
+  padding: 0.5rem 0.9rem;
+}
+.btn-alternative:hover {
+  filter: brightness(0.98);
+}
+
+.btn-dangerous {
+  background: var(--danger);
+  color: white;
+  border-radius: 9999px;
+  padding: 0.625rem 1.25rem;
+  font-weight: 600;
+}
+.btn-dangerous:hover {
+  filter: brightness(0.95);
+}
+
+.btn-tertiary {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.85rem;
+}
+.btn-tertiary:hover {
+  background: var(--glass-bg);
+}
+
+.btn-link {
+  background: transparent;
+  color: var(--primary);
+  padding: 0.25rem 0.5rem;
+  text-decoration: underline;
+}
+
+/* Focus states for accessibility */
+.btn-primary:focus,
+.btn-secondary:focus,
+.btn-alternative:focus,
+.btn-dangerous:focus,
+.btn-tertiary:focus,
+.btn-link:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.08);
+}
+
 /* Ambient Background Light */
 .ambient-light {
   position: fixed;
@@ -416,11 +494,86 @@ input, textarea, select {
   background-color: var(--surface-solid) !important;
   border: 1px solid var(--border) !important;
   color: var(--fg) !important;
+  border-radius: 12px !important; /* 添加圆角 */
+  padding: 0.625rem 1rem !important; /* 统一padding */
+  font-size: 0.875rem !important; /* 统一字体大小 */
+  transition: all 0.2s ease !important; /* 平滑过渡 */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important; /* 轻微阴影 */
+}
+
+input::placeholder, textarea::placeholder, select::placeholder {
+  color: var(--fg-muted) !important;
+  opacity: 0.7 !important;
+}
+
+/* Global UI table styles (zebra / border variants) */
+.ui-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.ui-table thead th {
+  background: var(--surface-solid);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.ui-table-zebra tbody tr:nth-child(odd) {
+  background: rgba(0,0,0,0.02);
+}
+
+.ui-table-bordered {
+  border: 1px solid var(--surface-solid-border);
+}
+
+.ui-table-bordered td,
+.ui-table-bordered th {
+  border: 1px solid var(--surface-solid-border);
+}
+
+.ui-table-loading {
+  background: var(--surface-solid);
+  border: 1px dashed var(--surface-solid-border);
+  border-radius: 12px;
+}
+
+/* ---------------- Light theme accessibility helpers ---------------- */
+
+/* Make primary buttons and badges more visible on very light surfaces. 
+   Matches any element that uses the Tailwind arbitrary class `bg-[var(--primary)]`. */
+[data-theme="light"] [class*="bg-[var(--primary)"] {
+  border: 1px solid rgba(37,99,235,0.10);
+  box-shadow: 0 8px 24px rgba(37,99,235,0.04);
+  color: white !important;
+}
+
+/* Ensure form controls have a visible border and readable text on white backgrounds */
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea,
+[data-theme="light"] .auth-input {
+  background: var(--surface-solid);
+  border: 1px solid var(--surface-solid-border);
+  color: var(--fg);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* 更轻的阴影在亮模式 */
+}
+
+/* Provide a gentle focus ring for keyboard users on light theme */
+[data-theme="light"] input:focus,
+[data-theme="light"] select:focus,
+[data-theme="light"] textarea:focus,
+[data-theme="light"] button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12), 0 4px 12px rgba(0,0,0,0.1);
+  border-color: var(--primary);
 }
 
 input:focus, textarea:focus, select:focus {
   border-color: var(--primary) !important;
   outline: none !important;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1), 0 4px 12px rgba(0,0,0,0.15) !important; /* 增强focus阴影 */
 }
 
 /* Animation Keyframes */

@@ -1,10 +1,22 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { isDemo } from '@/lib/demo'
 import Link from "next/link"
 import toast, { Toaster } from "react-hot-toast"
 import { supabase } from "@/lib/supabase"
 import { PageHeader } from "@/components/PageHeader"
+import DataTable from '@/components/ui/DataTable'
+import { EmptyState } from "@/components/ui/EmptyState"
+import { Button } from "@/components/ui/Button"
+
+const defaultIcons = {
+  visits: (
+    <svg className="w-12 h-12 text-[var(--fg-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  ),
+}
 
 interface Visit {
   id: string
@@ -25,7 +37,26 @@ export default function Visits() {
   const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
-    fetchVisits()
+    if (isDemo()) {
+      // Provide lightweight demo visits
+      setTimeout(() => {
+        setVisits([
+          {
+            id: 'demo-v1',
+            customer_id: 'demo-c1',
+            visit_date: new Date().toISOString(),
+            latitude: null,
+            longitude: null,
+            address: '示例城市示例街道',
+            notes: '这是演示拜访记录',
+            customers: [{ company_name: '示例科技' }]
+          }
+        ])
+        setLoading(false)
+      }, 250)
+    } else {
+      fetchVisits()
+    }
   }, [])
 
   const fetchVisits = async (showToast = false) => {
@@ -89,10 +120,10 @@ export default function Visits() {
           subtitle="查看所有拜访历史"
           actions={
             <div className="flex gap-3">
-              <button
+              <Button
                 onClick={() => fetchVisits(true)}
                 disabled={refreshing}
-                className="bg-green-500/20 backdrop-blur-xl hover:bg-green-500/30 disabled:bg-gray-500/20 text-green-600 dark:text-green-200 hover:text-green-700 dark:hover:text-green-100 disabled:text-gray-400 font-medium py-2 px-4 rounded-xl transition-all duration-300 border border-green-400/30 hover:border-green-400/50 disabled:border-gray-400/30 shadow-lg hover:shadow-xl flex items-center gap-2"
+                variant="secondary"
               >
                 {refreshing ? (
                   <>
@@ -110,62 +141,40 @@ export default function Visits() {
                     刷新
                   </>
                 )}
-              </button>
-              <Link
-                href="/"
-                className="bg-[var(--primary)] text-white font-medium py-2 px-4 rounded-xl transition-all duration-300 hover:brightness-110 shadow-lg"
-              >
-                返回首页
-              </Link>
+              </Button>
+              <Button asChild>
+                <Link href="/">
+                  返回首页
+                </Link>
+              </Button>
             </div>
           }
         />
 
-      <div className="glass overflow-hidden shadow-lg">
-        {/* 桌面端表格 */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[var(--surface-solid)]">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--fg-muted)] uppercase tracking-wider">
-                  客户
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--fg-muted)] uppercase tracking-wider">
-                  拜访时间
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--fg-muted)] uppercase tracking-wider">
-                  位置
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-[var(--fg-muted)] uppercase tracking-wider">
-                  备注
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border)]">
-              {visits.map((visit) => (
-                <tr key={visit.id} className="hover:bg-[var(--surface-solid)] transition-all duration-300">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--fg)]">
-                    {visit.customers?.[0]?.company_name || "未知客户"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--fg-muted)]">
-                    {new Date(visit.visit_date).toLocaleString('zh-CN')}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--fg-muted)]">
-                    {visit.address || `${visit.latitude?.toFixed(6)}, ${visit.longitude?.toFixed(6)}` || "未知位置"}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-[var(--fg-muted)]">
-                    {visit.notes || "-"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <div className="mt-12"></div>
 
-        {/* 移动端卡片布局 */}
-        <div className="md:hidden divide-y divide-[var(--border)]">
-          {visits.map((visit) => (
-            <div key={visit.id} className="p-4 space-y-3 hover:bg-[var(--surface-solid)] transition-all duration-300">
+      <div className="glass overflow-hidden shadow-lg">
+        {visits.length > 0 ? (
+          <>
+            {/* 桌面端表格 */}
+            <div className="hidden md:block">
+              <DataTable
+                headers={[{ label: '客户' }, { label: '拜访时间' }, { label: '位置' }, { label: '备注' }]}
+                data={visits.map(v => [
+                  v.customers?.[0]?.company_name || '未知客户',
+                  new Date(v.visit_date).toLocaleString('zh-CN'),
+                  v.address || (v.latitude && v.longitude ? `${v.latitude.toFixed(6)}, ${v.longitude.toFixed(6)}` : '未知位置'),
+                  v.notes || '-'
+                ])}
+                rowStyle="zebra"
+                minHeight="160px"
+              />
+            </div>
+
+            {/* 移动端卡片布局 */}
+            <div className="md:hidden divide-y divide-[var(--border)]">
+              {visits.map((visit) => (
+                <div key={visit.id} className="p-4 space-y-3 hover:bg-[var(--surface-solid)] transition-all duration-300">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <h3 className="font-medium text-[var(--fg)] text-lg">
@@ -191,13 +200,17 @@ export default function Visits() {
                 )}
               </div>
             </div>
-          ))}
-        </div>
-
-        {visits.length === 0 && (
-          <div className="text-center py-8 text-[var(--fg-muted)]">
-            暂无拜访记录
-          </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <EmptyState
+            variant="inline"
+            size="sm"
+            icon={defaultIcons.visits}
+            title="暂无拜访记录"
+            description="还没有任何拜访记录，开始记录您的客户拜访吧"
+          />
         )}
       </div>
     </div>

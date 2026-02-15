@@ -12,6 +12,7 @@ import useSWR from "swr"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/components/AuthProvider"
 import { PageHeader } from "@/components/PageHeader"
+import { isDemo } from '@/lib/demo'
 
 const customerSchema = z.object({
   company_name: z.string().min(1, "公司名称不能为空"),
@@ -50,7 +51,26 @@ export default function EditCustomer() {
   const [isLocationExpanded, setIsLocationExpanded] = useState(false)
 
   const fetcher = async (id: string) => {
-    if (!user) throw new Error("未登录")
+    if (!user) {
+      if (isDemo()) {
+        // return lightweight demo customer for viewing in demo mode
+        return {
+          id: id,
+          company_name: '示例公司',
+          industry: '科技',
+          intent_level: 3,
+          visit_date: new Date().toISOString(),
+          contact: '张三',
+          notes: '这是演示数据，写入已禁用',
+          latitude: null,
+          longitude: null,
+          address: '示例城市示例街道',
+          created_at: new Date().toISOString(),
+        }
+      }
+      throw new Error("未登录")
+    }
+
     const { data, error } = await supabase
       .from("customers")
       .select("*")
@@ -61,7 +81,7 @@ export default function EditCustomer() {
   }
 
   const { data: customer, error, isLoading, mutate } = useSWR(
-    user ? id : null,
+    user ? id : (isDemo() ? `demo-${id}` : null),
     fetcher,
     { revalidateOnFocus: false }
   )
@@ -256,6 +276,8 @@ export default function EditCustomer() {
         title="编辑客户"
         subtitle="更新客户档案与跟进状态"
       />
+
+      <div className="mt-12"></div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Section A: Basic Info */}

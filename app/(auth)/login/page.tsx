@@ -1,9 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from 'next/navigation'
+
 import { supabase, isSupabaseConfigured } from "@/lib/supabase"
 import toast, { Toaster } from "react-hot-toast"
+import { useEffect } from "react"
+import { enableDemo } from '@/lib/demo'
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true)
@@ -215,6 +218,19 @@ export default function Login() {
             )}
           </div>
         </form>
+      </div>
+      {/* Demo quick-access button (skip login) */}
+      <div className="fixed right-6 bottom-6 z-50">
+        <button
+          onClick={() => {
+            enableDemo()
+            toast.success('已进入演示模式')
+            router.push('/')
+          }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--auth-primary)] text-white shadow-lg"
+        >
+          演示模式
+        </button>
       </div>
     </>
   )

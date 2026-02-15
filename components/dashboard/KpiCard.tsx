@@ -2,6 +2,8 @@
 
 import React from "react"
 import Link from "next/link"
+import { Card } from "@/components/ui/Card"
+import { Typography } from "@/components/ui/Typography"
 
 interface KpiCardProps {
   title: string
@@ -20,8 +22,8 @@ export function KpiCard({
   value,
   previousValue,
   trendPercent,
-  emptyLabel = "Start adding data",
-  emptyAction = "Add Now",
+  emptyLabel = "开始添加数据",
+  emptyAction = "立即添加",
   emptyHref = "/add",
   formatValue = (v) => v.toString(),
   showStorytelling = true
@@ -36,22 +38,22 @@ export function KpiCard({
       const isSignificant = percent >= 10
 
       if (isPositive && isSignificant) {
-        if (percent >= 50) return "🚀 Wow, massive growth!"
-        if (percent >= 25) return "📈 Strong upward trend"
-        return "📊 Steady improvement"
+        if (percent >= 50) return "🚀 哇，巨大增长！"
+        if (percent >= 25) return "📈 强劲上升趋势"
+        return "📊 稳步改善"
       }
       if (!isPositive && isSignificant) {
-        if (percent >= 25) return "📉 Let's turn this around"
-        return "📊 Slight dip, keep pushing"
+        if (percent >= 25) return "📉 让我们扭转局面"
+        return "📊 小幅下降，继续努力"
       }
-      return "📊 Holding steady"
+      return "📊 保持稳定"
     }, [trendPercent, previousValue])
 
     // Status: EMPTY
     // Logic: If value is 0 (or specifically "no data" but we simplify to 0 for now)
     if (value === 0 && (previousValue === 0 || previousValue === null)) {
         return (
-            <div className="glass-strong p-6 flex flex-col justify-between h-[160px] relative overflow-hidden group">
+            <Card className="flex flex-col justify-between h-[160px] relative overflow-hidden group">
                 <div className="text-sm font-semibold text-[var(--fg-muted)] tracking-wide uppercase">
                     {title}
                 </div>
@@ -70,7 +72,7 @@ export function KpiCard({
 
                 {/* Subtle Background Pattern for Empty State */}
                 <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-[var(--primary)]/5 rounded-full blur-2xl group-hover:bg-[var(--primary)]/10 transition-colors" />
-            </div>
+            </Card>
         )
     }
 
@@ -85,7 +87,7 @@ export function KpiCard({
     const finalStorytelling = showStorytelling ? storytelling : null
 
     return (
-        <div className="glass-strong p-6 flex flex-col justify-between h-[160px]">
+        <Card className="flex flex-col justify-between h-[160px]">
             <div className="text-sm font-semibold text-[var(--fg-muted)] tracking-wide uppercase">
                 {title}
             </div>
@@ -108,12 +110,12 @@ export function KpiCard({
                             {Math.abs(trendPercent).toFixed(0)}%
                         </span>
                         <span className="text-[var(--fg-muted)] font-normal ml-0.5">
-                            vs last month
+                            与上月相比
                         </span>
                     </div>
                 ) : (
                     <div className="text-sm text-[var(--fg-muted)] font-normal">
-                        No previous month data yet
+                        还没有上月数据
                     </div>
                 )}
 
@@ -124,6 +126,6 @@ export function KpiCard({
                     </div>
                 )}
             </div>
-        </div>
+        </Card>
     )
 }

@@ -9,6 +9,7 @@ import { z } from "zod"
 import toast, { Toaster } from "react-hot-toast"
 import { supabase } from "@/lib/supabase"
 import { PageHeader } from "@/components/PageHeader"
+import { showDemoBlockedToast } from '@/components/DemoBlockedToast'
 
 const customerSchema = z.object({
   company_name: z.string().min(1, "公司名称不能为空"),
@@ -149,26 +150,23 @@ export default function AddCustomer() {
 
   const onSubmit = async (data: CustomerForm) => {
     setLoading(true)
+    
 
     // Enhanced: Better error handling with specific error messages
     try {
-      const { error } = await supabase
-        .from("customers")
-        .insert([{
-          company_name: data.company_name,
-          industry: data.industry,
-          intent_level: data.intent_level,
-          visit_date: data.visit_date || null,
-          contact: data.contact || null,
-          notes: data.notes || null,
-          latitude: data.latitude ? parseFloat(data.latitude) : null,
-          longitude: data.longitude ? parseFloat(data.longitude) : null,
-          address: data.address || null
-        }])
-
-      if (error) {
-        throw error
-      }
+      // Prefer using API wrapper to respect demo-mode guards
+      const { createCustomer } = await import('@/lib/api/customers')
+      await createCustomer({
+        company_name: data.company_name,
+        industry: data.industry,
+        intent_level: data.intent_level,
+        visit_date: data.visit_date || null,
+        contact: data.contact || null,
+        notes: data.notes || null,
+        latitude: data.latitude ? parseFloat(data.latitude) : null,
+        longitude: data.longitude ? parseFloat(data.longitude) : null,
+        address: data.address || null
+      })
       
       toast.success("客户添加成功")
       router.push("/")
@@ -176,6 +174,12 @@ export default function AddCustomer() {
       console.error("提交失败:", error)
       // Enhanced: More specific error messages
       const errorMessage = error instanceof Error ? error.message : '未知错误'
+      // Demo mode handling: redirect to login/register when API layer blocks writes
+      if (error && (error as any).name === 'DemoModeError') {
+        showDemoBlockedToast(() => router.push('/login'))
+        setLoading(false)
+        return
+      }
       if (errorMessage.includes('duplicate')) {
         toast.error("客户已存在，请检查后重试")
       } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
@@ -196,6 +200,8 @@ export default function AddCustomer() {
         title="新增客户"
         subtitle="录入新的拜访与意向信息"
       />
+
+      <div className="mt-12"></div> {/* 增加呼吸空间 */}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Section A: Basic Info */}

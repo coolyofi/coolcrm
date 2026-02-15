@@ -22,21 +22,21 @@ export function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
     const yesterday = new Date(today)
     yesterday.setDate(yesterday.getDate() - 1)
 
-    if (date.toDateString() === today.toDateString()) return "Today"
-    if (date.toDateString() === yesterday.toDateString()) return "Yesterday"
+    if (date.toDateString() === today.toDateString()) return "今天"
+    if (date.toDateString() === yesterday.toDateString()) return "昨天"
 
     const diffTime = Math.abs(today.getTime() - date.getTime())
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
-    if (diffDays <= 7) return `${diffDays} days ago`
+    if (diffDays <= 7) return `${diffDays}天前`
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
   }, [])
   
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-[var(--fg)]">Recent Activity</h2>
-          <Link href="/history" className="text-sm font-medium text-[var(--primary)] hover:opacity-80">View All</Link>
+          <h2 className="text-xl font-bold text-[var(--fg)]">最近活动</h2>
+          <Link href="/history" className="text-sm font-medium text-[var(--primary)] hover:opacity-80">查看全部</Link>
       </div>
 
       <div className="glass-strong rounded-2xl overflow-hidden">

@@ -1,4 +1,6 @@
 import { supabase } from '../supabase'
+import { isDemo } from '@/lib/demo'
+import { DemoModeError } from './error'
 
 export type Customer = {
   id?: string
@@ -23,6 +25,9 @@ export async function fetchCustomers(client = supabase) {
 }
 
 export async function createCustomer(payload: Partial<Customer>, client = supabase) {
+  if (typeof window !== 'undefined' && isDemo()) {
+    throw new DemoModeError()
+  }
   const { data, error } = await client.from('customers').insert(payload).select().single()
   if (error) throw error
   return data as Customer

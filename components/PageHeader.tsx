@@ -2,6 +2,7 @@
 
 import { useScrollProgress } from "../hooks/useScrollProgress"
 import { UI_CONTRACT, calculateTitleSize } from "./navigation/constants"
+import { Typography } from "./ui/Typography"
 
 interface PageHeaderProps {
   title: string
@@ -16,7 +17,7 @@ export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
   const subtitleOpacity = 1 - p
 
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 animate-fade-in" style={{ height: `${UI_CONTRACT.TOPBAR_HEIGHT_PX}px`, paddingTop: '16px' }}>
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 animate-fade-in" style={{ minHeight: `${UI_CONTRACT.TOPBAR_HEIGHT_PX}px`, paddingTop: '16px' }}>
       <div>
         <h1
           className="font-bold tracking-tight text-[var(--fg)] transition-all duration-200"
@@ -25,12 +26,13 @@ export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
           {title}
         </h1>
         {subtitle && (
-          <p
-            className="text-[var(--fg-muted)] mt-2 text-lg transition-opacity duration-200"
+          <Typography
+            variant="lead"
+            className="mt-2 transition-opacity duration-200"
             style={{ opacity: subtitleOpacity }}
           >
             {subtitle}
-          </p>
+          </Typography>
         )}
       </div>
 

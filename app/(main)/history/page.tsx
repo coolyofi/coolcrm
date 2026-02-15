@@ -1,11 +1,24 @@
 "use client"
 
 import { useEffect, useState, useMemo, useCallback } from "react"
+import { isDemo } from '@/lib/demo'
+import { showDemoBlockedToast } from '@/components/DemoBlockedToast'
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import toast, { Toaster } from "react-hot-toast"
 import { PageHeader } from "@/components/PageHeader"
+import DataTable from '@/components/ui/DataTable'
+import { Button } from "@/components/ui/Button"
+import { EmptyState } from "@/components/ui/EmptyState"
 import { getIntentLevelLabel } from "@/lib/utils"
+
+const defaultIcons = {
+  customers: (
+    <svg className="w-12 h-12 text-[var(--fg-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  ),
+}
 
 interface Customer {
   id: string
@@ -27,6 +40,25 @@ export default function History() {
   const [industryFilter, setIndustryFilter] = useState("")
 
   const refetchData = useCallback(async () => {
+    if (isDemo()) {
+      setCustomers([
+        {
+          id: 'demo-c1',
+          company_name: '示例科技',
+          industry: '科技',
+          intent_level: 4,
+          visit_date: new Date().toISOString(),
+          contact: '李四',
+          notes: '演示客户',
+          latitude: null,
+          longitude: null,
+          address: '示例城市示例街道'
+        }
+      ])
+      setLoading(false)
+      return
+    }
+
     const { data, error } = await supabase
       .from("customers")
       .select("*")
@@ -74,6 +106,11 @@ export default function History() {
   const handleDelete = async (id: string) => {
     if (!confirm("确定要删除这个客户吗？")) return
 
+    if (isDemo()) {
+      showDemoBlockedToast(() => window.location.href = '/login')
+      return
+    }
+
     const { error } = await supabase.from("customers").delete().eq("id", id)
     if (error) {
       toast.error("删除失败")
@@ -95,17 +132,18 @@ export default function History() {
         title="客户 / 历史记录"
         subtitle="管理所有客户拜访与意向数据"
         actions={
-          <Link
-            href="/add"
-            className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-[var(--primary)] text-white font-medium text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-blue-500/25"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            新增客户
-          </Link>
+          <Button asChild>
+            <Link href="/add">
+              <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              新增客户
+            </Link>
+          </Button>
         }
       />
+
+      <div className="mt-12"></div>
 
       {/* 2. Filter Bar (Glass) */}
       <div className="glass px-6 py-4 rounded-[20px] flex flex-col sm:flex-row gap-4 sm:items-center">
@@ -164,91 +202,57 @@ export default function History() {
           </div>
         ) : filteredCustomers.length === 0 ? (
           /* 4. Empty State */
-          <div className="flex-1 flex flex-col items-center justify-center py-20 text-center px-4">
-            <div className="w-20 h-20 bg-[var(--glass-bg)] rounded-full flex items-center justify-center mb-6 ring-1 ring-[var(--border)]">
-              <svg className="w-10 h-10 text-[var(--fg-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
-            
-            <h3 className="text-lg font-semibold text-[var(--fg)] mb-2">
-              {searchTerm || industryFilter ? "没有匹配的客户" : "暂无客户记录"}
-            </h3>
-            <p className="text-[var(--fg-muted)] text-sm max-w-sm mb-8">
-              {searchTerm || industryFilter 
-                ? "尝试调整搜索关键词或筛选条件" 
-                : "现在还没有任何客户数据，您可以从右上角创建第一条客户信息，开始记录拜访跟进。"}
-            </p>
-            
-            <Link
-              href="/add"
-              className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-[var(--primary)] text-white font-medium hover:brightness-110 shadow-lg shadow-blue-500/20 transition-all"
-            >
-              + 新增客户
-            </Link>
+          <div className="flex-1">
+            <EmptyState
+              icon={defaultIcons.customers}
+              title={searchTerm || industryFilter ? "没有匹配的客户" : "暂无客户记录"}
+              description={
+                searchTerm || industryFilter
+                  ? "尝试调整搜索关键词或筛选条件"
+                  : "现在还没有任何客户数据，您可以从右上角创建第一条客户信息，开始记录拜访跟进。"
+              }
+              action={{
+                label: "+ 新增客户",
+                href: "/add"
+              }}
+            />
           </div>
         ) : (
           /* List Content */
           <>
             {/* Desktop Table */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-[var(--glass-bg)] text-xs font-medium text-[var(--fg-muted)] uppercase tracking-wider">
-                  <tr>
-                    <th className="px-6 py-4">公司信息</th>
-                    <th className="px-6 py-4">行业</th>
-                    <th className="px-6 py-4">联系人</th>
-                    <th className="px-6 py-4">意向等级</th>
-                    <th className="px-6 py-4">最后拜访</th>
-                    <th className="px-6 py-4 text-right">操作</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--border)]">
-                  {filteredCustomers.map((c: Customer) => (
-                    <tr 
-                      key={c.id} 
-                      className="group transition-colors hover:bg-[var(--glass-bg)]"
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col">
-                          <span className="font-medium text-[var(--fg)] text-sm">{c.company_name}</span>
-                          {c.address && <span className="text-xs text-[var(--fg-muted)] mt-0.5 truncate max-w-[180px]">{c.address}</span>}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[var(--glass-bg)] border border-[var(--border)] text-[var(--fg-muted)]">
-                          {c.industry || "未分类"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-[var(--fg)]">
-                         {c.contact || "-"}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${
-                                c.intent_level >= 4 ? 'bg-green-500' :
-                                c.intent_level === 3 ? 'bg-yellow-500' : 'bg-red-500'
-                            }`}></span>
-                            <span className="text-sm font-medium text-[var(--fg)]">{getIntentLevelLabel(c.intent_level || 1)}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-[var(--fg-muted)] tabular-nums">
-                        {c.visit_date ? new Date(c.visit_date).toLocaleDateString() : "-"}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Link href={`/edit/${c.id}`} className="text-sm font-medium text-[var(--primary)] hover:underline">
-                            编辑
-                          </Link>
-                          <button onClick={() => handleDelete(c.id)} className="text-sm font-medium text-[var(--danger)] hover:underline">
-                            删除
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="hidden md:block">
+              <DataTable
+                headers={[
+                  { label: '公司信息' },
+                  { label: '行业' },
+                  { label: '联系人' },
+                  { label: '意向等级' },
+                  { label: '最后拜访' },
+                  { label: '操作' }
+                ]}
+                data={filteredCustomers.map(c => [
+                  <div className="flex flex-col">
+                    <span className="font-medium text-[var(--fg)] text-sm">{c.company_name}</span>
+                    {c.address && <span className="text-xs text-[var(--fg-muted)] mt-0.5 truncate max-w-[180px]">{c.address}</span>}
+                  </div>,
+                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-[var(--glass-bg)] border border-[var(--border)] text-[var(--fg-muted)]">{c.industry || '未分类'}</span>,
+                  <span className="text-sm text-[var(--fg)]">{c.contact || '-'}</span>,
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${c.intent_level >= 4 ? 'bg-green-500' : c.intent_level === 3 ? 'bg-yellow-500' : 'bg-red-500'}`}></span>
+                    <span className="text-sm font-medium text-[var(--fg)]">{getIntentLevelLabel(c.intent_level || 1)}</span>
+                  </div>,
+                  <span className="text-sm text-[var(--fg-muted)] tabular-nums">{c.visit_date ? new Date(c.visit_date).toLocaleDateString() : '-'}</span>,
+                  <div className="text-right">
+                    <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Link href={`/edit/${c.id}`} className="text-sm font-medium text-[var(--primary)] hover:underline">编辑</Link>
+                      <button onClick={() => handleDelete(c.id)} className="text-sm font-medium text-[var(--danger)] hover:underline">删除</button>
+                    </div>
+                  </div>
+                ])}
+                rowStyle="zebra"
+                minHeight="240px"
+              />
             </div>
 
             {/* Mobile Cards (Optimized) */}
@@ -282,12 +286,14 @@ export default function History() {
                           {c.visit_date ? new Date(c.visit_date).toLocaleDateString() : "无日期"}
                       </span>
                       <div className="flex gap-4">
-                          <Link href={`/edit/${c.id}`} className="text-sm font-medium text-[var(--primary)]">
+                          <Button variant="link" size="sm" asChild>
+                            <Link href={`/edit/${c.id}`}>
                               编辑
-                          </Link>
-                          <button onClick={() => handleDelete(c.id)} className="text-sm font-medium text-[var(--danger)]">
+                            </Link>
+                          </Button>
+                          <Button variant="danger" size="sm" onClick={() => handleDelete(c.id)}>
                               删除
-                          </button>
+                          </Button>
                       </div>
                   </div>
                 </div>

@@ -23,11 +23,11 @@ export function GoalsSection({ stats }: GoalsSectionProps) {
         return (
             <div className="glass-strong p-6 rounded-2xl flex items-center justify-between">
                 <div>
-                     <h3 className="font-semibold text-[var(--fg)]">Set Monthly Goals</h3>
-                     <p className="text-sm text-[var(--fg-muted)]">Track your progress and stay motivated.</p>
+                     <h3 className="font-semibold text-[var(--fg)]">设置月度目标</h3>
+                     <p className="text-sm text-[var(--fg-muted)]">跟踪您的进度并保持动力。</p>
                 </div>
                 <button className="px-4 py-2 bg-[var(--surface-solid)] border border-[var(--border)] rounded-lg text-sm font-medium hover:bg-[var(--bg-elevated)] transition-colors">
-                    Set Goals
+                    设置目标
                 </button>
             </div>
         )
@@ -39,7 +39,7 @@ export function GoalsSection({ stats }: GoalsSectionProps) {
             <div className="glass-strong p-5 rounded-2xl">
                  <div className="flex justify-between items-end mb-2">
                      <div>
-                         <span className="text-xs uppercase tracking-wider text-[var(--fg-muted)] font-semibold">Monthly Customer Goal</span>
+                         <span className="text-xs uppercase tracking-wider text-[var(--fg-muted)] font-semibold">月度客户目标</span>
                          <div className="text-2xl font-bold mt-1 text-[var(--fg)]">
                             {stats.customers} <span className="text-base font-medium text-[var(--fg-muted)]">/ {GOALS.customerTarget}</span>
                          </div>
@@ -59,7 +59,7 @@ export function GoalsSection({ stats }: GoalsSectionProps) {
              <div className="glass-strong p-5 rounded-2xl">
                  <div className="flex justify-between items-end mb-2">
                      <div>
-                         <span className="text-xs uppercase tracking-wider text-[var(--fg-muted)] font-semibold">Monthly Visit Goal</span>
+                         <span className="text-xs uppercase tracking-wider text-[var(--fg-muted)] font-semibold">月度访问目标</span>
                          <div className="text-2xl font-bold mt-1 text-[var(--fg)]">
                             {stats.visits} <span className="text-base font-medium text-[var(--fg-muted)]">/ {GOALS.visitTarget}</span>
                          </div>

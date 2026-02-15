@@ -1,5 +1,6 @@
 "use client"
 
+import React from 'react'
 import { usePathname } from "next/navigation"
 import { useEffect } from "react"
 import { useNavigation } from "./NavigationProvider"
@@ -8,6 +9,8 @@ import { NavigationRoot } from "./NavigationRoot"
 import { MotionLevelToggle } from "../MotionLevelToggle"
 import { useScrollProgress } from "../../hooks/useScrollProgress"
 import { UI_CONTRACT, NAV_LAYOUT } from "./constants"
+import { isDemo } from '@/lib/demo'
+import showDemoBlockedToast from '../DemoBlockedToast'
 
 /**
  * AppShell - OS Layer Three-Layer Structure
@@ -36,6 +39,48 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = prevOverflow }
   }, [pathname, isHydrated])
+
+  // Demo mode: intercept clicks on buttons and form submits to show registration toast
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!isDemo()) return
+
+    const container = document.getElementById('content-scroll')
+    if (!container) return
+
+    const onClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null
+      if (!target) return
+      const actionable = target.closest('button, input[type="submit"], [data-demo-block]') as HTMLElement | null
+      if (!actionable) return
+
+      // Allow buttons that only toggle UI without writes by opting out with data-demo-allow
+      if (actionable.hasAttribute('data-demo-allow')) return
+
+      e.preventDefault()
+      e.stopPropagation()
+      showDemoBlockedToast(() => {
+        window.location.href = '/login'
+      })
+    }
+
+    const onSubmit = (e: Event) => {
+      const form = e.target as HTMLFormElement
+      if (!form) return
+      if (form.hasAttribute('data-demo-allow')) return
+      e.preventDefault()
+      e.stopPropagation()
+      showDemoBlockedToast(() => { window.location.href = '/login' })
+    }
+
+    container.addEventListener('click', onClick, true)
+    container.addEventListener('submit', onSubmit, true)
+
+    return () => {
+      container.removeEventListener('click', onClick, true)
+      container.removeEventListener('submit', onSubmit, true)
+    }
+  }, [isHydrated])
 
   // Don't wrap login page with shell. Also avoid rendering shell until
   // hydration completes to keep server and client markup identical on first load.
@@ -78,6 +123,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="h-[100dvh] overflow-hidden bg-[rgb(var(--bg))]">
       {/* NavigationLayer (fixed) */}
+      {/* Demo banner (fixed at top when active) */}
+      {/* Render lazily to avoid adding Bricks dependency unless needed */}
+      {typeof window !== 'undefined' ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        // import DemoBanner dynamically to avoid SSR issues with browser-only libs
+        React.createElement(require('@/components/DemoBanner').default)
+      ) : null}
       <NavigationRoot />
 
       {/* TopBarLayer (fixed) */}

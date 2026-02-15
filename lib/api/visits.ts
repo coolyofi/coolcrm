@@ -1,4 +1,6 @@
 import { supabase } from '../supabase'
+import { isDemo } from '@/lib/demo'
+import { DemoModeError } from './error'
 
 // Visit type definition matching the database schema
 export type Visit = {
@@ -49,4 +51,13 @@ export async function fetchVisits(client = supabase) {
   }))
   
   return normalized as Visit[]
+}
+
+export async function createVisit(payload: Partial<Visit>, client = supabase) {
+  if (typeof window !== 'undefined' && isDemo()) {
+    throw new DemoModeError()
+  }
+  const { data, error } = await client.from('visits').insert(payload).select().single()
+  if (error) throw error
+  return data as Visit
 }

@@ -2,8 +2,11 @@
 
 import Link from "next/link"
 import { useNavigation } from "./NavigationProvider"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useScrollProgress } from "../../hooks/useScrollProgress"
+import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
+import { isDemo, disableDemo } from '@/lib/demo'
 import { UI_CONTRACT, NAV_LAYOUT } from "./constants"
 
 function clamp(v: number, min: number, max: number) { return Math.max(min, Math.min(max, v)) }
@@ -21,6 +24,8 @@ function clamp(v: number, min: number, max: number) { return Math.max(min, Math.
 export function TopBar() {
   const { deviceMode, openDrawer, motion, isHydrated, topbarHeight } = useNavigation()
   const pathname = usePathname()
+  const router = useRouter()
+  const [demoEnabled, setDemoEnabled] = useState(false)
   const { p } = useScrollProgress("content-scroll", UI_CONTRACT.PAGE_HEADER_SCROLL_DISTANCE)
 
   const getCompactTitle = () => {
@@ -44,10 +49,15 @@ export function TopBar() {
   // Only show on mobile/tablet, but hide during hydration to prevent mismatch
   if (!isHydrated || deviceMode === "desktop") return null
 
+  useEffect(() => {
+    setDemoEnabled(isDemo())
+  }, [])
+
   return (
     <div
-      className="fixed top-0 left-0 right-0 glass scrolled border-b border-[var(--glass-border)] flex items-center justify-between px-4 safe-area-top backdrop-blur-md bg-[var(--glass-bg)] transition-all duration-200"
+      className="fixed left-0 right-0 glass scrolled border-b border-[var(--glass-border)] flex items-center justify-between px-4 safe-area-top backdrop-blur-md bg-[var(--glass-bg)] transition-all duration-200"
       style={{
+        top: demoEnabled ? '48px' : '0px',
         height: `${barHeight}px`,
         zIndex: 'var(--z-topbar)',
         "--glass-blur-scrolled": `${motion.topbarBlurPx}px`,
@@ -74,15 +84,32 @@ export function TopBar() {
       </span>
 
       {/* Quick Action */}
-      <Link 
-        href="/add" 
-        className="p-2 -mr-2 text-[var(--primary)] active:scale-95 transition-transform"
-        aria-label="Add New"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-        </svg>
-      </Link>
+      <div className="flex items-center gap-3">
+        <Link 
+          href="/add" 
+          className="p-2 -mr-2 text-[var(--primary)] active:scale-95 transition-transform"
+          aria-label="Add New"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+        </Link>
+
+        {/* Demo mode indicator */}
+        {demoEnabled ? (
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 rounded-full bg-yellow-400 text-black text-xs font-medium">演示模式</span>
+            <button
+              onClick={() => {
+                disableDemo()
+                toast('已退出演示模式')
+                router.push('/login')
+              }}
+              className="text-xs text-[var(--fg-muted)] px-2 py-1 rounded hover:bg-white/5"
+            >退出</button>
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 }

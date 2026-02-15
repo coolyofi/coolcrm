@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import { User } from "@supabase/supabase-js"
 import { supabase } from "@/lib/supabase"
+import { isDemo } from '@/lib/demo'
 import { useRouter } from "next/navigation"
 
 interface AuthContextType {
@@ -27,8 +28,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (mounted) {
           setUser(user)
           setLoading(false)
-          // If no user after loading, redirect to login
-          if (!user) {
+          // If no user after loading, redirect to login (unless demo mode)
+          if (!user && !isDemo()) {
             router.push('/login')
           }
         }
@@ -36,8 +37,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Error getting user:', error)
         if (mounted) {
           setLoading(false)
-          // On error, redirect to login
-          router.push('/login')
+          // On error, redirect to login (unless demo mode)
+          if (!isDemo()) router.push('/login')
         }
       }
     }
@@ -49,8 +50,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (mounted) {
           setUser(session?.user ?? null)
           setLoading(false)
-          // If user is signed out, redirect to login
-          if (!session?.user && event !== 'INITIAL_SESSION') {
+          // If user is signed out, redirect to login (unless demo mode)
+          if (!session?.user && event !== 'INITIAL_SESSION' && !isDemo()) {
             router.push('/login')
           }
         }
