@@ -5,28 +5,12 @@ import { useRouter } from "next/navigation"
 import { isDemo, disableDemo } from '@/lib/demo'
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
 import toast, { Toaster } from "react-hot-toast"
 import { supabase } from "@/lib/supabase"
+import { ProfileFormSchema, PasswordSchema, type ProfileForm, type PasswordForm } from "@/lib/schemas"
 import { useAuth } from "@/components/AuthProvider"
 import ErrorBoundary from "@/components/ErrorBoundary"
 import { PageHeader } from "@/components/PageHeader"
-
-const profileSchema = z.object({
-  nickname: z.string().min(1, "昵称不能为空").max(50, "昵称不能超过50个字符"),
-})
-
-const passwordSchema = z.object({
-  currentPassword: z.string().min(1, "请输入当前密码"),
-  newPassword: z.string().min(6, "新密码至少6位"),
-  confirmPassword: z.string().min(1, "请确认新密码"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "新密码和确认密码不匹配",
-  path: ["confirmPassword"],
-})
-
-type ProfileForm = z.infer<typeof profileSchema>
-type PasswordForm = z.infer<typeof passwordSchema>
 
 const FormField = ({
   label,
@@ -56,11 +40,11 @@ export default function Settings() {
   const [currentTheme, setCurrentTheme] = useState('auto')
 
   const profileForm = useForm<ProfileForm>({
-    resolver: zodResolver(profileSchema),
+    resolver: zodResolver(ProfileFormSchema),
   })
 
   const passwordForm = useForm<PasswordForm>({
-    resolver: zodResolver(passwordSchema),
+    resolver: zodResolver(PasswordSchema),
   })
 
   const fetchProfile = useCallback(async () => {
@@ -89,7 +73,8 @@ export default function Settings() {
         profileForm.reset({ nickname: "" })
       }
     } catch (error) {
-      toast.error("加载资料失败: " + (error as Error).message)
+      const { getFriendlyErrorMessage } = await import('@/lib/api/error')
+      toast.error("加载资料失败: " + getFriendlyErrorMessage(error))
       console.error(error)
     } finally {
       setLoading(false)
@@ -138,7 +123,8 @@ export default function Settings() {
       toast.success("昵称更新成功")
       fetchProfile() // 重新加载资料
     } catch (error) {
-      toast.error("更新失败: " + (error as Error).message)
+      const { getFriendlyErrorMessage } = await import('@/lib/api/error')
+      toast.error("更新失败: " + getFriendlyErrorMessage(error))
       console.error(error)
     } finally {
       setSavingProfile(false)
@@ -170,7 +156,8 @@ export default function Settings() {
       toast.success("密码修改成功")
       passwordForm.reset()
     } catch (error) {
-      toast.error("密码修改失败: " + (error as Error).message)
+      const { getFriendlyErrorMessage } = await import('@/lib/api/error')
+      toast.error("密码修改失败: " + getFriendlyErrorMessage(error))
       console.error(error)
     } finally {
       setChangingPassword(false)
@@ -262,6 +249,7 @@ export default function Settings() {
                 render={({ field }) => (
                   <input
                     {...field}
+                    value={field.value ?? ""}
                     type="text"
                     placeholder="输入昵称"
                     className="w-full px-4 py-3 rounded-lg transition-all duration-300 bg-[var(--surface-solid)] border border-[var(--glass-border)] text-[var(--fg)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
@@ -293,6 +281,7 @@ export default function Settings() {
                 render={({ field }) => (
                   <input
                     {...field}
+                    value={field.value ?? ""}
                     type="password"
                     placeholder="输入当前密码"
                     className="w-full px-4 py-3 rounded-lg transition-all duration-300 bg-[var(--surface-solid)] border border-[var(--glass-border)] text-[var(--fg)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
@@ -309,6 +298,7 @@ export default function Settings() {
                 render={({ field }) => (
                   <input
                     {...field}
+                    value={field.value ?? ""}
                     type="password"
                     placeholder="至少6个字符"
                     className="w-full px-4 py-3 rounded-lg transition-all duration-300 bg-[var(--surface-solid)] border border-[var(--glass-border)] text-[var(--fg)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
@@ -324,6 +314,7 @@ export default function Settings() {
                 render={({ field }) => (
                   <input
                     {...field}
+                    value={field.value ?? ""}
                     type="password"
                     placeholder="再次输入新密码"
                     className="w-full px-4 py-3 rounded-lg transition-all duration-300 bg-[var(--surface-solid)] border border-[var(--glass-border)] text-[var(--fg)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50"
@@ -367,7 +358,59 @@ export default function Settings() {
             </div>
           </div>
         </div>
+
+        {/* Goals Configuration */}
+        <GoalsSetter />
       </div>
     </ErrorBoundary>
   )
 }
+
+function GoalsSetter() {
+  const [goals, setGoals] = useState({ customerTarget: 20, visitTarget: 50 })
+
+  useEffect(() => {
+    const saved = localStorage.getItem('user_goals')
+    if (saved) {
+      try {
+        setGoals(JSON.parse(saved))
+      } catch (e) {
+        console.error(e)
+      }
+    }
+  }, [])
+
+  const saveGoals = (newGoals: typeof goals) => {
+    localStorage.setItem('user_goals', JSON.stringify(newGoals))
+    setGoals(newGoals)
+    toast.success("目标已保存")
+  }
+
+  return (
+    <div className="glass p-6">
+      <h2 className="text-xl font-semibold mb-6 text-[var(--fg)]">业务目标设置</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-[var(--fg-muted)] mb-2">月度新增客户目标</label>
+          <input 
+            type="number" 
+            value={goals.customerTarget}
+            onChange={(e) => saveGoals({ ...goals, customerTarget: parseInt(e.target.value) || 0 })}
+            className="w-full px-4 py-2 rounded-lg bg-[var(--surface-solid)] border border-[var(--border)] text-[var(--fg)]"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-[var(--fg-muted)] mb-2">月度拜访次数目标</label>
+          <input 
+            type="number" 
+            value={goals.visitTarget}
+            onChange={(e) => saveGoals({ ...goals, visitTarget: parseInt(e.target.value) || 0 })}
+            className="w-full px-4 py-2 rounded-lg bg-[var(--surface-solid)] border border-[var(--border)] text-[var(--fg)]"
+          />
+        </div>
+      </div>
+      <p className="text-xs text-[var(--fg-muted)] mt-6 italic">* 目标数据将保存在本地浏览器中</p>
+    </div>
+  )
+}
+

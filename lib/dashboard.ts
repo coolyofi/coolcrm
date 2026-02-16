@@ -1,8 +1,7 @@
 // Type-safe data fetching with proper type annotations
 // Import Customer and Visit types for type safety
 
-import type { Customer } from '@/lib/api/customers'
-import type { Visit } from '@/lib/api/visits'
+import type { Customer, Visit } from '@/lib/schemas'
 
 // Example of improved type annotations
 function fetchData<T>(url: string): Promise<T> {

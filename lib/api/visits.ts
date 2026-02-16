@@ -1,23 +1,8 @@
+import { z } from 'zod'
 import { supabase } from '../supabase'
 import { isDemo } from '@/lib/demo'
 import { DemoModeError } from './error'
-
-// Visit type definition matching the database schema
-export type Visit = {
-  id: string
-  customer_id: string
-  visit_date: string
-  latitude: number | null
-  longitude: number | null
-  address: string | null
-  notes: string | null
-  created_at?: string
-  updated_at?: string
-  // Nested customer data from join (always an array for consistency)
-  customers?: {
-    company_name: string
-  }[]
-}
+import { VisitSchema, type Visit } from '../schemas'
 
 export async function fetchVisits(client = supabase) {
   const { data, error } = await client
@@ -32,17 +17,20 @@ export async function fetchVisits(client = supabase) {
       notes,
       created_at,
       updated_at,
+      updated_by,
       customers (
         company_name
       )
     `)
     .order('visit_date', { ascending: false })
   
-  if (error) throw error
+  if (error) {
+    console.error("Supabase query failed for visits. Error object:", JSON.stringify(error, null, 2))
+    console.error("Context: fetching visits from table 'visits'")
+    throw new Error(`Supabase query failed: ${error.message || 'Unknown error'}`)
+  }
   
   // Normalize customers field to always be an array for type consistency
-  // Supabase may return either a single object or array depending on the relationship configuration
-  // This normalization ensures consistent behavior regardless of Supabase's runtime return type
   const normalized = (data || []).map(visit => ({
     ...visit,
     customers: visit.customers 
@@ -50,7 +38,16 @@ export async function fetchVisits(client = supabase) {
       : []
   }))
   
-  return normalized as Visit[]
+  try {
+    // Validate data from database
+    return z.array(VisitSchema).parse(normalized)
+  } catch (err) {
+    console.error("Zod validation error in fetchVisits:", err)
+    if (err instanceof z.ZodError) {
+      console.error("Zod error details:", JSON.stringify(err.issues, null, 2))
+    }
+    throw err
+  }
 }
 
 export async function createVisit(payload: Partial<Visit>, client = supabase) {
@@ -59,5 +56,6 @@ export async function createVisit(payload: Partial<Visit>, client = supabase) {
   }
   const { data, error } = await client.from('visits').insert(payload).select().single()
   if (error) throw error
-  return data as Visit
+  
+  return VisitSchema.parse(data)
 }

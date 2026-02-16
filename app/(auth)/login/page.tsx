@@ -28,7 +28,8 @@ export default function Login() {
       toast.success("登录成功")
       router.push("/")
     } catch (error) {
-      toast.error("登录失败: " + (error as Error).message)
+      const { getFriendlyErrorMessage } = await import('@/lib/api/error')
+      toast.error("登录失败: " + getFriendlyErrorMessage(error))
       console.error(error)
     } finally {
       setLoading(false)
@@ -50,7 +51,8 @@ export default function Login() {
       if (error) throw error
       toast.success("注册成功！请检查邮箱确认")
     } catch (error) {
-      toast.error("注册失败: " + (error as Error).message)
+      const { getFriendlyErrorMessage } = await import('@/lib/api/error')
+      toast.error("注册失败: " + getFriendlyErrorMessage(error))
       console.error(error)
     } finally {
       setLoading(false)

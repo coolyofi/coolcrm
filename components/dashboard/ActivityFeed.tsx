@@ -2,7 +2,7 @@
 
 import React from "react"
 import Link from "next/link"
-import type { ActivityItem } from "../../lib/dashboard-optimized"
+import type { ActivityItem } from "@/lib/schemas"
 
 export function ActivityFeed({ activities }: { activities: ActivityItem[] }) {
   // Memoize grouped activities to avoid recalculation on every render

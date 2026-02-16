@@ -1,5 +1,7 @@
 "use client"
 
+import { useState, useEffect } from "react"
+
 interface GoalsSectionProps {
   stats: {
     customers: number
@@ -7,15 +9,22 @@ interface GoalsSectionProps {
   }
 }
 
-// Mock goals (In a real app, these would come from settings table)
-const GOALS = {
-  customerTarget: 20, // Monthly target
-  visitTarget: 50
-}
-
 export function GoalsSection({ stats }: GoalsSectionProps) {
-    const customerProgress = Math.min(100, (stats.customers / GOALS.customerTarget) * 100)
-    const visitProgress = Math.min(100, (stats.visits / GOALS.visitTarget) * 100)
+    const [goals, setGoals] = useState({ customerTarget: 20, visitTarget: 50 })
+
+    useEffect(() => {
+        const saved = localStorage.getItem('user_goals')
+        if (saved) {
+            try {
+                setGoals(JSON.parse(saved))
+            } catch (e) {
+                console.error("Failed to parse goals", e)
+            }
+        }
+    }, [])
+
+    const customerProgress = Math.min(100, (stats.customers / goals.customerTarget) * 100)
+    const visitProgress = Math.min(100, (stats.visits / goals.visitTarget) * 100)
 
     const hasSetGoals = true // Mock state: if false, show CTA
 
@@ -41,7 +50,7 @@ export function GoalsSection({ stats }: GoalsSectionProps) {
                      <div>
                          <span className="text-xs uppercase tracking-wider text-[var(--fg-muted)] font-semibold">月度客户目标</span>
                          <div className="text-2xl font-bold mt-1 text-[var(--fg)]">
-                            {stats.customers} <span className="text-base font-medium text-[var(--fg-muted)]">/ {GOALS.customerTarget}</span>
+                            {stats.customers} <span className="text-base font-medium text-[var(--fg-muted)]">/ {goals.customerTarget}</span>
                          </div>
                      </div>
                      <span className="text-sm font-medium text-[var(--primary)]">{Math.round(customerProgress)}%</span>
@@ -61,7 +70,7 @@ export function GoalsSection({ stats }: GoalsSectionProps) {
                      <div>
                          <span className="text-xs uppercase tracking-wider text-[var(--fg-muted)] font-semibold">月度访问目标</span>
                          <div className="text-2xl font-bold mt-1 text-[var(--fg)]">
-                            {stats.visits} <span className="text-base font-medium text-[var(--fg-muted)]">/ {GOALS.visitTarget}</span>
+                            {stats.visits} <span className="text-base font-medium text-[var(--fg-muted)]">/ {goals.visitTarget}</span>
                          </div>
                      </div>
                      <span className="text-sm font-medium text-emerald-500">{Math.round(visitProgress)}%</span>

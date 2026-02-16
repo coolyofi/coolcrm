@@ -40,6 +40,9 @@ export const translations = {
     companyName: '公司名称',
     industry: '行业',
     contact: '联系人',
+    phone: '联系电话',
+    email: '联系邮箱',
+    status: '客户状态',
     intentLevel: '意向等级',
     visitDate: '拜访日期',
     notes: '备注',
@@ -49,6 +52,14 @@ export const translations = {
     customerHistory: '客户历史记录',
     totalCustomers: '总客户数',
     recentCustomers: '最近客户',
+  },
+
+  // Statuses
+  customerStatus: {
+    prospect: '潜在客户',
+    lead: '意向客户',
+    customer: '已成交客户',
+    inactive: '静默/流失',
   },
 
   // Visit related

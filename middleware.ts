@@ -34,17 +34,18 @@ export async function middleware(req: NextRequest) {
 
   if (!isBypassEnabled) {
     try {
+      // Refresh the session on each request to prevent token expiration issues
       const {
-        data: { session },
-      } = await supabase.auth.getSession()
+        data: { user },
+      } = await supabase.auth.getUser()
 
-      if (!session && req.nextUrl.pathname.startsWith('/edit')) {
+      if (!user && req.nextUrl.pathname.startsWith('/edit')) {
         // Redirect unauthenticated users trying to access protected routes
         return NextResponse.redirect(new URL('/login', req.url))
       }
     } catch (error) {
       // Log session fetch error and redirect to login for protected routes
-      console.error('Session retrieval failed:', error)
+      console.error('Session refresh failed:', error)
       if (req.nextUrl.pathname.startsWith('/edit')) {
         return NextResponse.redirect(new URL('/login', req.url))
       }

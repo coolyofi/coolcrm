@@ -129,3 +129,18 @@ export function KpiCard({
         </Card>
     )
 }
+
+export function KpiCardSkeleton() {
+  return (
+    <Card className="p-6 relative overflow-hidden group border border-[var(--border)] bg-[var(--card-bg)] shadow-none animate-pulse">
+      <div className="space-y-4">
+        <div className="h-4 w-24 bg-[var(--surface-solid)] rounded" />
+        <div className="h-10 w-20 bg-[var(--surface-solid)] rounded" />
+        <div className="space-y-2 pt-2">
+          <div className="h-3 w-32 bg-[var(--surface-solid)] rounded" />
+          <div className="h-4 w-full bg-[var(--surface-solid)] rounded-md mt-2" />
+        </div>
+      </div>
+    </Card>
+  )
+}

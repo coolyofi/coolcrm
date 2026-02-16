@@ -1,47 +1,19 @@
-import { supabase } from "@/lib/supabase"
-import type { Customer } from "@/lib/api/customers"
+import { supabase as defaultSupabase } from "@/lib/supabase"
+import { 
+  CustomerSchema, 
+  DashboardDataSchema, 
+  type Customer, 
+  type DashboardData,
+  type DashboardVisit,
+  type KpiTrend,
+  type ActivityItem 
+} from "@/lib/schemas"
 
 // Type for Supabase query errors
 type SupabaseError = {
   message: string
   details?: string
   hint?: string
-}
-
-// Partial Visit type for dashboard use (only includes fields we query)
-export type DashboardVisit = {
-  id: string
-  visit_date: string
-  notes: string | null
-  customers: { company_name: string }[]
-}
-
-export type KpiTrend = {
-  current: number
-  previous: number
-  trendPercent: number // percentage change, 100 for initial growth from 0
-}
-
-export type ActivityItem = {
-  id: string
-  type: 'visit' | 'customer'
-  title: string
-  subtitle: string
-  date: string
-}
-
-// Fixed: Replaced unknown[] with proper Customer[] and DashboardVisit[] types for type safety
-export type DashboardData = {
-  profile: { nickname: string | null } | null
-  customers: {
-    total: KpiTrend
-    recent: Customer[]
-  }
-  visits: {
-    thisMonth: KpiTrend
-    recent: DashboardVisit[]
-  }
-  activity: ActivityItem[] // Mixed timeline
 }
 
 // Helper: Get start/end of current and last month
@@ -57,52 +29,99 @@ function getMonthRanges() {
   return { startOfCurrent, startOfLast }
 }
 
-export async function getDashboardData(userId: string): Promise<DashboardData> {
+export async function getCustomerKpi(userId: string, supabaseClient = defaultSupabase) {
+  const { startOfCurrent } = getMonthRanges()
+  const [total, before] = await Promise.all([
+    supabaseClient.from("customers").select("*", { count: 'exact', head: true }),
+    supabaseClient.from("customers").select("*", { count: 'exact', head: true }).lt("created_at", startOfCurrent)
+  ])
+  
+  const current = total.count || 0
+  const previous = before.count || 0
+  
+  return {
+    current,
+    previous,
+    trendPercent: previous > 0 ? ((current - previous) / previous) * 100 : (current > 0 ? 100 : 0)
+  }
+}
+
+export async function getVisitKpi(userId: string, supabaseClient = defaultSupabase) {
+  const { startOfCurrent, startOfLast } = getMonthRanges()
+  const [thisMonth, lastMonth] = await Promise.all([
+    supabaseClient.from("visits").select("*", { count: 'exact', head: true }).gte("visit_date", startOfCurrent),
+    supabaseClient.from("visits").select("*", { count: 'exact', head: true }).gte("visit_date", startOfLast).lt("visit_date", startOfCurrent)
+  ])
+  
+  const current = thisMonth.count || 0
+  const previous = lastMonth.count || 0
+  
+  return {
+    current,
+    previous,
+    trendPercent: previous > 0 ? ((current - previous) / previous) * 100 : (current > 0 ? 100 : 0)
+  }
+}
+
+export async function getHighIntentKpi(userId: string, supabaseClient = defaultSupabase) {
+  const { count } = await supabaseClient
+    .from("customers")
+    .select("*", { count: 'exact', head: true })
+    .gte("intent_level", 4)
+  
+  return {
+    current: count || 0,
+    previous: null,
+    trendPercent: 0
+  }
+}
+
+export async function getDashboardData(userId: string, supabaseClient = defaultSupabase): Promise<DashboardData> {
   const { startOfCurrent, startOfLast } = getMonthRanges()
 
   // Execute all queries in parallel for better performance
   // Use Promise.allSettled to prevent one failure from breaking the entire dashboard
   const results = await Promise.allSettled([
     // 1. Profile
-    supabase
+    supabaseClient
       .from("profiles")
       .select("nickname")
       .eq("id", userId)
       .single(),
 
     // 2. Total customers count
-    supabase
+    supabaseClient
       .from("customers")
       .select("*", { count: 'exact', head: true }),
 
     // 3. Customers before this month
-    supabase
+    supabaseClient
       .from("customers")
       .select("*", { count: 'exact', head: true })
       .lt("created_at", startOfCurrent),
 
     // 4. Visits this month
-    supabase
+    supabaseClient
       .from("visits")
       .select("*", { count: 'exact', head: true })
       .gte("visit_date", startOfCurrent),
 
     // 5. Visits last month
-    supabase
+    supabaseClient
       .from("visits")
       .select("*", { count: 'exact', head: true })
       .gte("visit_date", startOfLast)
       .lt("visit_date", startOfCurrent),
 
     // 6. Recent customers
-    supabase
+    supabaseClient
       .from("customers")
       .select("id, company_name, created_at, intent_level")
       .order("created_at", { ascending: false })
       .limit(5),
 
     // 7. Recent visits
-    supabase
+    supabaseClient
       .from("visits")
       .select("id, visit_date, notes, customers(company_name)")
       .order("visit_date", { ascending: false })
@@ -183,7 +202,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   const customersMapped: ActivityItem[] = (recentCustomers || []).map((c: Customer) => ({
     type: 'customer' as const,
     id: c.id || '',
-    title: `Added new customer`,
+    title: `新增客户`,
     subtitle: c.company_name,
     date: c.created_at || ''
   }))
@@ -192,8 +211,8 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
   const visitsMapped: ActivityItem[] = (recentVisits || []).map((v: DashboardVisit) => ({
     type: 'visit' as const,
     id: v.id,
-    title: `Visited ${v.customers?.[0]?.company_name || 'Unknown'}`,
-    subtitle: v.notes || 'No notes',
+    title: `拜访客户: ${v.customers?.[0]?.company_name || '未知'}`,
+    subtitle: v.notes || '暂无备注',
     date: v.visit_date
   }))
 
@@ -201,7 +220,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 10)
 
-  return {
+  const result: DashboardData = {
     profile,
     customers: {
       total: customerTrend,
@@ -213,4 +232,5 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     },
     activity
   }
+  return DashboardDataSchema.parse(result)
 }

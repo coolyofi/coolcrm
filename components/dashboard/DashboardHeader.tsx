@@ -16,8 +16,16 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ nickname, stats }: DashboardHeaderProps) {
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Memoize dynamic greeting calculation
   const greeting = React.useMemo(() => {
+    if (!mounted) return "你好"
+
     const now = new Date()
     const hour = now.getHours()
     const dayOfWeek = now.getDay()
@@ -54,7 +62,7 @@ export function DashboardHeader({ nickname, stats }: DashboardHeaderProps) {
     }
 
     return timeGreeting
-  }, [stats.newCustomersThisWeek, stats.hasCustomers])
+  }, [stats.newCustomersThisWeek, stats.hasCustomers, mounted])
 
   // Memoize subtitle calculation
   const subtitle = React.useMemo(() => {
@@ -80,20 +88,10 @@ export function DashboardHeader({ nickname, stats }: DashboardHeaderProps) {
 
   const router = useRouter()
 
-  const actions = (
-    <Button onClick={() => router.push('/add')}>
-      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-      </svg>
-      添加客户
-    </Button>
-  )
-
   return (
     <PageHeader
       title={`${greeting}${greetingName}`}
       subtitle={subtitle}
-      actions={actions}
     />
   )
 }
